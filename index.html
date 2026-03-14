@@ -234,25 +234,36 @@ function parsePosiciones(rows) {
   }));
 }
 
-// RENDIMIENTO: fila 4=cabecera sub, filas 5-9=datos
-// Cols: 0=Período, 1=Días, 2=10B_ini, 3=10B_fin, 4=QH_ini, 5=QH_fin, 6=SPX_ini, 7=SPX_fin, 8=NDX_ini, 9=NDX_fin
+// RENDIMIENTO parser — robusto ante distintos formatos de Google Sheets
+// Estructura sheet: fila1=título, fila2=nota, fila3=cabeceras grupo, fila4=subcabeceras, filas5-9=datos
 function parseRendimiento(rows) {
   const periodos = [];
+  const skipStart = ['RENDIMIENTO', 'Rellena', 'Período', 'Los valores', 'V. Inicio', 'V. Fin', ''];
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const p = String(r[0] || '').trim();
-    if (!p || p.startsWith('RENDIMIENTO') || p.startsWith('Rellena') || p.startsWith('Período') || p.startsWith('Los valores')) continue;
+    // Saltar filas de cabecera, notas y vacías
+    if (!p) continue;
+    if (skipStart.some(s => p.startsWith(s))) continue;
+    // Necesita tener días (col 1) — número válido
     const dias = num(r[1]);
-    if (!dias) continue;
+    if (!dias || dias < 1) continue;
+    // Parsear todos los valores numéricos con num()
+    const b10i = num(r[2]), b10f = num(r[3]);
+    const qhi  = num(r[4]), qhf  = num(r[5]);
+    const spxi = num(r[6]), spxf = num(r[7]);
+    const ndxi = num(r[8]), ndxf = num(r[9]);
     periodos.push({
-      label: p,
-      dias: dias,
-      b10_ini: num(r[2]), b10_fin: num(r[3]),
-      qh_ini:  num(r[4]), qh_fin:  num(r[5]),
-      spx_ini: num(r[6]), spx_fin: num(r[7]),
-      ndx_ini: num(r[8]), ndx_fin: num(r[9]),
+      label:   p,
+      dias:    dias,
+      b10_ini: b10i, b10_fin: b10f,
+      qh_ini:  qhi,  qh_fin:  qhf,
+      spx_ini: spxi, spx_fin: spxf,
+      ndx_ini: ndxi, ndx_fin: ndxf,
     });
+    console.log(`[REND] ${p}: 10B ${b10i}→${b10f} SPX ${spxi}→${spxf} NDX ${ndxi}→${ndxf}`);
   }
+  console.log('[REND] Total períodos:', periodos.length, periodos);
   return periodos;
 }
 
@@ -268,6 +279,8 @@ async function loadAll() {
     ]);
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH);
+    // Debug: log raw rendimiento rows
+    console.log('[RAW REND rows]', JSON.stringify(rRend.slice(0,10)));
     D.rend   = parseRendimiento(rRend);
     setBadge('bl', '● En vivo');
     const t = now();
