@@ -28,7 +28,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 
-/* LOGIN */
 #login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
 .lcard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:2.5rem;width:100%;max-width:380px}
 .llogo{font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:4px}
@@ -42,7 +41,6 @@ input:focus{border-color:var(--blue)}
 .ssec{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
 .hint{font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px}
 
-/* DASHBOARD */
 #dash{display:none;flex-direction:column;min-height:100vh}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
 .brand{font-size:15px;font-weight:700;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
@@ -54,25 +52,32 @@ input:focus{border-color:var(--blue)}
 .bsm{font-size:12px;padding:5px 12px;border-radius:var(--rs);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit}
 .bsm:hover{background:var(--bg3)}
 .utime{font-size:11px;color:var(--text3)}
+.tabs{display:flex;padding:0 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{font-size:13px;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);white-space:nowrap;font-weight:500}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
 .main{padding:18px 20px;flex:1}
 .sbar{font-size:11px;color:var(--text3);padding:7px 20px;text-align:right;border-top:0.5px solid var(--border);background:var(--bg2)}
 
+/* PERIODO BUTTONS */
+.pbtns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.pbtn{font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.pbtn.active{background:var(--text);color:var(--bg2);border-color:var(--text)}
+
 /* MÉTRICAS */
-.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
 .metric{background:var(--bg3);border-radius:var(--rs);padding:13px 15px}
 .mlbl{font-size:10px;color:var(--text2);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
 .mval{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1.1}
 .msub{font-size:11px;margin-top:3px;color:var(--text2)}
 .pos{color:var(--green)}.neg{color:var(--red)}
 
-/* CARDS */
 .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
 .ch{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)}
 .ct{font-size:13px;font-weight:600;letter-spacing:-0.2px}
 .cm{font-size:11px;color:var(--text2)}
 .ox{overflow-x:auto}
 
-/* TABLA */
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{font-size:10px;color:var(--text2);font-weight:500;padding:8px 13px;text-align:right;border-bottom:0.5px solid var(--border);text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
 th:first-child{text-align:left}
@@ -82,7 +87,6 @@ tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:var(--bg3)}
 .tsub{font-size:10px;color:var(--text3);display:block;margin-top:1px;font-weight:400}
 
-/* BADGES */
 .risk{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;font-size:11px;font-weight:600}
 .rlo{background:var(--green-bg);color:var(--green)}
 .rmd{background:var(--amber-bg);color:var(--amber)}
@@ -90,19 +94,16 @@ tbody tr:hover td{background:var(--bg3)}
 .ilink{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:3px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:10px;font-weight:500;margin-left:3px;vertical-align:middle}
 .ilink:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
 
-/* GRÁFICOS */
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-@media(max-width:580px){.cgrid{grid-template-columns:1fr}}
+@media(max-width:600px){.cgrid{grid-template-columns:1fr}}
 .cwrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
 .ctit{font-size:10px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2)}
-.leg{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.leg span{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)}
-.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
 
-/* SPINNER */
 .spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ebox{background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
+
+.sep-hdr{font-size:11px;font-weight:600;color:var(--text2);padding:8px 13px;background:var(--bg3);border-bottom:0.5px solid var(--border);letter-spacing:0.3px}
 </style>
 </head>
 <body>
@@ -128,9 +129,14 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="brand">10Bagger Portfolio <span class="badge bc" id="badge">⟳ Cargando</span></div>
     <div class="tright">
       <span class="utime" id="lupd"></span>
-      <button class="bsm" onclick="loadData()">↻ Actualizar</button>
+      <button class="bsm" onclick="loadAll()">↻ Actualizar</button>
       <button class="bsm" onclick="doLogout()">Salir</button>
     </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('rentabilidad')">Rentabilidad</div>
+    <div class="tab" onclick="showTab('10bagger')">10Bagger</div>
+    <div class="tab" onclick="showTab('qualityhold')">Quality Hold</div>
   </div>
   <div class="main" id="mc"><div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando...</div></div>
   <div class="sbar" id="sb"></div>
@@ -138,37 +144,51 @@ tbody tr:hover td{background:var(--bg3)}
 
 <script>
 const PWD = "cartera2024";
-const COLS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#C55A11","#4472C4","#ED7D31","#A9D18E","#9DC3E6","#F4B183"];
+const COLS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#C55A11","#4472C4","#ED7D31","#A9D18E"];
 let SID = "1i9fgIwGdBx7p_fBqm95AL8betZ_Db57jPYPDXNMTqFo";
-let D = {}, CH = {};
+let D = {}, CH = {}, CUR = 'rentabilidad';
 
-// ── PARSEO ────────────────────────────────────────────────
-// Convierte string español a número: "30.059,72 €" → 30059.72 | "9,2%" → 9.2
+// ── UTILIDADES ────────────────────────────────────────────
 function num(v) {
-  if (v === null || v === undefined) return 0;
+  if (v === null || v === undefined) return null;
   let s = String(v).trim();
-  s = s.replace(/[€$£%\s]/g, '');
-  s = s.replace(/[^\d,.\-]/g, '');
-  if (!s) return 0;
-  if (s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
-  else if (s.includes(',')) s = s.replace(',', '.');
-  return parseFloat(s) || 0;
+  if (s === '—' || s === '') return null;
+  s = s.replace(/[€$£%\s]/g, '').replace(/[^\d,.\-]/g, '');
+  if (!s) return null;
+  if (s.includes('.') && s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+  else if (s.includes(',')) s = s.replace(',','.');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
 }
+function pct(vi, vf) { return vi && vf ? ((vf - vi) / vi) * 100 : null; }
+function cagr(vi, vf, dias) {
+  if (!vi || !vf || !dias) return null;
+  const years = dias / 365.25;
+  return (Math.pow(vf / vi, 1 / years) - 1) * 100;
+}
+function fmtPct(v, decimals=1) {
+  if (v === null || v === undefined) return '—';
+  return (v >= 0 ? '+' : '') + v.toFixed(decimals) + '%';
+}
+function fmtEur(v) {
+  if (v === null) return '—';
+  return '€' + v.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+function isNeg(v) { return v !== null && v < 0; }
 function fmt(v) { return v !== null && v !== undefined && String(v).trim() !== '' ? String(v).trim() : '—'; }
 function now() { return new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}); }
 function setStatus(m) { document.getElementById('sb').innerHTML = m; }
 function setBadge(cls, txt) { const b = document.getElementById('badge'); b.className = 'badge ' + cls; b.textContent = txt; }
+function destroyCharts() { Object.values(CH).forEach(c => { try { c.destroy(); } catch(e){} }); CH = {}; }
 
 // ── AUTH ─────────────────────────────────────────────────
 function doLogin() {
-  if (document.getElementById('pwd').value !== PWD) {
-    document.getElementById('lerr').textContent = 'Contraseña incorrecta'; return;
-  }
+  if (document.getElementById('pwd').value !== PWD) { document.getElementById('lerr').textContent = 'Contraseña incorrecta'; return; }
   document.getElementById('lerr').textContent = '';
   SID = document.getElementById('sid').value.trim() || SID;
   document.getElementById('login').style.display = 'none';
   document.getElementById('dash').style.display = 'flex';
-  loadData();
+  loadAll();
 }
 function doLogout() {
   document.getElementById('dash').style.display = 'none';
@@ -185,7 +205,6 @@ async function fetchSheet(sheet) {
   if (!m) throw new Error('Sin respuesta de Google Sheets');
   const tbl = JSON.parse(m[1]).table;
   if (!tbl || !tbl.rows) return [];
-  // Usar valor formateado (f) cuando existe — preserva el formato original del sheet
   return tbl.rows.map(row => row.c.map(c => {
     if (!c) return null;
     if (c.f !== null && c.f !== undefined) return c.f;
@@ -193,177 +212,413 @@ async function fetchSheet(sheet) {
   }));
 }
 
-// ── PARSER POSICIONES ────────────────────────────────────
-// Columnas: 0=Ticker, 1=Empresa, 2=Moneda, 3=NTit, 4=Precio, 5=FX, 6=ValorEUR, 7=Peso,
-//           8=PO, 9=CAGR, 10=Riesgo, 11=URLTesis, 12=URLModelo
+// ── PARSERS ───────────────────────────────────────────────
 function parsePosiciones(rows) {
-  const skip = ['POSICIONES', 'Rellena', 'Ticker', 'TOTAL', 'P.O.'];
+  const skip = ['POSICIONES', 'Rellena', 'Ticker', 'TOTAL', 'CAGR'];
   return rows.filter(r => {
     const t = String(r[0] || '').trim();
     return t && !skip.some(s => t.startsWith(s)) && r[6] && String(r[6]).includes('€');
   }).map(r => ({
-    ticker:   String(r[0] || '').trim(),
-    empresa:  fmt(r[1]),
-    moneda:   fmt(r[2]),
-    ntit:     fmt(r[3]),
-    precio:   fmt(r[4]),
-    fx:       fmt(r[5]),
-    valorEUR: num(r[6]),
-    valorFmt: fmt(r[6]),
-    peso:     num(r[7]),
-    pesoFmt:  fmt(r[7]),
-    cagr:     r[9] ? fmt(r[9]) : '—',
-    riesgo:   r[10] ? String(r[10]).trim() : '—',
-    urlTesis: r[11] && String(r[11]).trim() !== 'Disponible' && String(r[11]).startsWith('http') ? String(r[11]).trim() : '',
-    urlModelo:r[12] && String(r[12]).trim() !== 'Disponible' && String(r[12]).startsWith('http') ? String(r[12]).trim() : '',
-    tieneTesis:  r[11] && String(r[11]).trim() === 'Disponible',
-    tieneModelo: r[12] && String(r[12]).trim() === 'Disponible',
+    ticker:    String(r[0] || '').trim(),
+    empresa:   fmt(r[1]),
+    moneda:    fmt(r[2]),
+    ntit:      fmt(r[3]),
+    precio:    fmt(r[4]),
+    peso:      num(r[7]),
+    pesoFmt:   fmt(r[7]),
+    riesgo:    r[9] ? String(r[9]).trim() : '—',
+    urlTesis:  r[10] && String(r[10]).startsWith('http') ? String(r[10]).trim() : '',
+    urlModelo: r[11] && String(r[11]).startsWith('http') ? String(r[11]).trim() : '',
+    tieneTesis:  r[10] && String(r[10]).trim() === 'Disponible',
+    tieneModelo: r[11] && String(r[11]).trim() === 'Disponible',
   }));
 }
 
-// ── LOAD ─────────────────────────────────────────────────
-async function loadData() {
+// RENDIMIENTO: fila 4=cabecera sub, filas 5-9=datos
+// Cols: 0=Período, 1=Días, 2=10B_ini, 3=10B_fin, 4=QH_ini, 5=QH_fin, 6=SPX_ini, 7=SPX_fin, 8=NDX_ini, 9=NDX_fin
+function parseRendimiento(rows) {
+  const periodos = [];
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const p = String(r[0] || '').trim();
+    if (!p || p.startsWith('RENDIMIENTO') || p.startsWith('Rellena') || p.startsWith('Período') || p.startsWith('Los valores')) continue;
+    const dias = num(r[1]);
+    if (!dias) continue;
+    periodos.push({
+      label: p,
+      dias: dias,
+      b10_ini: num(r[2]), b10_fin: num(r[3]),
+      qh_ini:  num(r[4]), qh_fin:  num(r[5]),
+      spx_ini: num(r[6]), spx_fin: num(r[7]),
+      ndx_ini: num(r[8]), ndx_fin: num(r[9]),
+    });
+  }
+  return periodos;
+}
+
+// ── CARGA ────────────────────────────────────────────────
+async function loadAll() {
   setBadge('bc', '⟳ Cargando');
   setStatus('<span class="spin"></span> Conectando con Google Sheets...');
   try {
-    const rows10b = await fetchSheet('POSICIONES_10BAGGER');
-    D.pos10b = parsePosiciones(rows10b);
+    const [r10b, rQH, rRend] = await Promise.all([
+      fetchSheet('POSICIONES_10BAGGER'),
+      fetchSheet('POSICIONES_QUALITY_HOLD'),
+      fetchSheet('RENDIMIENTO'),
+    ]);
+    D.pos10b = parsePosiciones(r10b);
+    D.posQH  = parsePosiciones(rQH);
+    D.rend   = parseRendimiento(rRend);
     setBadge('bl', '● En vivo');
     const t = now();
     document.getElementById('lupd').textContent = 'Actualizado ' + t;
     setStatus('Datos en tiempo real desde Google Sheets · ' + t);
-    render();
+    showTab(CUR);
   } catch(e) {
     setBadge('bd', '⚠ Error');
     setStatus('Error: ' + e.message);
-    document.getElementById('mc').innerHTML = `<div class="ebox"><strong>No se pudo conectar con Google Sheets.</strong><br>Comprueba que el sheet está compartido como "Cualquiera con el enlace puede ver".<br><br>Error: ${e.message}</div>`;
+    document.getElementById('mc').innerHTML = `<div class="ebox"><strong>No se pudo conectar.</strong><br>${e.message}</div>`;
   }
 }
 
-// ── RENDER ───────────────────────────────────────────────
-function render() {
-  Object.values(CH).forEach(c => { try { c.destroy(); } catch(e) {} }); CH = {};
+// ── TABS ─────────────────────────────────────────────────
+function showTab(tab) {
+  CUR = tab;
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', ['rentabilidad','10bagger','qualityhold'][i] === tab);
+  });
+  destroyCharts();
+  const mc = document.getElementById('mc');
+  if (tab === 'rentabilidad') mc.innerHTML = renderRentabilidad();
+  else if (tab === '10bagger') { mc.innerHTML = renderCartera(D.pos10b, '10Bagger'); buildCarteraCharts('10bagger'); }
+  else if (tab === 'qualityhold') { mc.innerHTML = renderCartera(D.posQH, 'Quality Hold'); buildCarteraCharts('qualityhold'); }
+  if (tab === 'rentabilidad') setTimeout(() => buildRentCharts(), 60);
+}
 
-  const pos = (D.pos10b || []).filter(p => p.ticker !== 'LIQUIDEZ');
-  const liq = D.pos10b ? D.pos10b.find(p => p.ticker === 'LIQUIDEZ') : null;
-  const total = D.pos10b ? D.pos10b.reduce((s, p) => s + p.valorEUR, 0) : 0;
-  const nPos = pos.length;
+// ── RENTABILIDAD ─────────────────────────────────────────
+let currentPeriod = 'ytd';
 
-  // Mejor y peor por peso
-  const sorted = [...pos].sort((a, b) => b.peso - a.peso);
-  const top1 = sorted[0];
-  const riesgoMedio = pos.length ? (pos.reduce((s, p) => s + (parseInt(p.riesgo) || 0), 0) / pos.length).toFixed(1) : '—';
+function calcPeriods() {
+  const rend = D.rend || [];
+  if (!rend.length) return {};
 
-  document.getElementById('mc').innerHTML = `
+  // Período completo (todos los datos encadenados)
+  // Acumulada: producto de (1 + rent_i)
+  function acum(getIni, getFin) {
+    let acc = 1;
+    for (const p of rend) {
+      const ini = getIni(p), fin = getFin(p);
+      if (ini && fin) acc *= fin / ini;
+    }
+    return (acc - 1) * 100;
+  }
+
+  // CAGR total: desde inicio hasta fin usando días totales
+  function cagrTotal(getIni, getFin) {
+    const ini = getIni(rend[0]);
+    const last = rend[rend.length - 1];
+    const fin = getFin(last);
+    const dias = rend.reduce((s, p) => s + (p.dias || 0), 0);
+    return cagr(ini, fin, dias);
+  }
+
+  // Año en curso (último período)
+  const ytd = rend[rend.length - 1];
+
+  // Último año completo = último período completo de 365 días
+  const ly = rend.length >= 2 ? rend[rend.length - 2] : null;
+
+  // Períodos acumulados desde hace N años
+  function lastNYears(n) {
+    const relevant = rend.slice(-n);
+    if (!relevant.length) return null;
+    return {
+      b10: relevant.reduce((acc, p) => p.b10_ini && p.b10_fin ? acc * p.b10_fin / p.b10_ini : acc, 1) - 1,
+      qh:  relevant.reduce((acc, p) => p.qh_ini  && p.qh_fin  ? acc * p.qh_fin  / p.qh_ini  : acc, 1) - 1,
+      spx: relevant.reduce((acc, p) => p.spx_ini && p.spx_fin ? acc * p.spx_fin / p.spx_ini : acc, 1) - 1,
+      ndx: relevant.reduce((acc, p) => p.ndx_ini && p.ndx_fin ? acc * p.ndx_fin / p.ndx_ini : acc, 1) - 1,
+      dias: relevant.reduce((s, p) => s + (p.dias || 0), 0),
+    };
+  }
+
+  const total_dias = rend.reduce((s, p) => s + (p.dias || 0), 0);
+
+  return {
+    ytd: {
+      label: ytd.label,
+      b10:  pct(ytd.b10_ini, ytd.b10_fin),
+      qh:   pct(ytd.qh_ini,  ytd.qh_fin),
+      spx:  pct(ytd.spx_ini, ytd.spx_fin),
+      ndx:  pct(ytd.ndx_ini, ytd.ndx_fin),
+    },
+    '1y': ly ? {
+      label: ly.label,
+      b10:  pct(ly.b10_ini, ly.b10_fin),
+      qh:   pct(ly.qh_ini,  ly.qh_fin),
+      spx:  pct(ly.spx_ini, ly.spx_fin),
+      ndx:  pct(ly.ndx_ini, ly.ndx_fin),
+    } : null,
+    '2y': (() => { const d = lastNYears(2); return d ? { label:'Últimos 2 años', b10:d.b10*100, qh:d.qh*100, spx:d.spx*100, ndx:d.ndx*100 } : null; })(),
+    '3y': (() => { const d = lastNYears(3); return d ? { label:'Últimos 3 años', b10:d.b10*100, qh:d.qh*100, spx:d.spx*100, ndx:d.ndx*100 } : null; })(),
+    '4y': (() => { const d = lastNYears(4); return d ? { label:'Últimos 4 años', b10:d.b10*100, qh:d.qh*100, spx:d.spx*100, ndx:d.ndx*100 } : null; })(),
+    all: {
+      label: 'Desde inicio (ago 2022)',
+      b10:  acum(p => p.b10_ini, p => p.b10_fin),
+      qh:   (() => { const rel = rend.filter(p => p.qh_ini && p.qh_fin); return rel.reduce((a,p) => a * p.qh_fin/p.qh_ini, 1) - 1; })() * 100,
+      spx:  acum(p => p.spx_ini, p => p.spx_fin),
+      ndx:  acum(p => p.ndx_ini, p => p.ndx_fin),
+    },
+    cagr: {
+      label: 'Anualizada (CAGR)',
+      b10:  cagrTotal(p => p.b10_ini, p => p.b10_fin),
+      qh:   null, // QH empezó después, lo calculamos aparte
+      spx:  cagrTotal(p => p.spx_ini, p => p.spx_fin),
+      ndx:  cagrTotal(p => p.ndx_ini, p => p.ndx_fin),
+    },
+  };
+}
+
+function renderRentabilidad() {
+  const periods = calcPeriods();
+  const p = periods[currentPeriod] || periods.ytd;
+  const años = (D.rend || []).map(r => r.label);
+  const hasQH = D.rend && D.rend.some(r => r.qh_ini && r.qh_fin);
+
+  function metricCard(label, val, sub) {
+    const cls = val === null ? '' : val >= 0 ? 'pos' : 'neg';
+    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtPct(val)}</div>${sub ? `<div class="msub">${sub}</div>` : ''}</div>`;
+  }
+
+  const btnDefs = [
+    { key:'ytd', label:'Año en curso' },
+    { key:'1y',  label:'Año anterior' },
+    { key:'2y',  label:'2 años' },
+    { key:'3y',  label:'3 años' },
+    { key:'4y',  label:'4 años' },
+    { key:'all', label:'Desde inicio' },
+    { key:'cagr',label:'CAGR anualizada' },
+  ].filter(b => periods[b.key]);
+
+  return `
+<div class="pbtns">${btnDefs.map(b =>
+  `<button class="pbtn${b.key === currentPeriod ? ' active' : ''}" onclick="setPeriod('${b.key}')">${b.label}</button>`
+).join('')}</div>
+
 <div class="mgrid">
-  <div class="metric"><div class="mlbl">Valor total cartera</div><div class="mval">€${total.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="msub">${nPos} posiciones + liquidez</div></div>
-  <div class="metric"><div class="mlbl">Mayor posición</div><div class="mval" style="font-size:16px">${top1 ? top1.empresa.split(' ')[0] : '—'}</div><div class="msub">${top1 ? top1.pesoFmt : '—'} del total</div></div>
-  <div class="metric"><div class="mlbl">Liquidez</div><div class="mval">${liq ? liq.pesoFmt : '—'}</div><div class="msub">${liq ? liq.valorFmt : '—'}</div></div>
-  <div class="metric"><div class="mlbl">Riesgo medio</div><div class="mval">${riesgoMedio}<span style="font-size:13px;font-weight:400">/10</span></div><div class="msub">media ponderada</div></div>
+  ${metricCard('10Bagger', p.b10, p.label)}
+  ${hasQH ? metricCard('Quality Hold', p.qh, p.label) : ''}
+  ${metricCard('S&P 500', p.spx, p.label)}
+  ${metricCard('Nasdaq-100', p.ndx, p.label)}
 </div>
 
+<div class="cwrap">
+  <div class="ctit">Comparativa — ${p.label}</div>
+  <div style="position:relative;height:200px"><canvas id="c-comp"></canvas></div>
+</div>
+
+<div class="cwrap">
+  <div class="ctit">Rentabilidad anual por año</div>
+  <div style="position:relative;height:220px"><canvas id="c-anual"></canvas></div>
+</div>`;
+}
+
+function buildRentCharts() {
+  const periods = calcPeriods();
+  const p = periods[currentPeriod] || periods.ytd;
+  const rend = D.rend || [];
+  const hasQH = rend.some(r => r.qh_ini && r.qh_fin);
+
+  // Gráfico comparativa período
+  const labels = ['10Bagger', hasQH ? 'Quality Hold' : null, 'S&P 500', 'Nasdaq-100'].filter(Boolean);
+  const vals   = [p.b10, hasQH ? p.qh : null, p.spx, p.ndx].filter((_, i) => labels[i]);
+  const colors = ['#378ADD','#1D9E75','#888780','#B4B2A9'];
+
+  const elC = document.getElementById('c-comp');
+  if (elC) CH.comp = new Chart(elC, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: colors.slice(0, labels.length), borderRadius: 4, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${fmtPct(c.raw)}` } } },
+      scales: {
+        x: { ticks: { font: {size:11} }, grid: { display: false } },
+        y: { ticks: { font: {size:10}, color:'#888', callback: v => v + '%' }, grid: { color: 'rgba(128,128,128,0.08)' } }
+      }
+    }
+  });
+
+  // Gráfico barras anuales
+  const años = rend.map(r => r.label.replace(' (ago–dic)','').replace(' (YTD)','*'));
+  const d10b = rend.map(r => r.b10_ini && r.b10_fin ? parseFloat(((r.b10_fin/r.b10_ini-1)*100).toFixed(1)) : null);
+  const dQH  = rend.map(r => r.qh_ini  && r.qh_fin  ? parseFloat(((r.qh_fin /r.qh_ini -1)*100).toFixed(1)) : null);
+  const dSPX = rend.map(r => r.spx_ini && r.spx_fin ? parseFloat(((r.spx_fin/r.spx_ini-1)*100).toFixed(1)) : null);
+  const dNDX = rend.map(r => r.ndx_ini && r.ndx_fin ? parseFloat(((r.ndx_fin/r.ndx_ini-1)*100).toFixed(1)) : null);
+
+  const datasets = [
+    { label:'10Bagger', data:d10b, backgroundColor:'#378ADD', borderRadius:3, borderWidth:0 },
+    ...(hasQH ? [{ label:'Quality Hold', data:dQH, backgroundColor:'#1D9E75', borderRadius:3, borderWidth:0 }] : []),
+    { label:'S&P 500', data:dSPX, backgroundColor:'#B4B2A9', borderRadius:3, borderWidth:0 },
+    { label:'Nasdaq-100', data:dNDX, backgroundColor:'#D3D1C7', borderRadius:3, borderWidth:0 },
+  ];
+
+  const elA = document.getElementById('c-anual');
+  if (elA) CH.anual = new Chart(elA, {
+    type: 'bar',
+    data: { labels: años, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, boxHeight: 10, font: {size:11}, padding: 12 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtPct(c.raw)}` } }
+      },
+      scales: {
+        x: { ticks: { font:{size:11} }, grid: { display:false } },
+        y: { ticks: { font:{size:10}, color:'#888', callback: v => v+'%' }, grid: { color:'rgba(128,128,128,0.08)' } }
+      }
+    }
+  });
+}
+
+function setPeriod(key) {
+  currentPeriod = key;
+  destroyCharts();
+  document.getElementById('mc').innerHTML = renderRentabilidad();
+  setTimeout(() => buildRentCharts(), 60);
+}
+
+// ── CARTERA ───────────────────────────────────────────────
+function renderCartera(pos, nombre) {
+  const activos = (pos || []).filter(p => p.ticker !== 'LIQUIDEZ');
+  const liq = (pos || []).find(p => p.ticker === 'LIQUIDEZ');
+
+  const rows = (pos || []).map(p => {
+    const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
+    const rNum = parseInt(p.riesgo) || 0;
+    const rCls = rNum <= 3 ? 'rlo' : rNum <= 6 ? 'rmd' : 'rhi';
+    const tLink = p.urlTesis
+      ? `<a href="${p.urlTesis}" target="_blank" class="ilink">Tesis</a>`
+      : p.tieneTesis ? `<span class="ilink" style="opacity:.35;cursor:default">Tesis</span>` : '';
+    const mLink = p.urlModelo
+      ? `<a href="${p.urlModelo}" target="_blank" class="ilink">Modelo</a>`
+      : p.tieneModelo ? `<span class="ilink" style="opacity:.35;cursor:default">Modelo</span>` : '';
+    return `<tr>
+      <td>${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+      <td>${p.moneda}</td>
+      <td>${p.ntit}</td>
+      <td>${p.precio}</td>
+      <td style="font-weight:600">${p.pesoFmt}</td>
+      <td>${p.riesgo !== '—' ? `<span class="risk ${rCls}">${p.riesgo}</span>` : '—'}</td>
+      <td style="text-align:right">${tLink}${mLink}</td>
+    </tr>`;
+  }).join('');
+
+  const id = nombre === '10Bagger' ? '10bagger' : 'qh';
+
+  return `
 <div class="cgrid">
-  <div class="cwrap" style="margin-bottom:0">
-    <div class="ctit">Composición 10Bagger</div>
-    <div class="leg" id="leg-donut"></div>
-    <div style="position:relative;height:220px"><canvas id="c-donut"></canvas></div>
+  <div class="cwrap" style="margin-bottom:0;position:relative">
+    <div class="ctit">Composición ${nombre}</div>
+    <div style="position:relative;height:260px"><canvas id="c-donut-${id}"></canvas></div>
   </div>
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Peso por posición</div>
-    <div style="position:relative;height:${pos.length * 28 + 40}px"><canvas id="c-bar"></canvas></div>
+    <div style="position:relative;height:${activos.length * 26 + 50}px"><canvas id="c-bar-${id}"></canvas></div>
   </div>
 </div>
-
-<div class="card" style="margin-top:14px">
+<div class="card">
   <div class="ch">
-    <span class="ct">Posiciones — 10Bagger</span>
-    <span class="cm">${nPos} valores · total €${total.toLocaleString('es-ES',{maximumFractionDigits:0})}</span>
+    <span class="ct">Posiciones — ${nombre}</span>
+    <span class="cm">${activos.length} valores${liq ? ' · liquidez ' + liq.pesoFmt : ''}</span>
   </div>
   <div class="ox"><table>
     <thead><tr>
       <th style="width:28%;text-align:left">Empresa</th>
       <th>Moneda</th><th>Nº títulos</th><th>Precio</th>
-      <th>Valor EUR</th><th>Peso</th><th>Riesgo</th><th>Links</th>
+      <th>Peso</th><th>Riesgo</th><th style="text-align:right">Links</th>
     </tr></thead>
-    <tbody>
-      ${(D.pos10b || []).map(p => {
-        const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
-        const rNum = parseInt(p.riesgo) || 0;
-        const rCls = rNum <= 3 ? 'rlo' : rNum <= 6 ? 'rmd' : 'rhi';
-        const tLink = p.urlTesis
-          ? `<a href="${p.urlTesis}" target="_blank" class="ilink">Tesis</a>`
-          : p.tieneTesis ? `<span class="ilink" style="opacity:.4">Tesis</span>` : '';
-        const mLink = p.urlModelo
-          ? `<a href="${p.urlModelo}" target="_blank" class="ilink">Modelo</a>`
-          : p.tieneModelo ? `<span class="ilink" style="opacity:.4">Modelo</span>` : '';
-        return `<tr>
-          <td>${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
-          <td>${p.moneda}</td>
-          <td>${p.ntit}</td>
-          <td>${p.precio}</td>
-          <td style="font-weight:600">${p.valorFmt}</td>
-          <td style="font-weight:600">${p.pesoFmt}</td>
-          <td>${p.riesgo !== '—' ? `<span class="risk ${rCls}">${p.riesgo}</span>` : '—'}</td>
-          <td style="text-align:right">${tLink}${mLink}</td>
-        </tr>`;
-      }).join('')}
-    </tbody>
+    <tbody>${rows}</tbody>
   </table></div>
 </div>`;
+}
 
-  // ── DONUT ────────────────────────────────────────────
-  const donutData = pos;
-  const leg = document.getElementById('leg-donut');
-  if (leg) leg.innerHTML = donutData.map((p, i) =>
-    `<span><span class="ld" style="background:${COLS[i % COLS.length]}"></span>${p.ticker.split(':').pop()} ${p.pesoFmt}</span>`
-  ).join('');
+function buildCarteraCharts(id) {
+  const pos = id === '10bagger' ? D.pos10b : D.posQH;
+  const activos = (pos || []).filter(p => p.ticker !== 'LIQUIDEZ' && p.peso);
 
-  const elD = document.getElementById('c-donut');
-  if (elD) CH.donut = new Chart(elD, {
-    type: 'doughnut',
-    data: {
-      labels: donutData.map(p => p.ticker.split(':').pop()),
-      datasets: [{
-        data: donutData.map(p => p.peso),
-        backgroundColor: COLS,
-        borderWidth: 2,
-        borderColor: 'rgba(255,255,255,0.15)'
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw.toFixed(1)}%` } }
-      }
-    }
-  });
-
-  // ── BAR HORIZONTAL ───────────────────────────────────
-  const barData = [...pos].sort((a, b) => b.peso - a.peso);
-  const elB = document.getElementById('c-bar');
-  if (elB) CH.bar = new Chart(elB, {
-    type: 'bar',
-    data: {
-      labels: barData.map(p => p.ticker.split(':').pop()),
-      datasets: [{
-        data: barData.map(p => p.peso),
-        backgroundColor: barData.map((_, i) => COLS[i % COLS.length]),
-        borderRadius: 3, borderWidth: 0
-      }]
-    },
-    options: {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(1)}%` } }
+  // DONUT con labels dentro
+  const elD = document.getElementById(`c-donut-${id}`);
+  if (elD && activos.length) {
+    CH[`donut-${id}`] = new Chart(elD, {
+      type: 'doughnut',
+      data: {
+        labels: activos.map(p => p.ticker.split(':').pop()),
+        datasets: [{
+          data: activos.map(p => p.peso),
+          backgroundColor: COLS,
+          borderWidth: 2,
+          borderColor: 'rgba(255,255,255,0.15)'
+        }]
       },
-      scales: {
-        x: { ticks: { font: {size:10}, color:'#888', callback: v => v + '%' }, grid: { color: 'rgba(128,128,128,0.08)' } },
-        y: { ticks: { font: {size:11} }, grid: { display: false } }
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw.toFixed(1)}%` } }
+        }
+      },
+      plugins: [{
+        id: 'centerLabels',
+        afterDraw(chart) {
+          const { ctx, chartArea: { left, right, top, bottom } } = chart;
+          const cx = (left + right) / 2, cy = (top + bottom) / 2;
+          const meta = chart.getDatasetMeta(0);
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const textColor = isDark ? '#e8e8e4' : '#1a1a18';
+          const mutedColor = isDark ? '#9e9e99' : '#6b6b66';
+
+          meta.data.forEach((arc, i) => {
+            const angle = (arc.startAngle + arc.endAngle) / 2;
+            const r = (arc.outerRadius + arc.innerRadius) / 2;
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+            const pct = activos[i].peso;
+            if (pct < 3.5) return; // no dibujar si muy pequeño
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 11px -apple-system, sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.fillText(activos[i].ticker.split(':').pop(), x, y - 6);
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.fillText(pct.toFixed(1) + '%', x, y + 6);
+            ctx.restore();
+          });
+        }
+      }]
+    });
+  }
+
+  // BAR horizontal
+  const sorted = [...activos].sort((a, b) => b.peso - a.peso);
+  const elB = document.getElementById(`c-bar-${id}`);
+  if (elB && sorted.length) {
+    CH[`bar-${id}`] = new Chart(elB, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(p => p.ticker.split(':').pop()),
+        datasets: [{ data: sorted.map(p => p.peso), backgroundColor: sorted.map((_, i) => COLS[i % COLS.length]), borderRadius: 3, borderWidth: 0 }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(1)}%` } } },
+        scales: {
+          x: { ticks: { font:{size:10}, color:'#888', callback: v => v+'%' }, grid: { color:'rgba(128,128,128,0.08)' } },
+          y: { ticks: { font:{size:11} }, grid: { display:false } }
+        }
       }
-    }
-  });
+    });
+  }
 }
 </script>
 </body>
