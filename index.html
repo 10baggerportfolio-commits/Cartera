@@ -234,36 +234,46 @@ function parsePosiciones(rows) {
   }));
 }
 
-// RENDIMIENTO parser — robusto ante distintos formatos de Google Sheets
-// Estructura sheet: fila1=título, fila2=nota, fila3=cabeceras grupo, fila4=subcabeceras, filas5-9=datos
+// RENDIMIENTO parser — busca datos por contenido, no por posición
 function parseRendimiento(rows) {
   const periodos = [];
-  const skipStart = ['RENDIMIENTO', 'Rellena', 'Período', 'Los valores', 'V. Inicio', 'V. Fin', ''];
+  // Primero buscar qué fila tiene las subcabeceras V.Inicio/V.Fin para saber el offset
+  // La API puede fusionar celdas de cabecera de grupo, desplazando columnas
+  // Estrategia: buscar filas que tengan un número en col 1 (días) y texto de período en col 0
+  const añosValidos = ['2022','2023','2024','2025','2026'];
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    const p = String(r[0] || '').trim();
-    // Saltar filas de cabecera, notas y vacías
-    if (!p) continue;
-    if (skipStart.some(s => p.startsWith(s))) continue;
-    // Necesita tener días (col 1) — número válido
-    const dias = num(r[1]);
-    if (!dias || dias < 1) continue;
-    // Parsear todos los valores numéricos con num()
-    const b10i = num(r[2]), b10f = num(r[3]);
-    const qhi  = num(r[4]), qhf  = num(r[5]);
-    const spxi = num(r[6]), spxf = num(r[7]);
-    const ndxi = num(r[8]), ndxf = num(r[9]);
-    periodos.push({
-      label:   p,
-      dias:    dias,
-      b10_ini: b10i, b10_fin: b10f,
-      qh_ini:  qhi,  qh_fin:  qhf,
-      spx_ini: spxi, spx_fin: spxf,
-      ndx_ini: ndxi, ndx_fin: ndxf,
-    });
-    console.log(`[REND] ${p}: 10B ${b10i}→${b10f} SPX ${spxi}→${spxf} NDX ${ndxi}→${ndxf}`);
+    if (!r || !r[0]) continue;
+    const p = String(r[0]).trim();
+    if (!añosValidos.some(a => p.startsWith(a))) continue;
+    // Buscar días — puede estar en col 1 o col 2 dependiendo de fusión
+    let diasCol = -1, valStartCol = -1;
+    for (let c = 1; c <= 3; c++) {
+      const v = num(r[c]);
+      if (v && v >= 50 && v <= 400) { diasCol = c; valStartCol = c + 1; break; }
+    }
+    if (diasCol === -1) continue;
+    const dias = num(r[diasCol]);
+    // Valores: V.Inicio y V.Fin para cada cartera/índice
+    // Probamos desde valStartCol hasta encontrar 8 valores
+    const vals = [];
+    for (let c = valStartCol; c < r.length && vals.length < 8; c++) {
+      const v = num(r[c]);
+      if (v !== null) vals.push(v);
+      else vals.push(null);
+    }
+    // vals[0]=10B_ini, [1]=10B_fin, [2]=QH_ini, [3]=QH_fin, [4]=SPX_ini, [5]=SPX_fin, [6]=NDX_ini, [7]=NDX_fin
+    const entry = {
+      label: p, dias,
+      b10_ini: vals[0], b10_fin: vals[1],
+      qh_ini:  vals[2], qh_fin:  vals[3],
+      spx_ini: vals[4], spx_fin: vals[5],
+      ndx_ini: vals[6], ndx_fin: vals[7],
+    };
+    console.log(`[REND] ${p} días=${dias}`, entry);
+    periodos.push(entry);
   }
-  console.log('[REND] Total períodos:', periodos.length, periodos);
+  console.log('[REND total]', periodos.length);
   return periodos;
 }
 
@@ -393,7 +403,8 @@ function calcPeriods() {
 
 function renderRentabilidad() {
   const periods = calcPeriods();
-  const p = periods[currentPeriod] || periods.ytd;
+  const p = periods[currentPeriod] || periods.ytd || {label:'Sin datos',b10:null,qh:null,spx:null,ndx:null};
+  if (!p) return '<div class="ebox">No hay datos de rentabilidad. Comprueba que la pestaña RENDIMIENTO está rellena en el sheet.</div>';
   const años = (D.rend || []).map(r => r.label);
   const hasQH = D.rend && D.rend.some(r => r.qh_ini && r.qh_fin);
 
