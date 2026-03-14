@@ -230,22 +230,23 @@ function parseRend(rows) {
     // Si fx sube (dólar se debilita), rentabilidad EUR < USD
     const spx_ini = v(4), spx_fin = v(5);
     const ndx_ini = v(6), ndx_fin = v(7);
-    // Guardamos tanto los valores originales como los ajustados
+    // Rentabilidad ajustada a EUR por período:
+    // rent_eur = (1 + rent_usd) / (1 + var_fx_eurusd) - 1
+    // var_fx = fx_fin/fx_ini - 1  (fx en EUR/USD)
+    // Si el euro se aprecia (fx sube), la rentabilidad en EUR baja
+    const var_fx = fx_ini && fx_fin ? fx_fin / fx_ini : 1;
+    const spx_rent_eur = spx_ini && spx_fin ? ((spx_fin/spx_ini) / var_fx) : null;
+    const ndx_rent_eur = ndx_ini && ndx_fin ? ((ndx_fin/ndx_ini) / var_fx) : null;
     return {
-      label:    String(r[0]).trim(),
-      dias:     v(1),
-      b10_ini:  v(2), b10_fin: v(3),
+      label:   String(r[0]).trim(),
+      dias:    v(1),
+      b10_ini: v(2), b10_fin: v(3),
       spx_ini, spx_fin,
       ndx_ini, ndx_fin,
       fx_ini,  fx_fin,
-      // Valores ajustados a EUR para comparación justa
-      spx_ini_eur: spx_ini, // base de cálculo igual
-      spx_fin_eur: fx_ini && fx_fin && spx_ini && spx_fin
-        ? spx_ini * ((spx_fin/spx_ini) / (fx_fin/fx_ini))
-        : spx_fin,
-      ndx_fin_eur: fx_ini && fx_fin && ndx_ini && ndx_fin
-        ? ndx_ini * ((ndx_fin/ndx_ini) / (fx_fin/fx_ini))
-        : ndx_fin,
+      // Rentabilidades ajustadas EUR (factores multiplicativos, no %)
+      spx_eur: spx_rent_eur,
+      ndx_eur: ndx_rent_eur,
     };
   }).filter(r => r.dias && r.dias > 0);
 }
@@ -308,13 +309,11 @@ function calcPeriods() {
   const rend = D.rend;
   if (!rend || !rend.length) return null;
 
-  // Rentabilidad ajustada a EUR: (rent_usd) / (var_fx) - 1
-  // fx = EUR/USD. Si el dólar se debilita (fx sube), la rentabilidad en EUR es menor.
   function rentPeriodo(r) {
     return {
       b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null,
-      spx: r.spx_ini && r.spx_fin_eur ? ((r.spx_fin_eur/r.spx_ini)-1)*100 : null,
-      ndx: r.ndx_ini && r.ndx_fin_eur ? ((r.ndx_fin_eur/r.ndx_ini)-1)*100 : null,
+      spx: r.spx_eur !== null && r.spx_eur !== undefined ? (r.spx_eur-1)*100 : null,
+      ndx: r.ndx_eur !== null && r.ndx_eur !== undefined ? (r.ndx_eur-1)*100 : null,
     };
   }
 
@@ -323,8 +322,8 @@ function calcPeriods() {
     let b10=1, spx=1, ndx=1;
     for (const r of slice) {
       if (r.b10_ini && r.b10_fin) b10 *= r.b10_fin/r.b10_ini;
-      if (r.spx_ini && r.spx_fin_eur) spx *= r.spx_fin_eur/r.spx_ini;
-      if (r.ndx_ini && r.ndx_fin_eur) ndx *= r.ndx_fin_eur/r.ndx_ini;
+      if (r.spx_eur) spx *= r.spx_eur;
+      if (r.ndx_eur) ndx *= r.ndx_eur;
     }
     return { b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100 };
   }
@@ -333,18 +332,22 @@ function calcPeriods() {
     const totalDias = rend.reduce((s,r) => s+(r.dias||0), 0);
     const years = totalDias / 365.25;
     const f = rend[0], l = rend[rend.length-1];
+    // CAGR: encadenar todos los factores
+    let spxAcum=1, ndxAcum=1;
+    for (const r of rend) { if (r.spx_eur) spxAcum*=r.spx_eur; if (r.ndx_eur) ndxAcum*=r.ndx_eur; }
     return {
       b10: f.b10_ini && l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini, 1/years)-1)*100 : null,
-      spx: f.spx_ini && l.spx_fin_eur ? (Math.pow(l.spx_fin_eur/f.spx_ini, 1/years)-1)*100 : null,
-      ndx: f.ndx_ini && l.ndx_fin_eur ? (Math.pow(l.ndx_fin_eur/f.ndx_ini, 1/years)-1)*100 : null,
+      spx: (Math.pow(spxAcum, 1/years)-1)*100,
+      ndx: (Math.pow(ndxAcum, 1/years)-1)*100,
     };
   }
 
+  const totalDiasAcum = rend.reduce((s,r) => s+(r.dias||0), 0);
   const ytd = rentPeriodo(rend[rend.length-1]);
   const a1  = rend.length >= 2 ? rentPeriodo(rend[rend.length-2]) : null;
-  const a2  = rend.length >= 2 ? acumN(2) : null;
-  const a3  = rend.length >= 3 ? acumN(3) : null;
-  const a4  = rend.length >= 4 ? acumN(4) : null;
+  const a2  = totalDiasAcum >= 2*365 ? acumN(2) : null;
+  const a3  = totalDiasAcum >= 3*365 ? acumN(3) : null;
+  const a4  = totalDiasAcum >= 4*365 ? acumN(4) : null;
   const all = acumN(rend.length);
   const cr  = cagrTotal();
 
