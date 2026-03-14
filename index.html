@@ -211,8 +211,9 @@ function doLogout() {
 }
 
 // ── FETCH ────────────────────────────────────────────────
-async function fetchSheet(sheet) {
-  const url = `https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
+async function fetchSheet(sheet, gid) {
+  const gidParam = gid ? `&gid=${gid}` : '';
+  const url = `https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}${gidParam}`;
   const res = await fetch(url);
   const text = await res.text();
   const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
@@ -282,7 +283,7 @@ async function loadAll() {
     const [r10b, rQH, rRend] = await Promise.all([
       fetchSheet('POSICIONES_10BAGGER'),
       fetchSheet('POSICIONES_QUALITY_HOLD'),
-      fetchSheet('REND_SIMPLE'),
+      fetchSheet('REND_SIMPLE', 351033993),
     ]);
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH);
