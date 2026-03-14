@@ -272,6 +272,25 @@ async function loadAll() {
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH);
     D.rend   = parseRendimiento(rRend);
+
+    // Obtener valor actual de cartera directamente de la fila TOTAL de posiciones
+    // Esto evita el problema de fórmulas cross-sheet que la API no evalúa
+    const totalRow10b = r10b.find(r => r[0] && String(r[0]).includes('TOTAL'));
+    const totalRowQH  = rQH.find(r  => r[0] && String(r[0]).includes('TOTAL'));
+    if (totalRow10b && totalRow10b[6]) {
+      const totalVal = num(totalRow10b[6]);
+      if (totalVal && D.rend.length) {
+        D.rend[D.rend.length - 1].b10_fin = totalVal;
+      }
+    }
+    if (totalRowQH && totalRowQH[6]) {
+      const totalVal = num(totalRowQH[6]);
+      if (totalVal && D.rend.length) {
+        // QH solo desde 2023
+        const qhPeriods = D.rend.filter(p => p.qh_ini);
+        if (qhPeriods.length) qhPeriods[qhPeriods.length-1].qh_fin = totalVal;
+      }
+    }
     setBadge('bl', '● En vivo');
     const t = now();
     document.getElementById('lupd').textContent = 'Actualizado ' + t;
