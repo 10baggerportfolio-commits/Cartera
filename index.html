@@ -214,23 +214,40 @@ function parsePosiciones(rows) {
 }
 
 // REND_SIMPLE: cabecera en fila 0, datos en filas 1+
-// Cols: Periodo, Dias, b10_ini, b10_fin, spx_ini, spx_fin, ndx_ini, ndx_fin
+// Cols: Periodo, Dias, b10_ini, b10_fin, spx_ini, spx_fin, ndx_ini, ndx_fin, fx_ini, fx_fin
+// fx = EUR/USD (cuántos dólares vale 1 euro)
+// Ajuste EUR: rent_eur = (1 + rent_usd) / (1 + var_fx) - 1
 function parseRend(rows) {
   const años = ['2022','2023','2024','2025','2026'];
   return rows.filter(r => {
     if (!r || !r[0]) return false;
     const p = String(r[0]).trim();
     return años.some(a => p.startsWith(a));
-  }).map(r => ({
-    label:   String(r[0]).trim(),
-    dias:    typeof r[1]==='number' ? r[1] : toNum(r[1]),
-    b10_ini: typeof r[2]==='number' ? r[2] : toNum(r[2]),
-    b10_fin: typeof r[3]==='number' ? r[3] : toNum(r[3]),
-    spx_ini: typeof r[4]==='number' ? r[4] : toNum(r[4]),
-    spx_fin: typeof r[5]==='number' ? r[5] : toNum(r[5]),
-    ndx_ini: typeof r[6]==='number' ? r[6] : toNum(r[6]),
-    ndx_fin: typeof r[7]==='number' ? r[7] : toNum(r[7]),
-  })).filter(r => r.dias && r.dias > 0);
+  }).map(r => {
+    const v = i => typeof r[i]==='number' ? r[i] : toNum(r[i]);
+    const fx_ini = v(8), fx_fin = v(9);
+    // Rentabilidad de índices ajustada a EUR
+    // Si fx sube (dólar se debilita), rentabilidad EUR < USD
+    const spx_ini = v(4), spx_fin = v(5);
+    const ndx_ini = v(6), ndx_fin = v(7);
+    // Guardamos tanto los valores originales como los ajustados
+    return {
+      label:    String(r[0]).trim(),
+      dias:     v(1),
+      b10_ini:  v(2), b10_fin: v(3),
+      spx_ini, spx_fin,
+      ndx_ini, ndx_fin,
+      fx_ini,  fx_fin,
+      // Valores ajustados a EUR para comparación justa
+      spx_ini_eur: spx_ini, // base de cálculo igual
+      spx_fin_eur: fx_ini && fx_fin && spx_ini && spx_fin
+        ? spx_ini * ((spx_fin/spx_ini) / (fx_fin/fx_ini))
+        : spx_fin,
+      ndx_fin_eur: fx_ini && fx_fin && ndx_ini && ndx_fin
+        ? ndx_ini * ((ndx_fin/ndx_ini) / (fx_fin/fx_ini))
+        : ndx_fin,
+    };
+  }).filter(r => r.dias && r.dias > 0);
 }
 
 // ── CARGA ─────────────────────────────────────────────────────
@@ -291,11 +308,13 @@ function calcPeriods() {
   const rend = D.rend;
   if (!rend || !rend.length) return null;
 
+  // Rentabilidad ajustada a EUR: (rent_usd) / (var_fx) - 1
+  // fx = EUR/USD. Si el dólar se debilita (fx sube), la rentabilidad en EUR es menor.
   function rentPeriodo(r) {
     return {
       b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null,
-      spx: r.spx_ini && r.spx_fin ? ((r.spx_fin/r.spx_ini)-1)*100 : null,
-      ndx: r.ndx_ini && r.ndx_fin ? ((r.ndx_fin/r.ndx_ini)-1)*100 : null,
+      spx: r.spx_ini && r.spx_fin_eur ? ((r.spx_fin_eur/r.spx_ini)-1)*100 : null,
+      ndx: r.ndx_ini && r.ndx_fin_eur ? ((r.ndx_fin_eur/r.ndx_ini)-1)*100 : null,
     };
   }
 
@@ -304,8 +323,8 @@ function calcPeriods() {
     let b10=1, spx=1, ndx=1;
     for (const r of slice) {
       if (r.b10_ini && r.b10_fin) b10 *= r.b10_fin/r.b10_ini;
-      if (r.spx_ini && r.spx_fin) spx *= r.spx_fin/r.spx_ini;
-      if (r.ndx_ini && r.ndx_fin) ndx *= r.ndx_fin/r.ndx_ini;
+      if (r.spx_ini && r.spx_fin_eur) spx *= r.spx_fin_eur/r.spx_ini;
+      if (r.ndx_ini && r.ndx_fin_eur) ndx *= r.ndx_fin_eur/r.ndx_ini;
     }
     return { b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100 };
   }
@@ -316,8 +335,8 @@ function calcPeriods() {
     const f = rend[0], l = rend[rend.length-1];
     return {
       b10: f.b10_ini && l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini, 1/years)-1)*100 : null,
-      spx: f.spx_ini && l.spx_fin ? (Math.pow(l.spx_fin/f.spx_ini, 1/years)-1)*100 : null,
-      ndx: f.ndx_ini && l.ndx_fin ? (Math.pow(l.ndx_fin/f.ndx_ini, 1/years)-1)*100 : null,
+      spx: f.spx_ini && l.spx_fin_eur ? (Math.pow(l.spx_fin_eur/f.spx_ini, 1/years)-1)*100 : null,
+      ndx: f.ndx_ini && l.ndx_fin_eur ? (Math.pow(l.ndx_fin_eur/f.ndx_ini, 1/years)-1)*100 : null,
     };
   }
 
