@@ -6,78 +6,49 @@
 <title>10Bagger Portfolio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg:#f7f7f5;--bg2:#ffffff;--bg3:#f0f0ed;
-    --text:#1a1a18;--text2:#6b6b66;--text3:#9e9e99;
-    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
-    --green:#0f6e56;--green-bg:#e1f5ee;
-    --blue:#185fa5;--blue-bg:#e6f1fb;
-    --amber:#854f0b;--amber-bg:#faeeda;
-    --red:#a32d2d;--red-bg:#fcebeb;
-    --radius:10px;--radius-sm:6px;
-  }
-  @media(prefers-color-scheme:dark){:root{
-    --bg:#1c1c1a;--bg2:#242422;--bg3:#2e2e2b;
-    --text:#e8e8e4;--text2:#9e9e99;--text3:#6b6b66;
-    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-    --green:#5dcaa5;--green-bg:#04342c;
-    --blue:#85b7eb;--blue-bg:#042c53;
-    --amber:#ef9f27;--amber-bg:#412402;
-    --red:#f09595;--red-bg:#501313;
-  }}
+  :root{--bg:#f7f7f5;--bg2:#fff;--bg3:#f0f0ed;--text:#1a1a18;--text2:#6b6b66;--text3:#9e9e99;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--green:#0f6e56;--green-bg:#e1f5ee;--blue:#185fa5;--blue-bg:#e6f1fb;--amber:#854f0b;--amber-bg:#faeeda;--red:#a32d2d;--red-bg:#fcebeb;--r:10px;--rs:6px}
+  @media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#242422;--bg3:#2e2e2b;--text:#e8e8e4;--text2:#9e9e99;--text3:#6b6b66;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--green:#5dcaa5;--green-bg:#04342c;--blue:#85b7eb;--blue-bg:#042c53;--amber:#ef9f27;--amber-bg:#412402;--red:#f09595;--red-bg:#501313}}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-
-  /* LOGIN */
   #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-  .login-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:2.5rem;width:100%;max-width:380px}
-  .login-logo{font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:4px}
-  .login-sub{font-size:13px;color:var(--text2);margin-bottom:2rem}
-  .form-label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
-  .form-input{width:100%;padding:9px 12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:14px;outline:none;margin-bottom:12px;font-family:inherit}
-  .form-input:focus{border-color:var(--blue)}
-  .btn-primary{width:100%;padding:10px;border-radius:var(--radius-sm);background:var(--text);color:var(--bg2);border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
-  .btn-primary:hover{opacity:.85}
-  #login-error{font-size:12px;color:var(--red);margin-top:6px;min-height:16px}
-  .sheet-section{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
+  .lcard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:2.5rem;width:100%;max-width:380px}
+  .llogo{font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:4px}
+  .lsub{font-size:13px;color:var(--text2);margin-bottom:2rem}
+  .flabel{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
+  .finput{width:100%;padding:9px 12px;border:0.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:14px;outline:none;margin-bottom:12px;font-family:inherit}
+  .finput:focus{border-color:var(--blue)}
+  .btnp{width:100%;padding:10px;border-radius:var(--rs);background:var(--text);color:var(--bg2);border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
+  .btnp:hover{opacity:.85}
+  #lerr{font-size:12px;color:var(--red);margin-top:6px;min-height:16px}
+  .ssec{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
   .hint{font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px}
-
-  /* DASHBOARD */
-  #dashboard{display:none;min-height:100vh;flex-direction:column}
+  #dashboard{display:none;flex-direction:column;min-height:100vh}
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
   .brand{font-size:15px;font-weight:700;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
-  .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:0.2px}
-  .badge-live{background:var(--green-bg);color:var(--green)}
-  .badge-demo{background:var(--amber-bg);color:var(--amber)}
-  .badge-load{background:var(--blue-bg);color:var(--blue)}
-  .topbar-right{display:flex;align-items:center;gap:8px}
-  .btn-sm{font-size:12px;padding:5px 12px;border-radius:var(--radius-sm);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit}
-  .btn-sm:hover{background:var(--bg3)}
-  .update-time{font-size:11px;color:var(--text3)}
-
-  /* TABS */
+  .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+  .bl{background:var(--green-bg);color:var(--green)}
+  .bd{background:var(--amber-bg);color:var(--amber)}
+  .bc{background:var(--blue-bg);color:var(--blue)}
+  .tright{display:flex;align-items:center;gap:8px}
+  .bsm{font-size:12px;padding:5px 12px;border-radius:var(--rs);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit}
+  .bsm:hover{background:var(--bg3)}
+  .utime{font-size:11px;color:var(--text3)}
   .tabs{display:flex;padding:0 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tab{font-size:13px;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);white-space:nowrap;font-weight:500}
   .tab.active{color:var(--text);border-bottom-color:var(--text)}
-
-  /* MAIN */
   .main{padding:18px 20px}
-
-  /* METRICS */
-  .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:16px}
-  .metric{background:var(--bg3);border-radius:var(--radius-sm);padding:13px 15px}
-  .metric-label{font-size:11px;color:var(--text2);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
-  .metric-value{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1.1}
-  .metric-sub{font-size:11px;margin-top:3px;color:var(--text2)}
-  .pos{color:var(--green)} .neg{color:var(--red)}
-
-  /* CARDS & TABLES */
-  .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
-  .card-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)}
-  .card-title{font-size:13px;font-weight:600;letter-spacing:-0.2px}
-  .card-meta{font-size:11px;color:var(--text2)}
-  .overflow-x{overflow-x:auto}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:16px}
+  .metric{background:var(--bg3);border-radius:var(--rs);padding:13px 15px}
+  .mlabel{font-size:11px;color:var(--text2);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
+  .mval{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1.1}
+  .msub{font-size:11px;margin-top:3px;color:var(--text2)}
+  .pos{color:var(--green)}.neg{color:var(--red)}
+  .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+  .ch{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)}
+  .ct{font-size:13px;font-weight:600;letter-spacing:-0.2px}
+  .cm{font-size:11px;color:var(--text2)}
+  .ox{overflow-x:auto}
   table{width:100%;border-collapse:collapse;font-size:12px}
   th{font-size:10px;color:var(--text2);font-weight:600;padding:8px 13px;text-align:right;border-bottom:0.5px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:0.4px}
   th:first-child{text-align:left}
@@ -86,645 +57,421 @@
   tr:last-child td{border-bottom:none}
   tbody tr:hover td{background:var(--bg3)}
   .tsub{font-size:10px;color:var(--text3);display:block;margin-top:1px}
-  .divider-row td{background:var(--bg3)!important;font-size:10px;color:var(--text3);font-weight:700;text-align:left!important;padding:5px 13px;text-transform:uppercase;letter-spacing:0.5px}
-
-  /* BADGES */
+  .dr td{background:var(--bg3)!important;font-size:10px;color:var(--text3);font-weight:700;text-align:left!important;padding:5px 13px;text-transform:uppercase;letter-spacing:0.5px}
   .nat{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .nat-core{background:var(--green-bg);color:var(--green)}
-  .nat-trans{background:var(--blue-bg);color:var(--blue)}
-  .nat-nocore{background:var(--bg3);color:var(--text2)}
-  .risk-hi{color:var(--red);font-weight:700}
-  .risk-md{color:var(--amber);font-weight:700}
-  .risk-lo{color:var(--green);font-weight:700}
-  .sig-buy{color:var(--green);font-weight:700}
-  .sig-wait{color:var(--text2)}
-  .op-ap{background:var(--green-bg);color:var(--green);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .op-ci{background:var(--red-bg);color:var(--red);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .op-au{background:var(--blue-bg);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .op-re{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-
-  /* LINKS */
-  .ilink{display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 5px;border-radius:3px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:10px;font-weight:600;margin-left:3px;vertical-align:middle}
+  .nc{background:var(--green-bg);color:var(--green)}
+  .nt{background:var(--blue-bg);color:var(--blue)}
+  .nn{background:var(--bg3);color:var(--text2)}
+  .rhi{color:var(--red);font-weight:700}.rmd{color:var(--amber);font-weight:700}.rlo{color:var(--green);font-weight:700}
+  .sb{color:var(--green);font-weight:700}.sw{color:var(--text2)}
+  .oap{background:var(--green-bg);color:var(--green);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .oci{background:var(--red-bg);color:var(--red);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .oau{background:var(--blue-bg);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .ore{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .ilink{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:3px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:10px;font-weight:600;margin-left:3px;vertical-align:middle}
   .ilink:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
-
-  /* CHARTS */
-  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-  @media(max-width:600px){.charts-grid{grid-template-columns:1fr}}
-  .chart-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
-  .chart-title{font-size:11px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2)}
-  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-  .legend span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
-  .ldot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-
-  /* STATUS */
-  .status-bar{font-size:11px;color:var(--text3);padding:7px 20px;text-align:right;border-top:0.5px solid var(--border);background:var(--bg2);margin-top:auto}
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:600px){.cgrid{grid-template-columns:1fr}}
+  .cwrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
+  .ctit{font-size:11px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2)}
+  .leg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .leg span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
+  .ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+  .sbar{font-size:11px;color:var(--text3);padding:7px 20px;text-align:right;border-top:0.5px solid var(--border);background:var(--bg2);margin-top:auto}
   .spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .error-box{background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
+  .ebox{background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
 </style>
 </head>
 <body>
-
 <div id="login-screen">
-  <div class="login-card">
-    <div class="login-logo">10Bagger Portfolio</div>
-    <div class="login-sub">Panel privado de inversiones</div>
-    <label class="form-label">Contraseña</label>
-    <input type="password" class="form-input" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn-primary" onclick="doLogin()">Entrar</button>
-    <div id="login-error"></div>
-    <div class="sheet-section">
-      <label class="form-label">ID de Google Sheet</label>
-      <input type="text" class="form-input" id="sheet-id" value="1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM">
-      <div class="hint">El sheet debe estar compartido como "Cualquiera con el enlace puede ver"</div>
+  <div class="lcard">
+    <div class="llogo">10Bagger Portfolio</div>
+    <div class="lsub">Panel privado de inversiones</div>
+    <label class="flabel">Contraseña</label>
+    <input type="password" class="finput" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btnp" onclick="doLogin()">Entrar</button>
+    <div id="lerr"></div>
+    <div class="ssec">
+      <label class="flabel">ID de Google Sheet</label>
+      <input type="text" class="finput" id="sid" value="1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM">
+      <div class="hint">Compartido como "Cualquiera con el enlace puede ver"</div>
     </div>
   </div>
 </div>
 
 <div id="dashboard">
   <div class="topbar">
-    <div class="brand">10Bagger Portfolio <span class="badge badge-load" id="live-badge">⟳ Cargando</span></div>
-    <div class="topbar-right">
-      <span class="update-time" id="last-update"></span>
-      <button class="btn-sm" onclick="refreshData()">↻ Actualizar</button>
-      <button class="btn-sm" onclick="doLogout()">Salir</button>
+    <div class="brand">10Bagger Portfolio <span class="badge bc" id="lbadge">⟳ Cargando</span></div>
+    <div class="tright">
+      <span class="utime" id="lupd"></span>
+      <button class="bsm" onclick="load()">↻ Actualizar</button>
+      <button class="bsm" onclick="logout()">Salir</button>
     </div>
   </div>
   <div class="tabs">
-    <div class="tab active" onclick="showTab('resumen')">Resumen</div>
-    <div class="tab" onclick="showTab('10bagger')">10Bagger</div>
-    <div class="tab" onclick="showTab('qualityhold')">Quality Hold</div>
-    <div class="tab" onclick="showTab('watchlist')">Watchlist</div>
-    <div class="tab" onclick="showTab('historico')">Histórico</div>
-    <div class="tab" onclick="showTab('operaciones')">Operaciones</div>
+    <div class="tab active" onclick="tab('resumen')">Resumen</div>
+    <div class="tab" onclick="tab('10bagger')">10Bagger</div>
+    <div class="tab" onclick="tab('qualityhold')">Quality Hold</div>
+    <div class="tab" onclick="tab('watchlist')">Watchlist</div>
+    <div class="tab" onclick="tab('historico')">Histórico</div>
+    <div class="tab" onclick="tab('ops')">Operaciones</div>
   </div>
-  <div class="main" id="main-content">
-    <div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando con Google Sheets...</div>
-  </div>
-  <div class="status-bar" id="status-bar"></div>
+  <div class="main" id="mc"><div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando...</div></div>
+  <div class="sbar" id="sb"></div>
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────
-const PASSWORD = "cartera2024";
-const SHEET_ID_DEFAULT = "1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM";
-const COLORS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#1D9E75"];
+const PWD="cartera2024";
+const COLS=["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A"];
+let SID="1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM";
+let D={}, CH={}, CUR='resumen';
 
-let sheetId = SHEET_ID_DEFAULT;
-let D = {}; // all parsed data
-let charts = {};
-let currentTab = 'resumen';
-
-// ── NÚMERO ESPAÑOL ──────────────────────────────────────────
-// "9,2%" → 9.2   "4,1%" → 4.1   "$17,76" → 17.76   "1.670,00" → 1670
-function numES(v) {
-  if(v === null || v === undefined) return 0;
-  let s = String(v).trim();
-  s = s.replace(/[€$£%\s]/g, '');       // quita símbolos
-  s = s.replace(/[^\d,.-]/g, '');       // quita letras y demás
-  // Si tiene punto Y coma: punto=miles, coma=decimal → "1.670,00"
-  if(s.includes('.') && s.includes(',')) {
-    s = s.replace(/\./g, '').replace(',', '.');
-  } else {
-    // Solo coma: es decimal español
-    s = s.replace(',', '.');
-  }
-  return parseFloat(s) || 0;
+// ── PARSEO DE NÚMEROS ESPAÑOL ─────────────────────────────────
+// Maneja: "9,2%" → 9.2  "4,1%" → 4.1  "$1.670,00" → 1670  "596,60 kr" → 596.6
+function num(v){
+  if(v===null||v===undefined) return 0;
+  let s=String(v).trim();
+  // quitar todo lo que no sea dígito, coma, punto, signo negativo
+  s=s.replace(/[^0-9,.\-]/g,'');
+  if(!s) return 0;
+  // Si tiene punto Y coma → punto=miles, coma=decimal: "1.670,00"
+  if(s.includes('.')&&s.includes(',')) s=s.replace(/\./g,'').replace(',','.');
+  // Solo coma → decimal español: "9,2"
+  else if(s.includes(',')) s=s.replace(',','.');
+  // Solo punto → ya es decimal inglés o miles sin decimal
+  return parseFloat(s)||0;
 }
 
-// Formatea porcentaje desde el string original (ya viene formateado)
-function fmtStr(v) { return v !== null && v !== undefined && String(v).trim() !== '' ? String(v).trim() : '—'; }
+function fmt(v){return v!==null&&v!==undefined&&String(v).trim()!==''?String(v).trim():'—';}
+function isNeg(s){return s&&String(s).trim().startsWith('-');}
+function now(){return new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});}
+function setStatus(m){document.getElementById('sb').innerHTML=m;}
+function setBadge(c,t){const b=document.getElementById('lbadge');b.className='badge '+c;b.textContent=t;}
 
-// ── AUTH ────────────────────────────────────────────────────
-function doLogin() {
-  const pwd = document.getElementById('pwd').value;
-  const sid = document.getElementById('sheet-id').value.trim();
-  if(pwd !== PASSWORD) { document.getElementById('login-error').textContent = 'Contraseña incorrecta'; return; }
-  document.getElementById('login-error').textContent = '';
-  if(sid) sheetId = sid;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'flex';
-  refreshData();
+// ── AUTH ──────────────────────────────────────────────────────
+function doLogin(){
+  if(document.getElementById('pwd').value!==PWD){document.getElementById('lerr').textContent='Contraseña incorrecta';return;}
+  document.getElementById('lerr').textContent='';
+  SID=document.getElementById('sid').value.trim()||SID;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').style.display='flex';
+  load();
 }
-function doLogout() {
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('pwd').value = '';
-}
-
-// ── FETCH ───────────────────────────────────────────────────
-async function fetchSheet(name) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
-  const res = await fetch(url);
-  const text = await res.text();
-  const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
-  if(!m) throw new Error('Respuesta inesperada de Google Sheets');
-  return JSON.parse(m[1]).table;
+function logout(){
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pwd').value='';
 }
 
-// Convierte tabla gviz en array de arrays (valores raw)
-function tableToRows(table) {
-  if(!table || !table.rows) return [];
-  return table.rows.map(r => r.c.map(c => (c && c.v !== null && c.v !== undefined) ? c.v : (c && c.f ? c.f : null)));
-}
-
-// ── PARSE ESPECÍFICO POR PESTAÑA ────────────────────────────
-
-// COMPOSICIÓN 10BAGGER / QUALITY HOLD
-// Col: 0=ticker, 1=empresa, 2=tesis, 3=precio, 4=modelo, 5=PO, 6=CAGR, 7=div, 8=rentTotal, 9=riesgo, 10=principal, 11=actualizada
-// Cols extra: 12=URL_Tesis, 13=URL_Modelo (si las añades)
-function parseComp(table) {
-  const rows = tableToRows(table);
-  return rows.slice(1).filter(r => r[1] && !String(r[1]).toLowerCase().includes('total') && String(r[1]).trim() !== '').map(r => ({
-    ticker:    fmtStr(r[0]),
-    empresa:   fmtStr(r[1]),
-    tesis:     fmtStr(r[2]),
-    precio:    fmtStr(r[3]),
-    modelo:    fmtStr(r[4]),
-    po:        fmtStr(r[5]),
-    cagr:      fmtStr(r[6]),
-    cagrNum:   numES(r[6]),
-    div:       fmtStr(r[7]),
-    rentTotal: fmtStr(r[8]),
-    riesgo:    fmtStr(r[9]),
-    principal: fmtStr(r[10]),
-    actualizada: fmtStr(r[11]),
-    urlTesis:  r[12] ? String(r[12]) : '',
-    urlModelo: r[13] ? String(r[13]) : '',
+// ── FETCH ─────────────────────────────────────────────────────
+async function fetchSheet(name){
+  const r=await fetch(`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`);
+  const t=await r.text();
+  const m=t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+  if(!m) throw new Error('Sin respuesta de Sheets');
+  const tbl=JSON.parse(m[1]).table;
+  // Convertir a array de arrays usando el valor formateado (f) si existe, si no el valor (v)
+  if(!tbl||!tbl.rows) return [];
+  return tbl.rows.map(row=>row.c.map(c=>{
+    if(!c) return null;
+    // Preferir valor formateado para strings con %, £, $, etc.
+    // Usar valor numérico (v) solo si no hay formato o es un número puro sin símbolo
+    if(c.f!==null&&c.f!==undefined) return c.f;
+    return c.v!==null&&c.v!==undefined?c.v:null;
   }));
 }
 
-// RENTABILIDAD 10BAGGER / QH
-// Col: 0=ticker, 1=empresa, 2=cotiz, 3=ntit, 4=valTotal, 5=valEUR, 6=peso, 7=riesgo, 8=naturaleza
-// Operaciones: col 10=nombre, 11=fecha, 12=ticker, 13=operacion, 14=pct, 15=precio
-// Rentabilidades: filas especiales con "RENTABILIDADES", "NDX", ".INX", "10B"/"QH", "USD/EUR"
-function parseRent(table) {
-  const rows = tableToRows(table);
-  const posiciones = [];
-  const operaciones = [];
-  const rentabilidades = {};
+// ── PARSERS ESPECÍFICOS ───────────────────────────────────────
 
-  let inRent = false;
-  let inMoneda = false;
+// COMPOSICIÓN 10BAGGER: col0=ticker(sin cabecera), col1=empresa, col3=precio, col5=PO, col6=CAGR%, col7=div%, col8=rentTotal%, col9=riesgo, col10=principal
+// COMPOSICIÓN QH: col0=ticker(CON cabecera "Ticker"), misma estructura
+function parseComp(rows, skipFirstCol){
+  return rows.slice(1).filter(r=>r[1]&&!String(r[1]).toLowerCase().includes('total')&&String(r[1]).trim()!=='').map(r=>({
+    ticker:    fmt(r[0]),
+    empresa:   fmt(r[1]),
+    precio:    fmt(r[3]),
+    po:        fmt(r[5]),
+    cagr:      fmt(r[6]),    // ya viene como "4,1%" — mostrar tal cual
+    cagrNum:   num(r[6]),    // para gráfico
+    div:       fmt(r[7]),
+    rentTotal: fmt(r[8]),
+    riesgo:    fmt(r[9]),
+    principal: fmt(r[10]),
+    urlTesis:  r[12]&&String(r[12]).startsWith('http')?String(r[12]):'',
+    urlModelo: r[13]&&String(r[13]).startsWith('http')?String(r[13]):'',
+  }));
+}
 
-  for(let i = 1; i < rows.length; i++) {
-    const r = rows[i];
-    const col0 = String(r[0] || '').trim();
-    const col1 = String(r[1] || '').trim();
+// RENTABILIDAD: col0=ticker, col1=empresa, col2=cotiz, col3=ntit, col6=peso%, col7=riesgo, col8=naturaleza
+// Operaciones en 10B: col10=empresa, col11=fecha, col12=ticker, col13=op, col14=pct, col15=precio
+// Operaciones en QH: col9=empresa, col10=fecha, col11=ticker, col12=op, col13=pct, col14=precio (una col menos)
+// Rentabilidades: filas especiales RENTABILIDADES / NDX / .INX / 10B / QH / EFECTO MONEDA / USD/EUR
+function parseRent(rows, tipo){
+  const pos=[], ops=[];
+  const rent={};
+  let inR=false, inM=false;
+  const opsOffset = tipo==='10b' ? 10 : 9; // offset de columna de operaciones
 
-    if(col0 === 'RENTABILIDADES') { inRent = true; continue; }
-    if(col0 === 'EFECTO MONEDA')  { inRent = false; inMoneda = true; continue; }
-    if(col0 === 'Ticker' && inRent) continue; // cabecera repetida
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    const c0=String(r[0]||'').trim();
+    const c1=String(r[1]||'').trim();
 
-    if(inMoneda) {
-      if(col0 === 'USD/EUR') {
-        rentabilidades.usdeur = { desde: fmtStr(r[2]), actual: fmtStr(r[3]), rent: fmtStr(r[4]) };
-      }
-      // ops en col 10-15
-    } else if(inRent) {
-      if(col0 === 'NDX')  rentabilidades.ndx  = { desde: fmtStr(r[2]), actual: fmtStr(r[3]), rent: fmtStr(r[4]), rentDiv: fmtStr(r[6]) };
-      if(col0 === '.INX') rentabilidades.spx  = { desde: fmtStr(r[2]), actual: fmtStr(r[3]), rent: fmtStr(r[4]), rentDiv: fmtStr(r[6]) };
-      if(col0 === '10B')  rentabilidades.p10b = { rent: fmtStr(r[4]), rentDiv: fmtStr(r[6]) };
-      if(col0 === 'QH')   rentabilidades.qh   = { rent: fmtStr(r[4]), rentDiv: fmtStr(r[6]) };
+    if(c0==='RENTABILIDADES'){inR=true;continue;}
+    if(c0==='EFECTO MONEDA'){inR=false;inM=true;continue;}
+    if(c0==='Ticker'&&inR) continue; // cabecera repetida
+
+    if(inM){
+      if(c0==='USD/EUR') rent.fx={desde:fmt(r[2]),actual:fmt(r[3]),rent:fmt(r[4])};
+    } else if(inR){
+      if(c0==='NDX')  rent.ndx ={rent:fmt(r[4]),rentDiv:fmt(r[6])};
+      if(c0==='.INX') rent.spx ={rent:fmt(r[4]),rentDiv:fmt(r[6])};
+      if(c0==='10B')  rent.p10b={rent:fmt(r[4]),rentDiv:fmt(r[6])};
+      if(c0==='QH')   rent.qh  ={rent:fmt(r[6]),rentDiv:fmt(r[6])}; // QH usa col6
     } else {
-      // Posiciones: col0=ticker, col1=empresa, col6=peso
-      if(col0 && col0 !== '' && col1 && col1 !== '') {
-        posiciones.push({
-          ticker:     col0,
-          empresa:    col1,
-          cot:        fmtStr(r[2]),
-          ntit:       fmtStr(r[3]),
-          peso:       fmtStr(r[6]),
-          pesoNum:    numES(r[6]),
-          riesgo:     fmtStr(r[7]),
-          naturaleza: fmtStr(r[8]),
-          urlTesis:   r[16] ? String(r[16]) : '',
-          urlModelo:  r[17] ? String(r[17]) : '',
+      // Posiciones normales
+      if(c0&&c1&&c0!=='100,0%'){
+        pos.push({
+          ticker:c0, empresa:c1,
+          cot:fmt(r[2]), ntit:fmt(r[3]),
+          peso:fmt(r[6]), pesoNum:num(r[6]),
+          riesgo:fmt(r[7]), naturaleza:fmt(r[8]||''),
+          urlTesis:'', urlModelo:'',
         });
       }
-      // Operaciones: col11=fecha, col12=ticker, col13=op, col14=pct, col15=precio
-      if(r[11] && r[12] && r[13]) {
-        operaciones.push({
-          empresa:  fmtStr(r[10]),
-          fecha:    fmtStr(r[11]),
-          ticker:   fmtStr(r[12]),
-          op:       fmtStr(r[13]),
-          pct:      fmtStr(r[14]),
-          precio:   fmtStr(r[15]),
-        });
+      // Operaciones
+      const oe=opsOffset, of_=opsOffset+1, ot=opsOffset+2, oo=opsOffset+3, op_=opsOffset+4, opr=opsOffset+5;
+      if(r[of_]&&r[ot]&&r[oo]){
+        ops.push({empresa:fmt(r[oe]),fecha:fmt(r[of_]),ticker:fmt(r[ot]),op:fmt(r[oo]),pct:fmt(r[op_]),precio:fmt(r[opr])});
       }
     }
 
-    // ops también en filas de posición vacías (col0 vacío pero col11 tiene datos)
-    if((!col0 || col0 === '') && r[11] && r[12] && r[13]) {
-      operaciones.push({
-        empresa: fmtStr(r[10]),
-        fecha:   fmtStr(r[11]),
-        ticker:  fmtStr(r[12]),
-        op:      fmtStr(r[13]),
-        pct:     fmtStr(r[14]),
-        precio:  fmtStr(r[15]),
-      });
+    // Ops en filas sin posición (col0 vacío)
+    if(!c0||c0===''){
+      const oe=opsOffset, of_=opsOffset+1, ot=opsOffset+2, oo=opsOffset+3, op_=opsOffset+4, opr=opsOffset+5;
+      if(r[of_]&&r[ot]&&r[oo]){
+        ops.push({empresa:fmt(r[oe]),fecha:fmt(r[of_]),ticker:fmt(r[ot]),op:fmt(r[oo]),pct:fmt(r[op_]),precio:fmt(r[opr])});
+      }
     }
   }
-
-  return { posiciones, operaciones, rentabilidades };
+  return {pos,ops,rent};
 }
 
-// WATCHLIST
-// Col: 0=ticker, 1=empresa, 2=tesis, 3=grafico, 4=precio, 5=52sem, 6=entrada, 7=pctEntrada, 8=señal, 9=actualizada
-// Cols extra: 10=URL_Tesis, 11=URL_Modelo
-function parseWatchlist(table) {
-  const rows = tableToRows(table);
-  return rows.slice(1).filter(r => r[0] && String(r[0]).trim() !== '' && String(r[0]).trim() !== 'Ticker').map(r => ({
-    ticker:     fmtStr(r[0]),
-    empresa:    fmtStr(r[1]),
-    precio:     fmtStr(r[4]),
-    sem52:      fmtStr(r[5]),
-    entrada:    fmtStr(r[6]),
-    pctEntrada: fmtStr(r[7]),
-    pctNum:     numES(r[7]),
-    signal:     fmtStr(r[8]),
-    urlTesis:   r[10] ? String(r[10]) : '',
+// WATCHLIST: col0=ticker, col1=empresa, col4=precio, col5=52sem, col6=entrada, col7=pctEntrada%, col8=señal
+function parseWL(rows){
+  return rows.slice(1).filter(r=>r[0]&&String(r[0]).trim()&&String(r[0]).trim()!=='Ticker').map(r=>({
+    ticker:fmt(r[0]), empresa:fmt(r[1]),
+    precio:fmt(r[4]), sem52:fmt(r[5]),
+    entrada:fmt(r[6]),
+    pctEntrada:fmt(r[7]),  // ya viene "28,64%" — mostrar tal cual
+    pctNum:num(r[7]),
+    signal:fmt(r[8]),
+    urlTesis:r[10]&&String(r[10]).startsWith('http')?String(r[10]):'',
   }));
 }
 
-// HISTÓRICO
-// Col: 0=ticker, 1=empresa, 2=tesis, 3=precio, 4=modelo, 5=PO, 6=CAGR, 7=div, 8=rentTotal, 9=riesgo, 10=principal, 11=actualizada
-function parseHistorico(table) {
-  const rows = tableToRows(table);
-  return rows.slice(1).filter(r => r[1] && String(r[1]).trim() !== '').map(r => ({
-    ticker:    fmtStr(r[0]),
-    empresa:   fmtStr(r[1]),
-    precio:    fmtStr(r[3]),
-    po:        fmtStr(r[5]),
-    cagr:      fmtStr(r[6]),
-    riesgo:    fmtStr(r[9]),
-    principal: fmtStr(r[10]),
+// HISTÓRICO: col0=ticker, col1=empresa, col3=precio, col5=PO, col6=CAGR, col9=riesgo, col10=principal
+function parseHist(rows){
+  return rows.slice(1).filter(r=>r[1]&&String(r[1]).trim()!=='').map(r=>({
+    ticker:fmt(r[0]),empresa:fmt(r[1]),precio:fmt(r[3]),po:fmt(r[5]),cagr:fmt(r[6]),riesgo:fmt(r[9]),principal:fmt(r[10]),
   }));
 }
 
-// ── REFRESH ─────────────────────────────────────────────────
-async function refreshData() {
-  setBadge('load', '⟳ Cargando');
+// ── LOAD ──────────────────────────────────────────────────────
+async function load(){
+  setBadge('bc','⟳ Cargando');
   setStatus('<span class="spin"></span> Conectando con Google Sheets...');
-  try {
-    const [t10b, tQH, r10b, rQH, wl, hist] = await Promise.all([
-      fetchSheet('COMPOSICIÓN_10BAGGER'),
-      fetchSheet('COMPOSICIÓN_QUALITY_H_'),
+  try{
+    const [r10b,rQH,c10b,cQH,wl,hist]=await Promise.all([
       fetchSheet('RENTABILIDAD_10BAGGER'),
       fetchSheet('RENTABILIDAD_Q_HOLD'),
+      fetchSheet('COMPOSICIÓN_10BAGGER'),
+      fetchSheet('COMPOSICIÓN_QUALITY_H_'),
       fetchSheet('WATCHLIST'),
       fetchSheet('HISTÓRICO'),
     ]);
-
-    D.comp10b   = parseComp(t10b);
-    D.compQH    = parseComp(tQH);
-    const r10   = parseRent(r10b);
-    const rQ    = parseRent(rQH);
-    D.pos10b    = r10.posiciones;
-    D.ops10b    = r10.operaciones;
-    D.rent10b   = r10.rentabilidades;
-    D.posQH     = rQ.posiciones;
-    D.rentQH    = rQ.rentabilidades;
-    D.watchlist = parseWatchlist(wl);
-    D.historico = parseHistorico(hist);
-
-    setBadge('live', '● En vivo');
-    const t = new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('last-update').textContent = 'Actualizado ' + t;
-    setStatus('Datos en tiempo real desde Google Sheets · ' + t);
-    showTab(currentTab);
-  } catch(err) {
-    setBadge('demo', '⚠ Error');
-    setStatus('Error al conectar con Google Sheets: ' + err.message);
-    document.getElementById('main-content').innerHTML = `<div class="error-box"><strong>No se pudo conectar con el Google Sheet.</strong><br>Comprueba que el archivo está compartido como "Cualquiera con el enlace puede ver" y que los nombres de las pestañas son exactamente: COMPOSICIÓN_10BAGGER, COMPOSICIÓN_QUALITY_H_, RENTABILIDAD_10BAGGER, RENTABILIDAD_Q_HOLD, WATCHLIST, HISTÓRICO.<br><br>Error técnico: ${err.message}</div>`;
-    console.error(err);
+    const p10=parseRent(r10b,'10b');
+    const pQH=parseRent(rQH,'qh');
+    D={
+      pos10b:p10.pos, ops10b:p10.ops, rent10b:p10.rent,
+      posQH:pQH.pos,  opsQH:pQH.ops,  rentQH:pQH.rent,
+      comp10b:parseComp(c10b),
+      compQH:parseComp(cQH),
+      wl:parseWL(wl),
+      hist:parseHist(hist),
+    };
+    setBadge('bl','● En vivo');
+    const t=now();
+    document.getElementById('lupd').textContent='Actualizado '+t;
+    setStatus('Datos en tiempo real desde Google Sheets · '+t);
+    tab(CUR);
+  }catch(e){
+    setBadge('bd','⚠ Error');
+    setStatus('Error: '+e.message);
+    document.getElementById('mc').innerHTML=`<div class="ebox"><strong>No se pudo conectar con Google Sheets.</strong><br>Verifica que el archivo está compartido como "Cualquiera con el enlace puede ver".<br><br>Error: ${e.message}</div>`;
+    console.error(e);
   }
 }
 
-function setBadge(type, txt) {
-  const b = document.getElementById('live-badge');
-  b.className = 'badge badge-' + type;
-  b.textContent = txt;
-}
-function setStatus(msg) { document.getElementById('status-bar').innerHTML = msg; }
-
-// ── TABS ────────────────────────────────────────────────────
-function showTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach((el,i) => {
-    el.classList.toggle('active', ['resumen','10bagger','qualityhold','watchlist','historico','operaciones'][i] === tab);
-  });
-  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
-  charts = {};
-  const mc = document.getElementById('main-content');
-  if(tab==='resumen')     mc.innerHTML = renderResumen();
-  else if(tab==='10bagger')    mc.innerHTML = renderCartera('10b');
-  else if(tab==='qualityhold') mc.innerHTML = renderCartera('qh');
-  else if(tab==='watchlist')   mc.innerHTML = renderWatchlist();
-  else if(tab==='historico')   mc.innerHTML = renderHistorico();
-  else if(tab==='operaciones') mc.innerHTML = renderOps();
-  setTimeout(() => buildCharts(tab), 80);
+// ── TABS ──────────────────────────────────────────────────────
+function tab(t){
+  CUR=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['resumen','10bagger','qualityhold','watchlist','historico','ops'][i]===t));
+  Object.values(CH).forEach(c=>{try{c.destroy()}catch(e){}});CH={};
+  const mc=document.getElementById('mc');
+  if(t==='resumen')     mc.innerHTML=renderResumen();
+  else if(t==='10bagger')    mc.innerHTML=renderCartera('10b');
+  else if(t==='qualityhold') mc.innerHTML=renderCartera('qh');
+  else if(t==='watchlist')   mc.innerHTML=renderWL();
+  else if(t==='historico')   mc.innerHTML=renderHist();
+  else if(t==='ops')         mc.innerHTML=renderOps();
+  setTimeout(()=>buildCharts(t),80);
 }
 
-// ── HELPERS HTML ────────────────────────────────────────────
-function riskCls(r) { const v=parseInt(r); return v>=8?'risk-hi':v>=5?'risk-md':'risk-lo'; }
-function natBadge(n) {
-  if(n==='core')      return '<span class="nat nat-core">core</span>';
-  if(n==='transición') return '<span class="nat nat-trans">transición</span>';
-  if(n==='no core')   return '<span class="nat nat-nocore">no core</span>';
-  return '';
-}
-function opBadge(op) {
-  const o = (op||'').toLowerCase();
-  if(o==='apertura') return `<span class="op-ap">APERTURA</span>`;
-  if(o==='cierre')   return `<span class="op-ci">CIERRE</span>`;
-  if(o==='aumento')  return `<span class="op-au">AUMENTO</span>`;
-  return `<span class="op-re">${op.toUpperCase()}</span>`;
-}
-function links(ticker, urlTesis, urlModelo) {
-  const gf = `https://www.google.com/finance/quote/${encodeURIComponent(ticker.replace(':','.'))}`;
-  let s = `<a href="${gf}" target="_blank" class="ilink">GF</a>`;
-  if(urlTesis && urlTesis.startsWith('http'))   s += `<a href="${urlTesis}" target="_blank" class="ilink">✍</a>`;
-  if(urlModelo && urlModelo.startsWith('http')) s += `<a href="${urlModelo}" target="_blank" class="ilink">📊</a>`;
+// ── HELPERS ───────────────────────────────────────────────────
+function rc(r){const v=parseInt(r);return v>=8?'rhi':v>=5?'rmd':'rlo';}
+function natB(n){return n==='core'?'<span class="nat nc">core</span>':n==='transición'?'<span class="nat nt">transición</span>':n==='no core'?'<span class="nat nn">no core</span>':'';}
+function opB(o){const l=(o||'').toLowerCase();return l==='apertura'?'<span class="oap">APERTURA</span>':l==='cierre'?'<span class="oci">CIERRE</span>':l==='aumento'?'<span class="oau">AUMENTO</span>':`<span class="ore">${o.toUpperCase()}</span>`;}
+function lks(ticker,uT,uM){
+  const gf=`https://www.google.com/finance/quote/${encodeURIComponent(ticker.replace(':','.'))}`;
+  let s=`<a href="${gf}" target="_blank" class="ilink">GF</a>`;
+  if(uT) s+=`<a href="${uT}" target="_blank" class="ilink">✍</a>`;
+  if(uM) s+=`<a href="${uM}" target="_blank" class="ilink">📊</a>`;
   return s;
 }
 
-// ── RESUMEN ─────────────────────────────────────────────────
-function renderResumen() {
-  const r10 = D.rent10b || {};
-  const rQH = D.rentQH  || {};
-  const p10 = r10.p10b  || {};
-  const pQH = rQH.qh    || {};
-  const ndx = r10.ndx   || {};
-  const spx = r10.spx   || {};
-  const fx  = r10.usdeur|| {};
-
-  const isNeg = v => v && v.startsWith('-');
-
+// ── RESUMEN ───────────────────────────────────────────────────
+function renderResumen(){
+  const r10=D.rent10b||{}, rQH=D.rentQH||{};
+  const p10=r10.p10b||{}, pQH=rQH.qh||{}, ndx=r10.ndx||{}, spx=r10.spx||{}, fx=r10.fx||{};
+  const n10=D.pos10b?D.pos10b.filter(p=>p.ticker!=='LIQUIDEZ').length:0;
+  const nQH=D.posQH?D.posQH.filter(p=>p.ticker!=='LIQUIDEZ').length:0;
   return `
-<div class="metrics-grid">
-  <div class="metric">
-    <div class="metric-label">10Bagger 2026</div>
-    <div class="metric-value ${isNeg(p10.rent)?'neg':'pos'}">${p10.rent||'—'}</div>
-    <div class="metric-sub">con divisa: ${p10.rentDiv||'—'}</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">Quality Hold 2026</div>
-    <div class="metric-value ${isNeg(pQH.rent)?'neg':'pos'}">${pQH.rent||'—'}</div>
-    <div class="metric-sub">con divisa: ${pQH.rentDiv||'—'}</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">Nasdaq-100 2026</div>
-    <div class="metric-value ${isNeg(ndx.rent)?'neg':'pos'}">${ndx.rent||'—'}</div>
-    <div class="metric-sub">con divisa: ${ndx.rentDiv||'—'}</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">S&P 500 2026</div>
-    <div class="metric-value ${isNeg(spx.rent)?'neg':'pos'}">${spx.rent||'—'}</div>
-    <div class="metric-sub">con divisa: ${spx.rentDiv||'—'}</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">Posiciones 10Bagger</div>
-    <div class="metric-value">${(D.pos10b||[]).filter(p=>p.ticker!=='LIQUIDEZ').length}</div>
-    <div class="metric-sub">${(D.comp10b||[]).find(r=>r.empresa.toLowerCase().includes('total')) ? '' : 'más liquidez'}</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">USD/EUR 2026</div>
-    <div class="metric-value ${isNeg(fx.rent)?'neg':'pos'}">${fx.rent||'—'}</div>
-    <div class="metric-sub">${fx.desde||'—'} → ${fx.actual||'—'}</div>
-  </div>
+<div class="mgrid">
+  <div class="metric"><div class="mlabel">10Bagger 2026</div><div class="mval ${isNeg(p10.rent)?'neg':'pos'}">${p10.rent||'—'}</div><div class="msub">con divisa: ${p10.rentDiv||'—'}</div></div>
+  <div class="metric"><div class="mlabel">Quality Hold 2026</div><div class="mval ${isNeg(pQH.rent)?'neg':'pos'}">${pQH.rent||'—'}</div><div class="msub">desde inicio del año</div></div>
+  <div class="metric"><div class="mlabel">Nasdaq-100 2026</div><div class="mval ${isNeg(ndx.rent)?'neg':'pos'}">${ndx.rent||'—'}</div><div class="msub">con divisa: ${ndx.rentDiv||'—'}</div></div>
+  <div class="metric"><div class="mlabel">S&P 500 2026</div><div class="mval ${isNeg(spx.rent)?'neg':'pos'}">${spx.rent||'—'}</div><div class="msub">con divisa: ${spx.rentDiv||'—'}</div></div>
+  <div class="metric"><div class="mlabel">Posiciones 10Bagger</div><div class="mval">${n10}</div><div class="msub">más liquidez</div></div>
+  <div class="metric"><div class="mlabel">USD/EUR 2026</div><div class="mval ${isNeg(fx.rent)?'neg':'pos'}">${fx.rent||'—'}</div><div class="msub">${fx.desde||'—'} → ${fx.actual||'—'}</div></div>
 </div>
-
-<div class="charts-grid">
-  <div class="chart-wrap" style="margin-bottom:0">
-    <div class="chart-title">Composición 10Bagger</div>
-    <div class="legend" id="leg-10b"></div>
-    <div style="position:relative;height:210px"><canvas id="chart-10b"></canvas></div>
-  </div>
-  <div class="chart-wrap" style="margin-bottom:0">
-    <div class="chart-title">Composición Quality Hold</div>
-    <div class="legend" id="leg-qh"></div>
-    <div style="position:relative;height:210px"><canvas id="chart-qh"></canvas></div>
-  </div>
+<div class="cgrid">
+  <div class="cwrap" style="margin-bottom:0"><div class="ctit">Composición 10Bagger</div><div class="leg" id="l10b"></div><div style="position:relative;height:210px"><canvas id="c10b"></canvas></div></div>
+  <div class="cwrap" style="margin-bottom:0"><div class="ctit">Composición Quality Hold</div><div class="leg" id="lqh"></div><div style="position:relative;height:210px"><canvas id="cqh"></canvas></div></div>
 </div>
-
-<div class="chart-wrap">
-  <div class="chart-title">CAGR esperado 2028 — 10Bagger</div>
-  <div style="position:relative;height:${Math.max(180,(D.comp10b||[]).filter(r=>r.cagrNum>0).length*30+60)}px">
-    <canvas id="chart-cagr"></canvas>
-  </div>
+<div class="cwrap" style="margin-top:14px"><div class="ctit">CAGR esperado 2028 — 10Bagger</div>
+  <div style="position:relative;height:${Math.max(160,(D.comp10b||[]).filter(c=>c.cagrNum>0).length*30+50)}px"><canvas id="ccagr"></canvas></div>
 </div>`;
 }
 
-// ── CARTERA ─────────────────────────────────────────────────
-function renderCartera(tipo) {
-  const isQH  = tipo === 'qh';
-  const pos   = isQH ? (D.posQH||[])  : (D.pos10b||[]);
-  const comp  = isQH ? (D.compQH||[]) : (D.comp10b||[]);
-  const title = isQH ? 'Quality Hold' : '10Bagger';
+// ── CARTERA ───────────────────────────────────────────────────
+function renderCartera(tipo){
+  const isQH=tipo==='qh';
+  const pos=isQH?D.posQH:D.pos10b||[];
+  const comp=isQH?D.compQH:D.comp10b||[];
+  const title=isQH?'Quality Hold':'10Bagger';
 
-  const posRows = pos.map(p => `<tr>
-    <td>
-      <span style="font-weight:600">${p.empresa}</span>
-      <span class="tsub">${p.ticker} ${links(p.ticker, p.urlTesis, p.urlModelo)}</span>
-    </td>
-    <td style="font-weight:600">${p.cot}</td>
-    <td>${p.ntit}</td>
+  const posR=pos.map(p=>`<tr>
+    <td><span style="font-weight:600">${p.empresa}</span><span class="tsub">${p.ticker} ${lks(p.ticker,p.urlTesis,p.urlModelo)}</span></td>
+    <td style="font-weight:600">${p.cot}</td><td>${p.ntit}</td>
     <td style="font-weight:600">${p.peso}</td>
-    <td class="${riskCls(p.riesgo)}">${p.riesgo}</td>
-    ${!isQH ? `<td>${natBadge(p.naturaleza)}</td>` : ''}
+    <td class="${rc(p.riesgo)}">${p.riesgo}</td>
+    ${!isQH?`<td>${natB(p.naturaleza)}</td>`:''}
   </tr>`).join('');
 
-  const compRows = comp.map(c => {
-    const pos = c.cagrNum > 0;
-    return `<tr>
-      <td>
-        <span style="font-weight:600">${c.empresa}</span>
-        <span class="tsub">${c.ticker} ${links(c.ticker, c.urlTesis, c.urlModelo)}</span>
-      </td>
-      <td>${c.precio}</td>
-      <td style="font-weight:600">${c.po}</td>
-      <td class="${pos?'pos':''}" style="font-weight:600">${c.cagr}</td>
-      <td>${c.div}</td>
-      <td class="${pos?'pos':''}" style="font-weight:600">${c.rentTotal}</td>
-      <td class="${riskCls(c.riesgo)}">${c.riesgo}</td>
-      <td style="text-align:left;color:var(--text2);font-size:11px;white-space:normal;max-width:160px">${c.principal}</td>
-    </tr>`;
-  }).join('');
+  const compR=comp.map(c=>`<tr>
+    <td><span style="font-weight:600">${c.empresa}</span><span class="tsub">${c.ticker} ${lks(c.ticker,c.urlTesis,c.urlModelo)}</span></td>
+    <td>${c.precio}</td><td style="font-weight:600">${c.po}</td>
+    <td class="${c.cagrNum>0?'pos':''}" style="font-weight:600">${c.cagr}</td>
+    <td>${c.div}</td>
+    <td class="${c.cagrNum>0?'pos':''}" style="font-weight:600">${c.rentTotal}</td>
+    <td class="${rc(c.riesgo)}">${c.riesgo}</td>
+    <td style="text-align:left;color:var(--text2);font-size:11px;white-space:normal;max-width:160px">${c.principal}</td>
+  </tr>`).join('');
 
   return `
 <div class="card">
-  <div class="card-header">
-    <span class="card-title">Posiciones actuales — ${title}</span>
-    <span class="card-meta">${pos.filter(p=>p.ticker!=='LIQUIDEZ').length} posiciones</span>
-  </div>
-  <div class="overflow-x"><table>
-    <thead><tr>
-      <th style="width:30%">Empresa</th><th>Cotización</th><th>Nº títulos</th>
-      <th>Peso</th><th>Riesgo</th>${!isQH?'<th>Naturaleza</th>':''}
-    </tr></thead>
-    <tbody>${posRows}</tbody>
-  </table></div>
+  <div class="ch"><span class="ct">Posiciones — ${title}</span><span class="cm">${pos.filter(p=>p.ticker!=='LIQUIDEZ').length} posiciones</span></div>
+  <div class="ox"><table><thead><tr><th style="width:28%">Empresa</th><th>Cotización</th><th>Nº títulos</th><th>Peso</th><th>Riesgo</th>${!isQH?'<th>Naturaleza</th>':''}</tr></thead><tbody>${posR}</tbody></table></div>
 </div>
 <div class="card">
-  <div class="card-header">
-    <span class="card-title">Valoraciones y P.O. 2028 — ${title}</span>
-    <span class="card-meta">GF = Google Finance · ✍ = Tesis · 📊 = Modelo (añade URLs en col M y N del sheet)</span>
-  </div>
-  <div class="overflow-x"><table>
-    <thead><tr>
-      <th style="width:26%">Empresa</th><th>Precio</th><th>P.O. 2028</th>
-      <th>CAGR</th><th>Div.</th><th>Rent. total</th><th>Riesgo</th>
-      <th style="text-align:left">Riesgo principal</th>
-    </tr></thead>
-    <tbody>${compRows}</tbody>
-  </table></div>
+  <div class="ch"><span class="ct">Valoraciones y P.O. 2028 — ${title}</span><span class="cm">GF=Google Finance · ✍=Tesis · 📊=Modelo</span></div>
+  <div class="ox"><table><thead><tr><th style="width:24%">Empresa</th><th>Precio</th><th>P.O. 2028</th><th>CAGR</th><th>Div.</th><th>Rent. total</th><th>Riesgo</th><th style="text-align:left">Riesgo principal</th></tr></thead><tbody>${compR}</tbody></table></div>
 </div>`;
 }
 
-// ── WATCHLIST ───────────────────────────────────────────────
-function renderWatchlist() {
-  const data = D.watchlist || [];
-  const buy  = data.filter(d => d.signal === 'Comprar');
-  const wait = data.filter(d => d.signal !== 'Comprar');
-
-  function rows(arr) {
-    return arr.map(d => {
-      const gf = `https://www.google.com/finance/quote/${encodeURIComponent(d.ticker.replace(':','.'))}`;
-      const tLink = d.urlTesis && d.urlTesis.startsWith('http') ? `<a href="${d.urlTesis}" target="_blank" class="ilink">✍</a>` : '';
-      return `<tr>
-        <td>
-          <span style="font-weight:600">${d.empresa}</span>
-          <span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${d.ticker}</a> ${tLink}</span>
-        </td>
-        <td style="font-weight:600">${d.precio}</td>
-        <td>${d.entrada}</td>
-        <td class="${d.pctNum>=0?'pos':'neg'}" style="font-weight:600">${d.pctEntrada}</td>
-        <td>${d.sem52}</td>
-        <td><span class="${d.signal==='Comprar'?'sig-buy':'sig-wait'}">${d.signal}</span></td>
-      </tr>`;
-    }).join('');
-  }
-
+// ── WATCHLIST ─────────────────────────────────────────────────
+function renderWL(){
+  const data=D.wl||[];
+  const buy=data.filter(d=>d.signal==='Comprar'), wait=data.filter(d=>d.signal!=='Comprar');
+  function rows(arr){return arr.map(d=>{
+    const gf=`https://www.google.com/finance/quote/${encodeURIComponent(d.ticker.replace(':','.'))}`;
+    const tL=d.urlTesis?`<a href="${d.urlTesis}" target="_blank" class="ilink">✍</a>`:'';
+    return `<tr>
+      <td><span style="font-weight:600">${d.empresa}</span><span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${d.ticker}</a> ${tL}</span></td>
+      <td style="font-weight:600">${d.precio}</td><td>${d.entrada}</td>
+      <td class="${d.pctNum>=0?'pos':'neg'}" style="font-weight:600">${d.pctEntrada}</td>
+      <td>${d.sem52}</td>
+      <td><span class="${d.signal==='Comprar'?'sb':'sw'}">${d.signal}</span></td>
+    </tr>`;
+  }).join('');}
   return `<div class="card">
-    <div class="card-header">
-      <span class="card-title">Watchlist</span>
-      <span class="card-meta">${data.length} empresas · ${buy.length} con señal de compra</span>
-    </div>
-    <div class="overflow-x"><table>
-      <thead><tr>
-        <th style="width:30%">Empresa</th><th>Precio actual</th><th>Precio entrada</th>
-        <th>Potencial</th><th>52 semanas</th><th>Señal</th>
-      </tr></thead>
-      <tbody>
-        <tr class="divider-row"><td colspan="6">Señal de compra — ${buy.length}</td></tr>
-        ${rows(buy)}
-        <tr class="divider-row"><td colspan="6">Esperar — ${wait.length}</td></tr>
-        ${rows(wait)}
-      </tbody>
+    <div class="ch"><span class="ct">Watchlist</span><span class="cm">${data.length} empresas · ${buy.length} señal de compra</span></div>
+    <div class="ox"><table><thead><tr><th style="width:28%">Empresa</th><th>Precio actual</th><th>Precio entrada</th><th>Potencial</th><th>52 semanas</th><th>Señal</th></tr></thead>
+    <tbody><tr class="dr"><td colspan="6">Señal de compra — ${buy.length}</td></tr>${rows(buy)}<tr class="dr"><td colspan="6">Esperar — ${wait.length}</td></tr>${rows(wait)}</tbody></table></div>
+  </div>`;
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────────────
+function renderHist(){
+  const data=D.hist||[];
+  return `<div class="card">
+    <div class="ch"><span class="ct">Posiciones cerradas</span><span class="cm">${data.length} posiciones</span></div>
+    <div class="ox"><table><thead><tr><th style="width:28%">Empresa</th><th>Precio salida</th><th>P.O. era</th><th>CAGR esp.</th><th>Riesgo</th><th style="text-align:left">Riesgo principal</th></tr></thead>
+    <tbody>${data.map(d=>`<tr><td><span style="font-weight:600">${d.empresa}</span><span class="tsub">${d.ticker}</span></td><td>${d.precio}</td><td>${d.po}</td><td>${d.cagr}</td><td class="${rc(d.riesgo)}">${d.riesgo}</td><td style="text-align:left;color:var(--text2);font-size:11px">${d.principal}</td></tr>`).join('')}</tbody>
     </table></div>
   </div>`;
 }
 
-// ── HISTÓRICO ───────────────────────────────────────────────
-function renderHistorico() {
-  const data = D.historico || [];
+// ── OPERACIONES ───────────────────────────────────────────────
+function renderOps(){
+  const ops=D.ops10b||[];
   return `<div class="card">
-    <div class="card-header">
-      <span class="card-title">Posiciones cerradas — Histórico</span>
-      <span class="card-meta">${data.length} posiciones</span>
-    </div>
-    <div class="overflow-x"><table>
-      <thead><tr>
-        <th style="width:30%">Empresa</th><th>Precio salida</th><th>P.O. era</th>
-        <th>CAGR esp.</th><th>Riesgo</th><th style="text-align:left">Riesgo principal</th>
-      </tr></thead>
-      <tbody>${data.map(d=>`<tr>
-        <td><span style="font-weight:600">${d.empresa}</span><span class="tsub">${d.ticker}</span></td>
-        <td>${d.precio}</td><td>${d.po}</td><td>${d.cagr}</td>
-        <td class="${riskCls(d.riesgo)}">${d.riesgo}</td>
-        <td style="text-align:left;color:var(--text2);font-size:11px">${d.principal}</td>
-      </tr>`).join('')}</tbody>
+    <div class="ch"><span class="ct">Últimas operaciones — 10Bagger</span><span class="cm">${ops.length} registradas</span></div>
+    <div class="ox"><table><thead><tr><th style="text-align:left">Fecha</th><th style="text-align:left">Empresa</th><th>Ticker</th><th>Operación</th><th>% sobre ant.</th><th>Precio</th></tr></thead>
+    <tbody>${ops.map(o=>`<tr><td style="text-align:left;color:var(--text2)">${o.fecha}</td><td style="text-align:left;font-weight:600">${o.empresa}</td><td style="font-size:11px">${o.ticker}</td><td>${opB(o.op)}</td><td>${o.pct}</td><td style="font-weight:600">${o.precio}</td></tr>`).join('')}</tbody>
     </table></div>
   </div>`;
 }
 
-// ── OPERACIONES ─────────────────────────────────────────────
-function renderOps() {
-  const ops = D.ops10b || [];
-  return `<div class="card">
-    <div class="card-header">
-      <span class="card-title">Últimas operaciones — 10Bagger</span>
-      <span class="card-meta">${ops.length} registradas</span>
-    </div>
-    <div class="overflow-x"><table>
-      <thead><tr>
-        <th style="text-align:left">Fecha</th><th style="text-align:left">Empresa</th>
-        <th>Ticker</th><th>Operación</th><th>% sobre ant.</th><th>Precio</th>
-      </tr></thead>
-      <tbody>${ops.map(o=>`<tr>
-        <td style="text-align:left;color:var(--text2)">${o.fecha}</td>
-        <td style="text-align:left;font-weight:600">${o.empresa}</td>
-        <td style="font-size:11px">${o.ticker}</td>
-        <td>${opBadge(o.op)}</td>
-        <td>${o.pct}</td>
-        <td style="font-weight:600">${o.precio}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>
-  </div>`;
-}
+// ── CHARTS ────────────────────────────────────────────────────
+function buildCharts(t){
+  if(t!=='resumen') return;
 
-// ── CHARTS ──────────────────────────────────────────────────
-function buildCharts(tab) {
-  if(tab !== 'resumen') return;
-
-  // Donut 10Bagger
-  const p10 = (D.pos10b||[]).filter(p=>p.ticker!=='LIQUIDEZ'&&p.pesoNum>0);
-  if(p10.length) {
-    const leg = document.getElementById('leg-10b');
-    if(leg) leg.innerHTML = p10.map((p,i)=>`<span><span class="ldot" style="background:${COLORS[i%COLORS.length]}"></span>${p.ticker.split(':').pop()}</span>`).join('');
-    const el = document.getElementById('chart-10b');
-    if(el) charts.d10b = new Chart(el, {
-      type:'doughnut',
-      data:{labels:p10.map(p=>p.ticker.split(':').pop()),datasets:[{data:p10.map(p=>p.pesoNum),backgroundColor:COLORS,borderWidth:2,borderColor:'var(--bg2)'}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}
-    });
+  // Donut 10Bagger — de posiciones reales
+  const p10=(D.pos10b||[]).filter(p=>p.ticker!=='LIQUIDEZ'&&p.pesoNum>0);
+  if(p10.length){
+    const el=document.getElementById('c10b');
+    const leg=document.getElementById('l10b');
+    if(leg) leg.innerHTML=p10.map((p,i)=>`<span><span class="ld" style="background:${COLS[i%COLS.length]}"></span>${p.ticker.split(':').pop()}</span>`).join('');
+    if(el) CH.d10b=new Chart(el,{type:'doughnut',data:{labels:p10.map(p=>p.ticker.split(':').pop()),datasets:[{data:p10.map(p=>p.pesoNum),backgroundColor:COLS,borderWidth:2,borderColor:'var(--bg2)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}});
   }
 
-  // Donut Quality Hold
-  const pQH = (D.posQH||[]).filter(p=>p.ticker!=='LIQUIDEZ'&&p.pesoNum>0);
-  if(pQH.length) {
-    const leg = document.getElementById('leg-qh');
-    if(leg) leg.innerHTML = pQH.map((p,i)=>`<span><span class="ldot" style="background:${COLORS[i%COLORS.length]}"></span>${p.ticker.split(':').pop()}</span>`).join('');
-    const el = document.getElementById('chart-qh');
-    if(el) charts.dqh = new Chart(el, {
-      type:'doughnut',
-      data:{labels:pQH.map(p=>p.ticker.split(':').pop()),datasets:[{data:pQH.map(p=>p.pesoNum),backgroundColor:COLORS,borderWidth:2,borderColor:'var(--bg2)'}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}
-    });
+  // Donut Quality Hold — de posiciones reales
+  const pQH=(D.posQH||[]).filter(p=>p.ticker!=='LIQUIDEZ'&&p.pesoNum>0);
+  if(pQH.length){
+    const el=document.getElementById('cqh');
+    const leg=document.getElementById('lqh');
+    if(leg) leg.innerHTML=pQH.map((p,i)=>`<span><span class="ld" style="background:${COLS[i%COLS.length]}"></span>${p.ticker.split(':').pop()}</span>`).join('');
+    if(el) CH.dqh=new Chart(el,{type:'doughnut',data:{labels:pQH.map(p=>p.ticker.split(':').pop()),datasets:[{data:pQH.map(p=>p.pesoNum),backgroundColor:COLS,borderWidth:2,borderColor:'var(--bg2)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}});
   }
 
-  // CAGR bar horizontal
-  const cagrData = (D.comp10b||[]).filter(c=>c.cagrNum>0).sort((a,b)=>b.cagrNum-a.cagrNum);
-  if(cagrData.length) {
-    const el = document.getElementById('chart-cagr');
-    if(el) charts.cagr = new Chart(el, {
-      type:'bar',
-      data:{
-        labels:cagrData.map(c=>c.empresa.substring(0,20)),
-        datasets:[{data:cagrData.map(c=>c.cagrNum),backgroundColor:'#378ADD',borderRadius:4,borderWidth:0}]
-      },
-      options:{
-        indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' CAGR: '+c.raw.toFixed(1)+'%'}}},
-        scales:{
-          x:{ticks:{font:{size:10},color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,0.08)'}},
-          y:{ticks:{font:{size:11}},grid:{display:false}}
-        }
-      }
-    });
+  // CAGR bar horizontal — de composición 10B
+  const cd=(D.comp10b||[]).filter(c=>c.cagrNum>0).sort((a,b)=>b.cagrNum-a.cagrNum);
+  if(cd.length){
+    const el=document.getElementById('ccagr');
+    if(el) CH.cagr=new Chart(el,{type:'bar',data:{labels:cd.map(c=>c.empresa.substring(0,22)),datasets:[{data:cd.map(c=>c.cagrNum),backgroundColor:'#378ADD',borderRadius:4,borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' CAGR: '+c.raw.toFixed(1)+'%'}}},scales:{x:{ticks:{font:{size:10},color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,0.08)'}},y:{ticks:{font:{size:11}},grid:{display:false}}}}});
   }
 }
 </script>
