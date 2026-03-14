@@ -152,11 +152,25 @@ let D = {}, CH = {}, CUR = 'rentabilidad';
 function num(v) {
   if (v === null || v === undefined) return null;
   let s = String(v).trim();
-  if (s === '—' || s === '') return null;
-  s = s.replace(/[€$£%\s]/g, '').replace(/[^\d,.\-]/g, '');
+  if (s === '—' || s === '' || s === 'null') return null;
+  s = s.replace(/[€$£%\s]/g, '');
+  s = s.replace(/[^\d,.\-]/g, '');
   if (!s) return null;
-  if (s.includes('.') && s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
-  else if (s.includes(',')) s = s.replace(',','.');
+  // punto Y coma → "1.670,00" = 1670
+  if (s.includes('.') && s.includes(',')) {
+    s = s.replace(/\./g,'').replace(',','.');
+  }
+  // solo coma → "9,2" = 9.2
+  else if (s.includes(',')) {
+    s = s.replace(',','.');
+  }
+  // solo punto → "70.000" (3 dec = miles) o "70.5" (decimal)
+  else if (s.includes('.')) {
+    const parts = s.split('.');
+    if (parts.length === 2 && parts[1].length === 3 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      s = parts[0] + parts[1]; // quitar separador de miles
+    }
+  }
   const n = parseFloat(s);
   return isNaN(n) ? null : n;
 }
