@@ -463,7 +463,9 @@ function renderRentabilidad() {
 
 function buildRentCharts() {
   const periods = calcPeriods();
+  if (!periods || !periods.ytd) return;
   const p = periods[currentPeriod] || periods.ytd;
+  if (!p) return;
   const rend = D.rend || [];
   const hasQH = rend.some(r => r.qh_ini && r.qh_fin);
 
