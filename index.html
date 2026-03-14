@@ -6,473 +6,364 @@
 <title>10Bagger Portfolio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root{--bg:#f7f7f5;--bg2:#fff;--bg3:#f0f0ed;--text:#1a1a18;--text2:#6b6b66;--text3:#9e9e99;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);--green:#0f6e56;--green-bg:#e1f5ee;--blue:#185fa5;--blue-bg:#e6f1fb;--amber:#854f0b;--amber-bg:#faeeda;--red:#a32d2d;--red-bg:#fcebeb;--r:10px;--rs:6px}
-  @media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#242422;--bg3:#2e2e2b;--text:#e8e8e4;--text2:#9e9e99;--text3:#6b6b66;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--green:#5dcaa5;--green-bg:#04342c;--blue:#85b7eb;--blue-bg:#042c53;--amber:#ef9f27;--amber-bg:#412402;--red:#f09595;--red-bg:#501313}}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-  .lcard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:2.5rem;width:100%;max-width:380px}
-  .llogo{font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:4px}
-  .lsub{font-size:13px;color:var(--text2);margin-bottom:2rem}
-  .flabel{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
-  .finput{width:100%;padding:9px 12px;border:0.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:14px;outline:none;margin-bottom:12px;font-family:inherit}
-  .finput:focus{border-color:var(--blue)}
-  .btnp{width:100%;padding:10px;border-radius:var(--rs);background:var(--text);color:var(--bg2);border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
-  .btnp:hover{opacity:.85}
-  #lerr{font-size:12px;color:var(--red);margin-top:6px;min-height:16px}
-  .ssec{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
-  .hint{font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px}
-  #dashboard{display:none;flex-direction:column;min-height:100vh}
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
-  .brand{font-size:15px;font-weight:700;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
-  .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
-  .bl{background:var(--green-bg);color:var(--green)}
-  .bd{background:var(--amber-bg);color:var(--amber)}
-  .bc{background:var(--blue-bg);color:var(--blue)}
-  .tright{display:flex;align-items:center;gap:8px}
-  .bsm{font-size:12px;padding:5px 12px;border-radius:var(--rs);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit}
-  .bsm:hover{background:var(--bg3)}
-  .utime{font-size:11px;color:var(--text3)}
-  .tabs{display:flex;padding:0 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none}
-  .tabs::-webkit-scrollbar{display:none}
-  .tab{font-size:13px;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);white-space:nowrap;font-weight:500}
-  .tab.active{color:var(--text);border-bottom-color:var(--text)}
-  .main{padding:18px 20px}
-  .mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:16px}
-  .metric{background:var(--bg3);border-radius:var(--rs);padding:13px 15px}
-  .mlabel{font-size:11px;color:var(--text2);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
-  .mval{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1.1}
-  .msub{font-size:11px;margin-top:3px;color:var(--text2)}
-  .pos{color:var(--green)}.neg{color:var(--red)}
-  .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
-  .ch{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)}
-  .ct{font-size:13px;font-weight:600;letter-spacing:-0.2px}
-  .cm{font-size:11px;color:var(--text2)}
-  .ox{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  th{font-size:10px;color:var(--text2);font-weight:600;padding:8px 13px;text-align:right;border-bottom:0.5px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:0.4px}
-  th:first-child{text-align:left}
-  td{padding:9px 13px;text-align:right;border-bottom:0.5px solid var(--border);white-space:nowrap;vertical-align:middle}
-  td:first-child{text-align:left}
-  tr:last-child td{border-bottom:none}
-  tbody tr:hover td{background:var(--bg3)}
-  .tsub{font-size:10px;color:var(--text3);display:block;margin-top:1px}
-  .dr td{background:var(--bg3)!important;font-size:10px;color:var(--text3);font-weight:700;text-align:left!important;padding:5px 13px;text-transform:uppercase;letter-spacing:0.5px}
-  .nat{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .nc{background:var(--green-bg);color:var(--green)}
-  .nt{background:var(--blue-bg);color:var(--blue)}
-  .nn{background:var(--bg3);color:var(--text2)}
-  .rhi{color:var(--red);font-weight:700}.rmd{color:var(--amber);font-weight:700}.rlo{color:var(--green);font-weight:700}
-  .sb{color:var(--green);font-weight:700}.sw{color:var(--text2)}
-  .oap{background:var(--green-bg);color:var(--green);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .oci{background:var(--red-bg);color:var(--red);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .oau{background:var(--blue-bg);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .ore{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-  .ilink{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:3px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:10px;font-weight:600;margin-left:3px;vertical-align:middle}
-  .ilink:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
-  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-  @media(max-width:600px){.cgrid{grid-template-columns:1fr}}
-  .cwrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
-  .ctit{font-size:11px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2)}
-  .leg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-  .leg span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
-  .ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-  .sbar{font-size:11px;color:var(--text3);padding:7px 20px;text-align:right;border-top:0.5px solid var(--border);background:var(--bg2);margin-top:auto}
-  .spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .ebox{background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
+:root{
+  --bg:#f7f7f5;--bg2:#fff;--bg3:#f0f0ed;
+  --text:#1a1a18;--text2:#6b6b66;--text3:#9e9e99;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --green:#0f6e56;--green-bg:#e1f5ee;
+  --blue:#185fa5;--blue-bg:#e6f1fb;
+  --amber:#854f0b;--amber-bg:#faeeda;
+  --red:#a32d2d;--red-bg:#fcebeb;
+  --r:10px;--rs:6px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#242422;--bg3:#2e2e2b;
+  --text:#e8e8e4;--text2:#9e9e99;--text3:#6b6b66;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --green:#5dcaa5;--green-bg:#04342c;
+  --blue:#85b7eb;--blue-bg:#042c53;
+  --amber:#ef9f27;--amber-bg:#412402;
+  --red:#f09595;--red-bg:#501313;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* LOGIN */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.lcard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:2.5rem;width:100%;max-width:380px}
+.llogo{font-size:24px;font-weight:700;letter-spacing:-1px;margin-bottom:4px}
+.lsub{font-size:13px;color:var(--text2);margin-bottom:2rem}
+.lbl{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
+input[type=password],input[type=text]{width:100%;padding:9px 12px;border:0.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:14px;outline:none;margin-bottom:12px;font-family:inherit}
+input:focus{border-color:var(--blue)}
+.btnp{width:100%;padding:10px;border-radius:var(--rs);background:var(--text);color:var(--bg2);border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
+.btnp:hover{opacity:.85}
+#lerr{font-size:12px;color:var(--red);margin-top:6px;min-height:16px}
+.ssec{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
+.hint{font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px}
+
+/* DASHBOARD */
+#dash{display:none;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
+.brand{font-size:15px;font-weight:700;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.bl{background:var(--green-bg);color:var(--green)}
+.bd{background:var(--amber-bg);color:var(--amber)}
+.bc{background:var(--blue-bg);color:var(--blue)}
+.tright{display:flex;align-items:center;gap:8px}
+.bsm{font-size:12px;padding:5px 12px;border-radius:var(--rs);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit}
+.bsm:hover{background:var(--bg3)}
+.utime{font-size:11px;color:var(--text3)}
+.main{padding:18px 20px;flex:1}
+.sbar{font-size:11px;color:var(--text3);padding:7px 20px;text-align:right;border-top:0.5px solid var(--border);background:var(--bg2)}
+
+/* MÉTRICAS */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.metric{background:var(--bg3);border-radius:var(--rs);padding:13px 15px}
+.mlbl{font-size:10px;color:var(--text2);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
+.mval{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1.1}
+.msub{font-size:11px;margin-top:3px;color:var(--text2)}
+.pos{color:var(--green)}.neg{color:var(--red)}
+
+/* CARDS */
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.ch{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)}
+.ct{font-size:13px;font-weight:600;letter-spacing:-0.2px}
+.cm{font-size:11px;color:var(--text2)}
+.ox{overflow-x:auto}
+
+/* TABLA */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;color:var(--text2);font-weight:500;padding:8px 13px;text-align:right;border-bottom:0.5px solid var(--border);text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:9px 13px;text-align:right;border-bottom:0.5px solid var(--border);white-space:nowrap;vertical-align:middle}
+td:first-child{text-align:left;font-weight:500}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg3)}
+.tsub{font-size:10px;color:var(--text3);display:block;margin-top:1px;font-weight:400}
+
+/* BADGES */
+.risk{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;font-size:11px;font-weight:600}
+.rlo{background:var(--green-bg);color:var(--green)}
+.rmd{background:var(--amber-bg);color:var(--amber)}
+.rhi{background:var(--red-bg);color:var(--red)}
+.ilink{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:3px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:10px;font-weight:500;margin-left:3px;vertical-align:middle}
+.ilink:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+
+/* GRÁFICOS */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:580px){.cgrid{grid-template-columns:1fr}}
+.cwrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.ctit{font-size:10px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2)}
+.leg{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.leg span{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)}
+.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* SPINNER */
+.spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ebox{background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
 </style>
 </head>
 <body>
-<div id="login-screen">
+
+<div id="login">
   <div class="lcard">
     <div class="llogo">10Bagger Portfolio</div>
     <div class="lsub">Panel privado de inversiones</div>
-    <label class="flabel">Contraseña</label>
-    <input type="password" class="finput" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="lbl">Contraseña</label>
+    <input type="password" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btnp" onclick="doLogin()">Entrar</button>
     <div id="lerr"></div>
     <div class="ssec">
-      <label class="flabel">ID de Google Sheet</label>
-      <input type="text" class="finput" id="sid" value="1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM">
-      <div class="hint">Compartido como "Cualquiera con el enlace puede ver"</div>
+      <label class="lbl">ID de Google Sheet</label>
+      <input type="text" id="sid" value="1i9fgIwGdBx7p_fBqm95AL8betZ_Db57jPYPDXNMTqFo">
+      <div class="hint">El sheet debe estar compartido como "Cualquiera con el enlace puede ver"</div>
     </div>
   </div>
 </div>
 
-<div id="dashboard">
+<div id="dash">
   <div class="topbar">
-    <div class="brand">10Bagger Portfolio <span class="badge bc" id="lbadge">⟳ Cargando</span></div>
+    <div class="brand">10Bagger Portfolio <span class="badge bc" id="badge">⟳ Cargando</span></div>
     <div class="tright">
       <span class="utime" id="lupd"></span>
-      <button class="bsm" onclick="load()">↻ Actualizar</button>
-      <button class="bsm" onclick="logout()">Salir</button>
+      <button class="bsm" onclick="loadData()">↻ Actualizar</button>
+      <button class="bsm" onclick="doLogout()">Salir</button>
     </div>
-  </div>
-  <div class="tabs">
-    <div class="tab active" onclick="tab('resumen')">Resumen</div>
-    <div class="tab" onclick="tab('10bagger')">10Bagger</div>
-    <div class="tab" onclick="tab('qualityhold')">Quality Hold</div>
-    <div class="tab" onclick="tab('watchlist')">Watchlist</div>
-    <div class="tab" onclick="tab('historico')">Histórico</div>
-    <div class="tab" onclick="tab('ops')">Operaciones</div>
   </div>
   <div class="main" id="mc"><div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando...</div></div>
   <div class="sbar" id="sb"></div>
 </div>
 
 <script>
-const PWD="cartera2024";
-const COLS=["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A"];
-let SID="1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM";
-let D={}, CH={}, CUR='resumen';
+const PWD = "cartera2024";
+const COLS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#C55A11","#4472C4","#ED7D31","#A9D18E","#9DC3E6","#F4B183"];
+let SID = "1i9fgIwGdBx7p_fBqm95AL8betZ_Db57jPYPDXNMTqFo";
+let D = {}, CH = {};
 
-// ── PARSEO DE NÚMEROS ESPAÑOL ─────────────────────────────────
-// Maneja: "9,2%" → 9.2  "4,1%" → 4.1  "$1.670,00" → 1670  "596,60 kr" → 596.6
-function num(v){
-  if(v===null||v===undefined) return 0;
-  let s=String(v).trim();
-  // quitar todo lo que no sea dígito, coma, punto, signo negativo
-  s=s.replace(/[^0-9,.\-]/g,'');
-  if(!s) return 0;
-  // Si tiene punto Y coma → punto=miles, coma=decimal: "1.670,00"
-  if(s.includes('.')&&s.includes(',')) s=s.replace(/\./g,'').replace(',','.');
-  // Solo coma → decimal español: "9,2"
-  else if(s.includes(',')) s=s.replace(',','.');
-  // Solo punto → ya es decimal inglés o miles sin decimal
-  return parseFloat(s)||0;
+// ── PARSEO ────────────────────────────────────────────────
+// Convierte string español a número: "30.059,72 €" → 30059.72 | "9,2%" → 9.2
+function num(v) {
+  if (v === null || v === undefined) return 0;
+  let s = String(v).trim();
+  s = s.replace(/[€$£%\s]/g, '');
+  s = s.replace(/[^\d,.\-]/g, '');
+  if (!s) return 0;
+  if (s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if (s.includes(',')) s = s.replace(',', '.');
+  return parseFloat(s) || 0;
 }
+function fmt(v) { return v !== null && v !== undefined && String(v).trim() !== '' ? String(v).trim() : '—'; }
+function now() { return new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}); }
+function setStatus(m) { document.getElementById('sb').innerHTML = m; }
+function setBadge(cls, txt) { const b = document.getElementById('badge'); b.className = 'badge ' + cls; b.textContent = txt; }
 
-function fmt(v){return v!==null&&v!==undefined&&String(v).trim()!==''?String(v).trim():'—';}
-function isNeg(s){return s&&String(s).trim().startsWith('-');}
-function now(){return new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});}
-function setStatus(m){document.getElementById('sb').innerHTML=m;}
-function setBadge(c,t){const b=document.getElementById('lbadge');b.className='badge '+c;b.textContent=t;}
-
-// ── AUTH ──────────────────────────────────────────────────────
-function doLogin(){
-  if(document.getElementById('pwd').value!==PWD){document.getElementById('lerr').textContent='Contraseña incorrecta';return;}
-  document.getElementById('lerr').textContent='';
-  SID=document.getElementById('sid').value.trim()||SID;
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('dashboard').style.display='flex';
-  load();
-}
-function logout(){
-  document.getElementById('dashboard').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('pwd').value='';
-}
-
-// ── FETCH ─────────────────────────────────────────────────────
-async function fetchSheet(name){
-  const r=await fetch(`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`);
-  const t=await r.text();
-  const m=t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
-  if(!m) throw new Error('Sin respuesta de Sheets');
-  const tbl=JSON.parse(m[1]).table;
-  // Convertir a array de arrays usando el valor formateado (f) si existe, si no el valor (v)
-  if(!tbl||!tbl.rows) return [];
-  return tbl.rows.map(row=>row.c.map(c=>{
-    if(!c) return null;
-    // Preferir valor formateado para strings con %, £, $, etc.
-    // Usar valor numérico (v) solo si no hay formato o es un número puro sin símbolo
-    if(c.f!==null&&c.f!==undefined) return c.f;
-    return c.v!==null&&c.v!==undefined?c.v:null;
-  }));
-}
-
-// ── PARSERS ESPECÍFICOS ───────────────────────────────────────
-
-// COMPOSICIÓN 10BAGGER: col0=ticker(sin cabecera), col1=empresa, col3=precio, col5=PO, col6=CAGR%, col7=div%, col8=rentTotal%, col9=riesgo, col10=principal
-// COMPOSICIÓN QH: col0=ticker(CON cabecera "Ticker"), misma estructura
-function parseComp(rows, skipFirstCol){
-  return rows.slice(1).filter(r=>r[1]&&!String(r[1]).toLowerCase().includes('total')&&String(r[1]).trim()!=='').map(r=>({
-    ticker:    fmt(r[0]),
-    empresa:   fmt(r[1]),
-    precio:    fmt(r[3]),
-    po:        fmt(r[5]),
-    cagr:      fmt(r[6]),    // ya viene como "4,1%" — mostrar tal cual
-    cagrNum:   num(r[6]),    // para gráfico
-    div:       fmt(r[7]),
-    rentTotal: fmt(r[8]),
-    riesgo:    fmt(r[9]),
-    principal: fmt(r[10]),
-    urlTesis:  r[12]&&String(r[12]).startsWith('http')?String(r[12]):'',
-    urlModelo: r[13]&&String(r[13]).startsWith('http')?String(r[13]):'',
-  }));
-}
-
-// RENTABILIDAD: col0=ticker, col1=empresa, col2=cotiz, col3=ntit, col6=peso%, col7=riesgo, col8=naturaleza
-// Operaciones en 10B: col10=empresa, col11=fecha, col12=ticker, col13=op, col14=pct, col15=precio
-// Operaciones en QH: col9=empresa, col10=fecha, col11=ticker, col12=op, col13=pct, col14=precio (una col menos)
-// Rentabilidades: filas especiales RENTABILIDADES / NDX / .INX / 10B / QH / EFECTO MONEDA / USD/EUR
-function parseRent(rows, tipo){
-  const pos=[], ops=[];
-  const rent={};
-  let inR=false, inM=false;
-  const opsOffset = tipo==='10b' ? 10 : 9; // offset de columna de operaciones
-
-  for(let i=1;i<rows.length;i++){
-    const r=rows[i];
-    const c0=String(r[0]||'').trim();
-    const c1=String(r[1]||'').trim();
-
-    if(c0==='RENTABILIDADES'){inR=true;continue;}
-    if(c0==='EFECTO MONEDA'){inR=false;inM=true;continue;}
-    if(c0==='Ticker'&&inR) continue; // cabecera repetida
-
-    if(inM){
-      if(c0==='USD/EUR') rent.fx={desde:fmt(r[2]),actual:fmt(r[3]),rent:fmt(r[4])};
-    } else if(inR){
-      if(c0==='NDX')  rent.ndx ={rent:fmt(r[4]),rentDiv:fmt(r[6])};
-      if(c0==='.INX') rent.spx ={rent:fmt(r[4]),rentDiv:fmt(r[6])};
-      if(c0==='10B')  rent.p10b={rent:fmt(r[4]),rentDiv:fmt(r[6])};
-      if(c0==='QH')   rent.qh  ={rent:fmt(r[6]),rentDiv:fmt(r[6])}; // QH usa col6
-    } else {
-      // Posiciones normales
-      if(c0&&c1&&c0!=='100,0%'){
-        pos.push({
-          ticker:c0, empresa:c1,
-          cot:fmt(r[2]), ntit:fmt(r[3]),
-          peso:fmt(r[6]), pesoNum:num(r[6]),
-          riesgo:fmt(r[7]), naturaleza:fmt(r[8]||''),
-          urlTesis:'', urlModelo:'',
-        });
-      }
-      // Operaciones
-      const oe=opsOffset, of_=opsOffset+1, ot=opsOffset+2, oo=opsOffset+3, op_=opsOffset+4, opr=opsOffset+5;
-      if(r[of_]&&r[ot]&&r[oo]){
-        ops.push({empresa:fmt(r[oe]),fecha:fmt(r[of_]),ticker:fmt(r[ot]),op:fmt(r[oo]),pct:fmt(r[op_]),precio:fmt(r[opr])});
-      }
-    }
-
-    // Ops en filas sin posición (col0 vacío)
-    if(!c0||c0===''){
-      const oe=opsOffset, of_=opsOffset+1, ot=opsOffset+2, oo=opsOffset+3, op_=opsOffset+4, opr=opsOffset+5;
-      if(r[of_]&&r[ot]&&r[oo]){
-        ops.push({empresa:fmt(r[oe]),fecha:fmt(r[of_]),ticker:fmt(r[ot]),op:fmt(r[oo]),pct:fmt(r[op_]),precio:fmt(r[opr])});
-      }
-    }
+// ── AUTH ─────────────────────────────────────────────────
+function doLogin() {
+  if (document.getElementById('pwd').value !== PWD) {
+    document.getElementById('lerr').textContent = 'Contraseña incorrecta'; return;
   }
-  return {pos,ops,rent};
+  document.getElementById('lerr').textContent = '';
+  SID = document.getElementById('sid').value.trim() || SID;
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('dash').style.display = 'flex';
+  loadData();
+}
+function doLogout() {
+  document.getElementById('dash').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('pwd').value = '';
 }
 
-// WATCHLIST: col0=ticker, col1=empresa, col4=precio, col5=52sem, col6=entrada, col7=pctEntrada%, col8=señal
-function parseWL(rows){
-  return rows.slice(1).filter(r=>r[0]&&String(r[0]).trim()&&String(r[0]).trim()!=='Ticker').map(r=>({
-    ticker:fmt(r[0]), empresa:fmt(r[1]),
-    precio:fmt(r[4]), sem52:fmt(r[5]),
-    entrada:fmt(r[6]),
-    pctEntrada:fmt(r[7]),  // ya viene "28,64%" — mostrar tal cual
-    pctNum:num(r[7]),
-    signal:fmt(r[8]),
-    urlTesis:r[10]&&String(r[10]).startsWith('http')?String(r[10]):'',
+// ── FETCH ────────────────────────────────────────────────
+async function fetchSheet(sheet) {
+  const url = `https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+  if (!m) throw new Error('Sin respuesta de Google Sheets');
+  const tbl = JSON.parse(m[1]).table;
+  if (!tbl || !tbl.rows) return [];
+  // Usar valor formateado (f) cuando existe — preserva el formato original del sheet
+  return tbl.rows.map(row => row.c.map(c => {
+    if (!c) return null;
+    if (c.f !== null && c.f !== undefined) return c.f;
+    return c.v !== null && c.v !== undefined ? c.v : null;
   }));
 }
 
-// HISTÓRICO: col0=ticker, col1=empresa, col3=precio, col5=PO, col6=CAGR, col9=riesgo, col10=principal
-function parseHist(rows){
-  return rows.slice(1).filter(r=>r[1]&&String(r[1]).trim()!=='').map(r=>({
-    ticker:fmt(r[0]),empresa:fmt(r[1]),precio:fmt(r[3]),po:fmt(r[5]),cagr:fmt(r[6]),riesgo:fmt(r[9]),principal:fmt(r[10]),
+// ── PARSER POSICIONES ────────────────────────────────────
+// Columnas: 0=Ticker, 1=Empresa, 2=Moneda, 3=NTit, 4=Precio, 5=FX, 6=ValorEUR, 7=Peso,
+//           8=PO, 9=CAGR, 10=Riesgo, 11=URLTesis, 12=URLModelo
+function parsePosiciones(rows) {
+  const skip = ['POSICIONES', 'Rellena', 'Ticker', 'TOTAL', 'P.O.'];
+  return rows.filter(r => {
+    const t = String(r[0] || '').trim();
+    return t && !skip.some(s => t.startsWith(s)) && r[6] && String(r[6]).includes('€');
+  }).map(r => ({
+    ticker:   String(r[0] || '').trim(),
+    empresa:  fmt(r[1]),
+    moneda:   fmt(r[2]),
+    ntit:     fmt(r[3]),
+    precio:   fmt(r[4]),
+    fx:       fmt(r[5]),
+    valorEUR: num(r[6]),
+    valorFmt: fmt(r[6]),
+    peso:     num(r[7]),
+    pesoFmt:  fmt(r[7]),
+    cagr:     r[9] ? fmt(r[9]) : '—',
+    riesgo:   r[10] ? String(r[10]).trim() : '—',
+    urlTesis: r[11] && String(r[11]).trim() !== 'Disponible' && String(r[11]).startsWith('http') ? String(r[11]).trim() : '',
+    urlModelo:r[12] && String(r[12]).trim() !== 'Disponible' && String(r[12]).startsWith('http') ? String(r[12]).trim() : '',
+    tieneTesis:  r[11] && String(r[11]).trim() === 'Disponible',
+    tieneModelo: r[12] && String(r[12]).trim() === 'Disponible',
   }));
 }
 
-// ── LOAD ──────────────────────────────────────────────────────
-async function load(){
-  setBadge('bc','⟳ Cargando');
+// ── LOAD ─────────────────────────────────────────────────
+async function loadData() {
+  setBadge('bc', '⟳ Cargando');
   setStatus('<span class="spin"></span> Conectando con Google Sheets...');
-  try{
-    const [r10b,rQH,c10b,cQH,wl,hist]=await Promise.all([
-      fetchSheet('RENTABILIDAD_10BAGGER'),
-      fetchSheet('RENTABILIDAD_Q_HOLD'),
-      fetchSheet('COMPOSICIÓN_10BAGGER'),
-      fetchSheet('COMPOSICIÓN_QUALITY_H_'),
-      fetchSheet('WATCHLIST'),
-      fetchSheet('HISTÓRICO'),
-    ]);
-    const p10=parseRent(r10b,'10b');
-    const pQH=parseRent(rQH,'qh');
-    D={
-      pos10b:p10.pos, ops10b:p10.ops, rent10b:p10.rent,
-      posQH:pQH.pos,  opsQH:pQH.ops,  rentQH:pQH.rent,
-      comp10b:parseComp(c10b),
-      compQH:parseComp(cQH),
-      wl:parseWL(wl),
-      hist:parseHist(hist),
-    };
-    setBadge('bl','● En vivo');
-    const t=now();
-    document.getElementById('lupd').textContent='Actualizado '+t;
-    setStatus('Datos en tiempo real desde Google Sheets · '+t);
-    tab(CUR);
-  }catch(e){
-    setBadge('bd','⚠ Error');
-    setStatus('Error: '+e.message);
-    document.getElementById('mc').innerHTML=`<div class="ebox"><strong>No se pudo conectar con Google Sheets.</strong><br>Verifica que el archivo está compartido como "Cualquiera con el enlace puede ver".<br><br>Error: ${e.message}</div>`;
-    console.error(e);
+  try {
+    const rows10b = await fetchSheet('POSICIONES_10BAGGER');
+    D.pos10b = parsePosiciones(rows10b);
+    setBadge('bl', '● En vivo');
+    const t = now();
+    document.getElementById('lupd').textContent = 'Actualizado ' + t;
+    setStatus('Datos en tiempo real desde Google Sheets · ' + t);
+    render();
+  } catch(e) {
+    setBadge('bd', '⚠ Error');
+    setStatus('Error: ' + e.message);
+    document.getElementById('mc').innerHTML = `<div class="ebox"><strong>No se pudo conectar con Google Sheets.</strong><br>Comprueba que el sheet está compartido como "Cualquiera con el enlace puede ver".<br><br>Error: ${e.message}</div>`;
   }
 }
 
-// ── TABS ──────────────────────────────────────────────────────
-function tab(t){
-  CUR=t;
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['resumen','10bagger','qualityhold','watchlist','historico','ops'][i]===t));
-  Object.values(CH).forEach(c=>{try{c.destroy()}catch(e){}});CH={};
-  const mc=document.getElementById('mc');
-  if(t==='resumen')     mc.innerHTML=renderResumen();
-  else if(t==='10bagger')    mc.innerHTML=renderCartera('10b');
-  else if(t==='qualityhold') mc.innerHTML=renderCartera('qh');
-  else if(t==='watchlist')   mc.innerHTML=renderWL();
-  else if(t==='historico')   mc.innerHTML=renderHist();
-  else if(t==='ops')         mc.innerHTML=renderOps();
-  setTimeout(()=>buildCharts(t),80);
-}
+// ── RENDER ───────────────────────────────────────────────
+function render() {
+  Object.values(CH).forEach(c => { try { c.destroy(); } catch(e) {} }); CH = {};
 
-// ── HELPERS ───────────────────────────────────────────────────
-function rc(r){const v=parseInt(r);return v>=8?'rhi':v>=5?'rmd':'rlo';}
-function natB(n){return n==='core'?'<span class="nat nc">core</span>':n==='transición'?'<span class="nat nt">transición</span>':n==='no core'?'<span class="nat nn">no core</span>':'';}
-function opB(o){const l=(o||'').toLowerCase();return l==='apertura'?'<span class="oap">APERTURA</span>':l==='cierre'?'<span class="oci">CIERRE</span>':l==='aumento'?'<span class="oau">AUMENTO</span>':`<span class="ore">${o.toUpperCase()}</span>`;}
-function lks(ticker,uT,uM){
-  const gf=`https://www.google.com/finance/quote/${encodeURIComponent(ticker.replace(':','.'))}`;
-  let s=`<a href="${gf}" target="_blank" class="ilink">GF</a>`;
-  if(uT) s+=`<a href="${uT}" target="_blank" class="ilink">✍</a>`;
-  if(uM) s+=`<a href="${uM}" target="_blank" class="ilink">📊</a>`;
-  return s;
-}
+  const pos = (D.pos10b || []).filter(p => p.ticker !== 'LIQUIDEZ');
+  const liq = D.pos10b ? D.pos10b.find(p => p.ticker === 'LIQUIDEZ') : null;
+  const total = D.pos10b ? D.pos10b.reduce((s, p) => s + p.valorEUR, 0) : 0;
+  const nPos = pos.length;
 
-// ── RESUMEN ───────────────────────────────────────────────────
-function renderResumen(){
-  const r10=D.rent10b||{}, rQH=D.rentQH||{};
-  const p10=r10.p10b||{}, pQH=rQH.qh||{}, ndx=r10.ndx||{}, spx=r10.spx||{}, fx=r10.fx||{};
-  const n10=D.pos10b?D.pos10b.filter(p=>p.ticker!=='LIQUIDEZ').length:0;
-  const nQH=D.posQH?D.posQH.filter(p=>p.ticker!=='LIQUIDEZ').length:0;
-  return `
+  // Mejor y peor por peso
+  const sorted = [...pos].sort((a, b) => b.peso - a.peso);
+  const top1 = sorted[0];
+  const riesgoMedio = pos.length ? (pos.reduce((s, p) => s + (parseInt(p.riesgo) || 0), 0) / pos.length).toFixed(1) : '—';
+
+  document.getElementById('mc').innerHTML = `
 <div class="mgrid">
-  <div class="metric"><div class="mlabel">10Bagger 2026</div><div class="mval ${isNeg(p10.rent)?'neg':'pos'}">${p10.rent||'—'}</div><div class="msub">con divisa: ${p10.rentDiv||'—'}</div></div>
-  <div class="metric"><div class="mlabel">Quality Hold 2026</div><div class="mval ${isNeg(pQH.rent)?'neg':'pos'}">${pQH.rent||'—'}</div><div class="msub">desde inicio del año</div></div>
-  <div class="metric"><div class="mlabel">Nasdaq-100 2026</div><div class="mval ${isNeg(ndx.rent)?'neg':'pos'}">${ndx.rent||'—'}</div><div class="msub">con divisa: ${ndx.rentDiv||'—'}</div></div>
-  <div class="metric"><div class="mlabel">S&P 500 2026</div><div class="mval ${isNeg(spx.rent)?'neg':'pos'}">${spx.rent||'—'}</div><div class="msub">con divisa: ${spx.rentDiv||'—'}</div></div>
-  <div class="metric"><div class="mlabel">Posiciones 10Bagger</div><div class="mval">${n10}</div><div class="msub">más liquidez</div></div>
-  <div class="metric"><div class="mlabel">USD/EUR 2026</div><div class="mval ${isNeg(fx.rent)?'neg':'pos'}">${fx.rent||'—'}</div><div class="msub">${fx.desde||'—'} → ${fx.actual||'—'}</div></div>
+  <div class="metric"><div class="mlbl">Valor total cartera</div><div class="mval">€${total.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="msub">${nPos} posiciones + liquidez</div></div>
+  <div class="metric"><div class="mlbl">Mayor posición</div><div class="mval" style="font-size:16px">${top1 ? top1.empresa.split(' ')[0] : '—'}</div><div class="msub">${top1 ? top1.pesoFmt : '—'} del total</div></div>
+  <div class="metric"><div class="mlbl">Liquidez</div><div class="mval">${liq ? liq.pesoFmt : '—'}</div><div class="msub">${liq ? liq.valorFmt : '—'}</div></div>
+  <div class="metric"><div class="mlbl">Riesgo medio</div><div class="mval">${riesgoMedio}<span style="font-size:13px;font-weight:400">/10</span></div><div class="msub">media ponderada</div></div>
 </div>
+
 <div class="cgrid">
-  <div class="cwrap" style="margin-bottom:0"><div class="ctit">Composición 10Bagger</div><div class="leg" id="l10b"></div><div style="position:relative;height:210px"><canvas id="c10b"></canvas></div></div>
-  <div class="cwrap" style="margin-bottom:0"><div class="ctit">Composición Quality Hold</div><div class="leg" id="lqh"></div><div style="position:relative;height:210px"><canvas id="cqh"></canvas></div></div>
+  <div class="cwrap" style="margin-bottom:0">
+    <div class="ctit">Composición 10Bagger</div>
+    <div class="leg" id="leg-donut"></div>
+    <div style="position:relative;height:220px"><canvas id="c-donut"></canvas></div>
+  </div>
+  <div class="cwrap" style="margin-bottom:0">
+    <div class="ctit">Peso por posición</div>
+    <div style="position:relative;height:${pos.length * 28 + 40}px"><canvas id="c-bar"></canvas></div>
+  </div>
 </div>
-<div class="cwrap" style="margin-top:14px"><div class="ctit">CAGR esperado 2028 — 10Bagger</div>
-  <div style="position:relative;height:${Math.max(160,(D.comp10b||[]).filter(c=>c.cagrNum>0).length*30+50)}px"><canvas id="ccagr"></canvas></div>
+
+<div class="card" style="margin-top:14px">
+  <div class="ch">
+    <span class="ct">Posiciones — 10Bagger</span>
+    <span class="cm">${nPos} valores · total €${total.toLocaleString('es-ES',{maximumFractionDigits:0})}</span>
+  </div>
+  <div class="ox"><table>
+    <thead><tr>
+      <th style="width:28%;text-align:left">Empresa</th>
+      <th>Moneda</th><th>Nº títulos</th><th>Precio</th>
+      <th>Valor EUR</th><th>Peso</th><th>Riesgo</th><th>Links</th>
+    </tr></thead>
+    <tbody>
+      ${(D.pos10b || []).map(p => {
+        const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
+        const rNum = parseInt(p.riesgo) || 0;
+        const rCls = rNum <= 3 ? 'rlo' : rNum <= 6 ? 'rmd' : 'rhi';
+        const tLink = p.urlTesis
+          ? `<a href="${p.urlTesis}" target="_blank" class="ilink">Tesis</a>`
+          : p.tieneTesis ? `<span class="ilink" style="opacity:.4">Tesis</span>` : '';
+        const mLink = p.urlModelo
+          ? `<a href="${p.urlModelo}" target="_blank" class="ilink">Modelo</a>`
+          : p.tieneModelo ? `<span class="ilink" style="opacity:.4">Modelo</span>` : '';
+        return `<tr>
+          <td>${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+          <td>${p.moneda}</td>
+          <td>${p.ntit}</td>
+          <td>${p.precio}</td>
+          <td style="font-weight:600">${p.valorFmt}</td>
+          <td style="font-weight:600">${p.pesoFmt}</td>
+          <td>${p.riesgo !== '—' ? `<span class="risk ${rCls}">${p.riesgo}</span>` : '—'}</td>
+          <td style="text-align:right">${tLink}${mLink}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div>
 </div>`;
-}
 
-// ── CARTERA ───────────────────────────────────────────────────
-function renderCartera(tipo){
-  const isQH=tipo==='qh';
-  const pos=isQH?D.posQH:D.pos10b||[];
-  const comp=isQH?D.compQH:D.comp10b||[];
-  const title=isQH?'Quality Hold':'10Bagger';
+  // ── DONUT ────────────────────────────────────────────
+  const donutData = pos;
+  const leg = document.getElementById('leg-donut');
+  if (leg) leg.innerHTML = donutData.map((p, i) =>
+    `<span><span class="ld" style="background:${COLS[i % COLS.length]}"></span>${p.ticker.split(':').pop()} ${p.pesoFmt}</span>`
+  ).join('');
 
-  const posR=pos.map(p=>`<tr>
-    <td><span style="font-weight:600">${p.empresa}</span><span class="tsub">${p.ticker} ${lks(p.ticker,p.urlTesis,p.urlModelo)}</span></td>
-    <td style="font-weight:600">${p.cot}</td><td>${p.ntit}</td>
-    <td style="font-weight:600">${p.peso}</td>
-    <td class="${rc(p.riesgo)}">${p.riesgo}</td>
-    ${!isQH?`<td>${natB(p.naturaleza)}</td>`:''}
-  </tr>`).join('');
+  const elD = document.getElementById('c-donut');
+  if (elD) CH.donut = new Chart(elD, {
+    type: 'doughnut',
+    data: {
+      labels: donutData.map(p => p.ticker.split(':').pop()),
+      datasets: [{
+        data: donutData.map(p => p.peso),
+        backgroundColor: COLS,
+        borderWidth: 2,
+        borderColor: 'rgba(255,255,255,0.15)'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw.toFixed(1)}%` } }
+      }
+    }
+  });
 
-  const compR=comp.map(c=>`<tr>
-    <td><span style="font-weight:600">${c.empresa}</span><span class="tsub">${c.ticker} ${lks(c.ticker,c.urlTesis,c.urlModelo)}</span></td>
-    <td>${c.precio}</td><td style="font-weight:600">${c.po}</td>
-    <td class="${c.cagrNum>0?'pos':''}" style="font-weight:600">${c.cagr}</td>
-    <td>${c.div}</td>
-    <td class="${c.cagrNum>0?'pos':''}" style="font-weight:600">${c.rentTotal}</td>
-    <td class="${rc(c.riesgo)}">${c.riesgo}</td>
-    <td style="text-align:left;color:var(--text2);font-size:11px;white-space:normal;max-width:160px">${c.principal}</td>
-  </tr>`).join('');
-
-  return `
-<div class="card">
-  <div class="ch"><span class="ct">Posiciones — ${title}</span><span class="cm">${pos.filter(p=>p.ticker!=='LIQUIDEZ').length} posiciones</span></div>
-  <div class="ox"><table><thead><tr><th style="width:28%">Empresa</th><th>Cotización</th><th>Nº títulos</th><th>Peso</th><th>Riesgo</th>${!isQH?'<th>Naturaleza</th>':''}</tr></thead><tbody>${posR}</tbody></table></div>
-</div>
-<div class="card">
-  <div class="ch"><span class="ct">Valoraciones y P.O. 2028 — ${title}</span><span class="cm">GF=Google Finance · ✍=Tesis · 📊=Modelo</span></div>
-  <div class="ox"><table><thead><tr><th style="width:24%">Empresa</th><th>Precio</th><th>P.O. 2028</th><th>CAGR</th><th>Div.</th><th>Rent. total</th><th>Riesgo</th><th style="text-align:left">Riesgo principal</th></tr></thead><tbody>${compR}</tbody></table></div>
-</div>`;
-}
-
-// ── WATCHLIST ─────────────────────────────────────────────────
-function renderWL(){
-  const data=D.wl||[];
-  const buy=data.filter(d=>d.signal==='Comprar'), wait=data.filter(d=>d.signal!=='Comprar');
-  function rows(arr){return arr.map(d=>{
-    const gf=`https://www.google.com/finance/quote/${encodeURIComponent(d.ticker.replace(':','.'))}`;
-    const tL=d.urlTesis?`<a href="${d.urlTesis}" target="_blank" class="ilink">✍</a>`:'';
-    return `<tr>
-      <td><span style="font-weight:600">${d.empresa}</span><span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${d.ticker}</a> ${tL}</span></td>
-      <td style="font-weight:600">${d.precio}</td><td>${d.entrada}</td>
-      <td class="${d.pctNum>=0?'pos':'neg'}" style="font-weight:600">${d.pctEntrada}</td>
-      <td>${d.sem52}</td>
-      <td><span class="${d.signal==='Comprar'?'sb':'sw'}">${d.signal}</span></td>
-    </tr>`;
-  }).join('');}
-  return `<div class="card">
-    <div class="ch"><span class="ct">Watchlist</span><span class="cm">${data.length} empresas · ${buy.length} señal de compra</span></div>
-    <div class="ox"><table><thead><tr><th style="width:28%">Empresa</th><th>Precio actual</th><th>Precio entrada</th><th>Potencial</th><th>52 semanas</th><th>Señal</th></tr></thead>
-    <tbody><tr class="dr"><td colspan="6">Señal de compra — ${buy.length}</td></tr>${rows(buy)}<tr class="dr"><td colspan="6">Esperar — ${wait.length}</td></tr>${rows(wait)}</tbody></table></div>
-  </div>`;
-}
-
-// ── HISTÓRICO ─────────────────────────────────────────────────
-function renderHist(){
-  const data=D.hist||[];
-  return `<div class="card">
-    <div class="ch"><span class="ct">Posiciones cerradas</span><span class="cm">${data.length} posiciones</span></div>
-    <div class="ox"><table><thead><tr><th style="width:28%">Empresa</th><th>Precio salida</th><th>P.O. era</th><th>CAGR esp.</th><th>Riesgo</th><th style="text-align:left">Riesgo principal</th></tr></thead>
-    <tbody>${data.map(d=>`<tr><td><span style="font-weight:600">${d.empresa}</span><span class="tsub">${d.ticker}</span></td><td>${d.precio}</td><td>${d.po}</td><td>${d.cagr}</td><td class="${rc(d.riesgo)}">${d.riesgo}</td><td style="text-align:left;color:var(--text2);font-size:11px">${d.principal}</td></tr>`).join('')}</tbody>
-    </table></div>
-  </div>`;
-}
-
-// ── OPERACIONES ───────────────────────────────────────────────
-function renderOps(){
-  const ops=D.ops10b||[];
-  return `<div class="card">
-    <div class="ch"><span class="ct">Últimas operaciones — 10Bagger</span><span class="cm">${ops.length} registradas</span></div>
-    <div class="ox"><table><thead><tr><th style="text-align:left">Fecha</th><th style="text-align:left">Empresa</th><th>Ticker</th><th>Operación</th><th>% sobre ant.</th><th>Precio</th></tr></thead>
-    <tbody>${ops.map(o=>`<tr><td style="text-align:left;color:var(--text2)">${o.fecha}</td><td style="text-align:left;font-weight:600">${o.empresa}</td><td style="font-size:11px">${o.ticker}</td><td>${opB(o.op)}</td><td>${o.pct}</td><td style="font-weight:600">${o.precio}</td></tr>`).join('')}</tbody>
-    </table></div>
-  </div>`;
-}
-
-// ── CHARTS ────────────────────────────────────────────────────
-function buildCharts(t){
-  if(t!=='resumen') return;
-
-  // Donut 10Bagger — de posiciones reales
-  const p10=(D.pos10b||[]).filter(p=>p.ticker!=='LIQUIDEZ'&&p.pesoNum>0);
-  if(p10.length){
-    const el=document.getElementById('c10b');
-    const leg=document.getElementById('l10b');
-    if(leg) leg.innerHTML=p10.map((p,i)=>`<span><span class="ld" style="background:${COLS[i%COLS.length]}"></span>${p.ticker.split(':').pop()}</span>`).join('');
-    if(el) CH.d10b=new Chart(el,{type:'doughnut',data:{labels:p10.map(p=>p.ticker.split(':').pop()),datasets:[{data:p10.map(p=>p.pesoNum),backgroundColor:COLS,borderWidth:2,borderColor:'var(--bg2)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}});
-  }
-
-  // Donut Quality Hold — de posiciones reales
-  const pQH=(D.posQH||[]).filter(p=>p.ticker!=='LIQUIDEZ'&&p.pesoNum>0);
-  if(pQH.length){
-    const el=document.getElementById('cqh');
-    const leg=document.getElementById('lqh');
-    if(leg) leg.innerHTML=pQH.map((p,i)=>`<span><span class="ld" style="background:${COLS[i%COLS.length]}"></span>${p.ticker.split(':').pop()}</span>`).join('');
-    if(el) CH.dqh=new Chart(el,{type:'doughnut',data:{labels:pQH.map(p=>p.ticker.split(':').pop()),datasets:[{data:pQH.map(p=>p.pesoNum),backgroundColor:COLS,borderWidth:2,borderColor:'var(--bg2)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}});
-  }
-
-  // CAGR bar horizontal — de composición 10B
-  const cd=(D.comp10b||[]).filter(c=>c.cagrNum>0).sort((a,b)=>b.cagrNum-a.cagrNum);
-  if(cd.length){
-    const el=document.getElementById('ccagr');
-    if(el) CH.cagr=new Chart(el,{type:'bar',data:{labels:cd.map(c=>c.empresa.substring(0,22)),datasets:[{data:cd.map(c=>c.cagrNum),backgroundColor:'#378ADD',borderRadius:4,borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' CAGR: '+c.raw.toFixed(1)+'%'}}},scales:{x:{ticks:{font:{size:10},color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,0.08)'}},y:{ticks:{font:{size:11}},grid:{display:false}}}}});
-  }
+  // ── BAR HORIZONTAL ───────────────────────────────────
+  const barData = [...pos].sort((a, b) => b.peso - a.peso);
+  const elB = document.getElementById('c-bar');
+  if (elB) CH.bar = new Chart(elB, {
+    type: 'bar',
+    data: {
+      labels: barData.map(p => p.ticker.split(':').pop()),
+      datasets: [{
+        data: barData.map(p => p.peso),
+        backgroundColor: barData.map((_, i) => COLS[i % COLS.length]),
+        borderRadius: 3, borderWidth: 0
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(1)}%` } }
+      },
+      scales: {
+        x: { ticks: { font: {size:10}, color:'#888', callback: v => v + '%' }, grid: { color: 'rgba(128,128,128,0.08)' } },
+        y: { ticks: { font: {size:11} }, grid: { display: false } }
+      }
+    }
+  });
 }
 </script>
 </body>
