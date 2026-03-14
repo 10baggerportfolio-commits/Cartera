@@ -248,30 +248,28 @@ function parsePosiciones(rows) {
   }));
 }
 
-// RENDIMIENTO parser — estructura simple sin cabeceras fusionadas
-// Fila 0: letras columna (A,B,C...) — saltar
-// Fila 1: cabeceras (Periodo,Dias,10B_ini...) — saltar
-// Filas 2+: datos
+// RENDIMIENTO parser — lee de REND_SIMPLE (datos limpios sin formato)
+// Fila 0: cabecera (Periodo,Dias,b10_ini,...) — saltar
+// Filas 1+: datos numéricos limpios
 function parseRendimiento(rows) {
   const periodos = [];
   const años = ['2022','2023','2024','2025','2026'];
-  for (let i = 0; i < rows.length; i++) {
+  for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
     if (!r || !r[0]) continue;
     const p = String(r[0]).trim();
-    // Solo filas que empiecen por año
     if (!años.some(a => p.startsWith(a))) continue;
     const dias = num(r[1]);
     if (!dias || dias < 1) continue;
-    const entry = {
-      label:   p,
+    // REND_SIMPLE: Periodo,Dias,b10_ini,b10_fin,spx_ini,spx_fin,ndx_ini,ndx_fin
+    periodos.push({
+      label:   p + (p === '2026' ? ' (YTD)' : ''),
       dias:    dias,
       b10_ini: num(r[2]), b10_fin: num(r[3]),
-      qh_ini:  num(r[4]), qh_fin:  num(r[5]),
-      spx_ini: num(r[6]), spx_fin: num(r[7]),
-      ndx_ini: num(r[8]), ndx_fin: num(r[9]),
-    };
-    periodos.push(entry);
+      qh_ini:  null,      qh_fin:  null,
+      spx_ini: num(r[4]), spx_fin: num(r[5]),
+      ndx_ini: num(r[6]), ndx_fin: num(r[7]),
+    });
   }
   return periodos;
 }
@@ -284,7 +282,7 @@ async function loadAll() {
     const [r10b, rQH, rRend] = await Promise.all([
       fetchSheet('POSICIONES_10BAGGER'),
       fetchSheet('POSICIONES_QUALITY_HOLD'),
-      fetchSheet('RENDIMIENTO'),
+      fetchSheet('REND_SIMPLE'),
     ]);
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH);
