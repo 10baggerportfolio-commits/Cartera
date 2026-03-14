@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10Bagger Portfolio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --bg2: #ffffff;
+    --bg3: #f0f0ed;
+    --text: #1a1a18;
+    --text2: #6b6b66;
+    --text3: #9e9e99;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --green: #0f6e56; --green-bg: #e1f5ee;
+    --blue: #185fa5; --blue-bg: #e6f1fb;
+    --amber: #854f0b; --amber-bg: #faeeda;
+    --red: #a32d2d; --red-bg: #fcebeb;
+    --teal: #1D9E75;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#1c1c1a;--bg2:#242422;--bg3:#2a2a28;
+      --text:#e8e8e4;--text2:#9e9e99;--text3:#6b6b66;
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --green:#5dcaa5;--green-bg:#04342c;
+      --blue:#85b7eb;--blue-bg:#042c53;
+      --amber:#ef9f27;--amber-bg:#412402;
+      --red:#f09595;--red-bg:#501313;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+  /* LOGIN */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .login-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:2.5rem;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+  .login-logo{font-size:24px;font-weight:600;letter-spacing:-0.8px;margin-bottom:4px}
+  .login-sub{font-size:13px;color:var(--text2);margin-bottom:2rem}
+  .form-label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
+  .form-input{width:100%;padding:9px 12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:14px;outline:none;margin-bottom:12px}
+  .form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,0.1)}
+  .btn-primary{width:100%;padding:10px;border-radius:var(--radius-sm);background:var(--text);color:var(--bg2);border:none;cursor:pointer;font-size:14px;font-weight:500;letter-spacing:-0.2px}
+  .btn-primary:hover{opacity:.85}
+  #login-error{font-size:12px;color:var(--red);margin-top:6px;min-height:16px}
+  .sheet-section{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
+  .hint{font-size:11px;color:var(--text3);line-height:1.6;margin-top:5px}
+  .hint a{color:var(--blue);text-decoration:none}
+
+  /* TOPBAR */
+  #dashboard{display:none}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
+  .brand{font-size:15px;font-weight:600;letter-spacing:-0.4px;display:flex;align-items:center;gap:10px}
+  .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:0.2px}
+  .badge-live{background:var(--green-bg);color:var(--green)}
+  .badge-demo{background:var(--amber-bg);color:var(--amber)}
+  .badge-loading{background:var(--blue-bg);color:var(--blue)}
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .btn-sm{font-size:12px;padding:5px 12px;border-radius:var(--radius-sm);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-weight:500}
+  .btn-sm:hover{background:var(--bg3)}
+  .update-time{font-size:11px;color:var(--text3)}
+
+  /* TABS */
+  .tabs{display:flex;padding:0 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);overflow-x:auto;gap:0;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{font-size:13px;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);white-space:nowrap;font-weight:500;transition:color .15s}
+  .tab.active{color:var(--text);border-bottom-color:var(--text)}
+  .tab:hover{color:var(--text)}
+
+  /* MAIN */
+  .main{padding:18px 20px;max-width:1200px}
+
+  /* METRICS */
+  .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+  .metric{background:var(--bg3);border-radius:var(--radius-sm);padding:14px}
+  .metric-label{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
+  .metric-value{font-size:22px;font-weight:600;letter-spacing:-0.5px;line-height:1.1}
+  .metric-sub{font-size:11px;margin-top:3px;color:var(--text2)}
+  .pos{color:var(--green)}
+  .neg{color:var(--red)}
+
+  /* CARDS */
+  .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+  .card-header{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)}
+  .card-title{font-size:13px;font-weight:600;letter-spacing:-0.2px}
+  .card-meta{font-size:11px;color:var(--text2)}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{font-size:11px;color:var(--text2);font-weight:600;padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
+  th:first-child{text-align:left}
+  td{padding:9px 14px;text-align:right;border-bottom:0.5px solid var(--border);white-space:nowrap;vertical-align:middle}
+  td:first-child{text-align:left}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:var(--bg3)}
+  .ticker-sub{font-size:10px;color:var(--text3);display:block;margin-top:1px;font-weight:400}
+  .overflow-x{overflow-x:auto}
+
+  /* BADGES */
+  .nat-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .nat-core{background:var(--green-bg);color:var(--green)}
+  .nat-trans{background:var(--blue-bg);color:var(--blue)}
+  .nat-nocore{background:var(--bg3);color:var(--text2)}
+  .risk-high{color:var(--red);font-weight:600}
+  .risk-mid{color:var(--amber);font-weight:600}
+  .risk-low{color:var(--green);font-weight:600}
+  .signal-buy{color:var(--green);font-weight:600}
+  .signal-wait{color:var(--text2)}
+
+  /* LINKS */
+  .icon-link{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:11px;margin-left:4px;transition:all .15s}
+  .icon-link:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+
+  /* CHARTS */
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:640px){.charts-grid{grid-template-columns:1fr}}
+  .chart-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px}
+  .chart-title{font-size:12px;font-weight:600;margin-bottom:12px;letter-spacing:-0.2px;text-transform:uppercase;color:var(--text2)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .legend span{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
+  .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+  /* OPS */
+  .op-apertura{background:var(--green-bg);color:var(--green);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .op-cierre{background:var(--red-bg);color:var(--red);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .op-aumento{background:var(--blue-bg);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .op-recorte{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .divider-row td{background:var(--bg3)!important;font-size:11px;color:var(--text3);font-weight:600;text-align:left!important;padding:5px 14px;text-transform:uppercase;letter-spacing:0.4px}
+
+  /* ERROR */
+  .error-box{background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--amber);margin-bottom:16px;line-height:1.6}
+
+  /* SPINNER */
+  .spin{display:inline-block;width:12px;height:12px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .status-bar{font-size:11px;color:var(--text3);padding:8px 20px;text-align:right;border-top:0.5px solid var(--border);background:var(--bg2)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">10Bagger Portfolio</div>
+    <div class="login-sub">Panel privado de inversiones</div>
+    <label class="form-label">Contraseña</label>
+    <input type="password" class="form-input" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    <div id="login-error"></div>
+    <div class="sheet-section">
+      <label class="form-label">ID de Google Sheet</label>
+      <input type="text" class="form-input" id="sheet-id" value="1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM">
+      <div class="hint">El sheet debe estar compartido como "Cualquiera con el enlace puede ver"</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="brand">
+      10Bagger Portfolio
+      <span class="badge badge-loading" id="live-badge">⟳ Cargando</span>
+    </div>
+    <div class="topbar-right">
+      <span class="update-time" id="last-update"></span>
+      <button class="btn-sm" onclick="refreshData()">↻ Actualizar</button>
+      <button class="btn-sm" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('resumen')">Resumen</div>
+    <div class="tab" onclick="showTab('10bagger')">10Bagger</div>
+    <div class="tab" onclick="showTab('qualityhold')">Quality Hold</div>
+    <div class="tab" onclick="showTab('watchlist')">Watchlist</div>
+    <div class="tab" onclick="showTab('historico')">Histórico</div>
+    <div class="tab" onclick="showTab('operaciones')">Operaciones</div>
+  </div>
+
+  <div class="main" id="main-content">
+    <div style="padding:2rem;text-align:center;color:var(--text2)"><span class="spin"></span> Cargando datos...</div>
+  </div>
+  <div class="status-bar" id="status-bar"></div>
+</div>
+
+<script>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────
+const PASSWORD   = "cartera2024"; // cambia esto
+const SHEET_ID_DEFAULT = "1qykdrfM0pf72Tcd3Y3u17RpusnWrFiSxvhJTKMem1YM";
+
+// Nombres exactos de las pestañas en tu Google Sheet
+const SHEETS = {
+  comp10b:  "COMPOSICIÓN_10BAGGER",
+  compQH:   "COMPOSICIÓN_QUALITY_H_",
+  rent10b:  "RENTABILIDAD_10BAGGER",
+  rentQH:   "RENTABILIDAD_Q_HOLD",
+  watchlist:"WATCHLIST",
+  historico:"HISTÓRICO",
+};
+
+const COLORS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A"];
+
+// ─── ESTADO ──────────────────────────────────────────────────
+let sheetId = SHEET_ID_DEFAULT;
+let charts  = {};
+let rawData = {};
+let currentTab = 'resumen';
+
+// ─── UTILIDADES ──────────────────────────────────────────────
+function n(v){ return parseFloat(String(v||'').replace(',','.')) || 0; }
+function pct(v){ const s=String(v||''); return s.includes('%')?s:(n(v).toFixed(1)+'%'); }
+function now(){ return new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }
+function setStatus(msg){ document.getElementById('status-bar').innerHTML=msg; }
+function riskClass(r){
+  if(!r||r==='—') return '';
+  const v=parseInt(r);
+  if(v>=8) return 'risk-high';
+  if(v>=5) return 'risk-mid';
+  return 'risk-low';
+}
+function natBadge(n){
+  if(n==='core') return '<span class="nat-badge nat-core">core</span>';
+  if(n==='transición') return '<span class="nat-badge nat-trans">transición</span>';
+  if(n==='no core') return '<span class="nat-badge nat-nocore">no core</span>';
+  return '';
+}
+function opBadge(op){
+  const o=(op||'').toLowerCase();
+  if(o==='apertura') return `<span class="op-apertura">APERTURA</span>`;
+  if(o==='cierre')   return `<span class="op-cierre">CIERRE</span>`;
+  if(o==='aumento')  return `<span class="op-aumento">AUMENTO</span>`;
+  return `<span class="op-recorte">${op.toUpperCase()}</span>`;
+}
+function linkIcon(url, emoji, title){
+  if(!url||url.trim()==='') return '';
+  return `<a href="${url}" target="_blank" class="icon-link" title="${title}">${emoji}</a>`;
+}
+function destroyCharts(){
+  Object.values(charts).forEach(c=>{ try{c.destroy()}catch(e){} });
+  charts={};
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────
+function doLogin(){
+  const pwd=document.getElementById('pwd').value;
+  const sid=document.getElementById('sheet-id').value.trim();
+  if(pwd!==PASSWORD){
+    document.getElementById('login-error').textContent='Contraseña incorrecta';
+    return;
+  }
+  document.getElementById('login-error').textContent='';
+  if(sid) sheetId=sid;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  refreshData();
+}
+function doLogout(){
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pwd').value='';
+}
+
+// ─── FETCH SHEET ──────────────────────────────────────────────
+async function fetchSheet(sheetName){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res=await fetch(url);
+  const text=await res.text();
+  const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+  return json.table;
+}
+
+function tableToObjects(table){
+  if(!table||!table.rows) return [];
+  const cols=table.cols.map(c=>c.label||'');
+  return table.rows.map(r=>{
+    const obj={};
+    r.c.forEach((cell,i)=>{ obj[cols[i]||i]=cell?cell.v:null; });
+    return obj;
+  }).filter(r=>Object.values(r).some(v=>v!==null&&v!==''));
+}
+
+async function refreshData(){
+  document.getElementById('live-badge').className='badge badge-loading';
+  document.getElementById('live-badge').textContent='⟳ Cargando';
+  setStatus('<span class="spin"></span> Conectando con Google Sheets...');
+
+  try {
+    // Cargar todas las pestañas en paralelo
+    const [t10b, tQH, r10b, rQH, wl, hist] = await Promise.all([
+      fetchSheet(SHEETS.comp10b),
+      fetchSheet(SHEETS.compQH),
+      fetchSheet(SHEETS.rent10b),
+      fetchSheet(SHEETS.rentQH),
+      fetchSheet(SHEETS.watchlist),
+      fetchSheet(SHEETS.historico),
+    ]);
+
+    rawData.comp10b   = tableToObjects(t10b);
+    rawData.compQH    = tableToObjects(tQH);
+    rawData.rent10b   = tableToObjects(r10b);
+    rawData.rentQH    = tableToObjects(rQH);
+    rawData.watchlist = tableToObjects(wl);
+    rawData.historico = tableToObjects(hist);
+
+    document.getElementById('live-badge').className='badge badge-live';
+    document.getElementById('live-badge').textContent='● En vivo';
+    document.getElementById('last-update').textContent='Actualizado '+now();
+    setStatus('Datos en tiempo real desde Google Sheets · '+now());
+    showTab(currentTab);
+
+  } catch(err) {
+    document.getElementById('live-badge').className='badge badge-demo';
+    document.getElementById('live-badge').textContent='◎ Error';
+    setStatus('⚠ No se pudo conectar con la hoja. Comprueba que está compartida públicamente.');
+    document.getElementById('main-content').innerHTML=`
+      <div class="error-box">
+        <strong>No se pudo leer el Google Sheet.</strong><br>
+        Asegúrate de que el archivo está compartido como "Cualquiera con el enlace puede ver".<br>
+        Error: ${err.message}
+      </div>`;
+  }
+}
+
+// ─── TABS ─────────────────────────────────────────────────────
+function showTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    const tabs=['resumen','10bagger','qualityhold','watchlist','historico','operaciones'];
+    el.classList.toggle('active', tabs[i]===tab);
+  });
+  destroyCharts();
+  const mc=document.getElementById('main-content');
+
+  if(tab==='resumen')      mc.innerHTML=renderResumen();
+  else if(tab==='10bagger')     mc.innerHTML=renderCartera('10b');
+  else if(tab==='qualityhold')  mc.innerHTML=renderCartera('qh');
+  else if(tab==='watchlist')    mc.innerHTML=renderWatchlist();
+  else if(tab==='historico')    mc.innerHTML=renderHistorico();
+  else if(tab==='operaciones')  mc.innerHTML=renderOperaciones();
+
+  setTimeout(()=>buildCharts(tab), 80);
+}
+
+// ─── RESUMEN ──────────────────────────────────────────────────
+function getRentabilidades(data){
+  // Busca fila de rentabilidades en la tabla de rentabilidad
+  const rows=data||[];
+  const rent10b=rows.find(r=>String(r['Ticker']||r['']).includes('10B')||String(r['Indice']||'').includes('10B'));
+  const rentQH=rows.find(r=>String(r['Ticker']||r['']).includes('QH'));
+  const ndx=rows.find(r=>String(r['Ticker']||r['']).includes('NDX')||String(r['Indice']||'').includes('NDX'));
+  const spx=rows.find(r=>String(r['Ticker']||r['']).includes('.INX')||String(r['Indice']||'').includes('S&P'));
+  return {rent10b, rentQH, ndx, spx};
+}
+
+function renderResumen(){
+  const r10b=rawData.rent10b||[];
+  const rQH=rawData.rentQH||[];
+  const comp10b=(rawData.comp10b||[]).filter(r=>r['Empresa']||r['']).filter(r=>!String(r['']).includes('Total'));
+  const compQH=(rawData.compQH||[]).filter(r=>r['Empresa']||r['Ticker']).filter(r=>!String(r['Ticker']||'').includes('Total'));
+
+  // Totales de la fila "Total" en composición
+  const total10b=comp10b.find(r=>String(Object.values(r)[0]||'').toLowerCase().includes('total'));
+  const totalQH=compQH.find(r=>String(Object.values(r)[0]||'').toLowerCase().includes('total'));
+
+  const pos10b=comp10b.filter(r=>r['Empresa']&&!String(r['Empresa']).toLowerCase().includes('total')).length;
+  const posQH=compQH.filter(r=>r['Empresa']&&!String(r['Empresa']).toLowerCase().includes('total')).length;
+
+  // Rentabilidades desde la pestaña de rentabilidad
+  const rent=getRentabilidades(r10b);
+
+  const fmt=v=>v?String(v):'—';
+
+  return `
+<div class="metrics-grid">
+  <div class="metric">
+    <div class="metric-label">10Bagger 2026</div>
+    <div class="metric-value ${rent.rent10b?'neg':''}">
+      ${rent.rent10b?fmt(rent.rent10b['Rent. 2026']):'—'}
+    </div>
+    <div class="metric-sub">con divisa: ${rent.rent10b?fmt(rent.rent10b['Rent. 2026 con Moneda']):'—'}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Quality Hold 2026</div>
+    <div class="metric-value pos">—</div>
+    <div class="metric-sub">desde inicio del año</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Nasdaq-100 2026</div>
+    <div class="metric-value neg">${rent.ndx?fmt(rent.ndx['Rent. 2026']):'—'}</div>
+    <div class="metric-sub">con divisa: ${rent.ndx?fmt(rent.ndx['Rent. 2026 con Moneda']):'—'}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">S&P 500 2026</div>
+    <div class="metric-value neg">${rent.spx?fmt(rent.spx['Rent. 2026']):'—'}</div>
+    <div class="metric-sub">con divisa: ${rent.spx?fmt(rent.spx['Rent. 2026 con Moneda']):'—'}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Posiciones 10Bagger</div>
+    <div class="metric-value">${pos10b}</div>
+    <div class="metric-sub">CAGR esp. medio: —</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Posiciones Quality Hold</div>
+    <div class="metric-value">${posQH}</div>
+    <div class="metric-sub">activas</div>
+  </div>
+</div>
+
+<div class="charts-grid">
+  <div class="chart-wrap">
+    <div class="chart-title">Composición 10Bagger</div>
+    <div class="legend" id="leg-10b"></div>
+    <div style="position:relative;height:210px"><canvas id="chart-10b"></canvas></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title">Composición Quality Hold</div>
+    <div class="legend" id="leg-qh"></div>
+    <div style="position:relative;height:210px"><canvas id="chart-qh"></canvas></div>
+  </div>
+</div>
+
+<div class="chart-wrap" style="margin-bottom:16px">
+  <div class="chart-title">CAGR esperado 2028 — 10Bagger</div>
+  <div style="position:relative;height:${Math.max(200, pos10b*32+60)}px"><canvas id="chart-cagr"></canvas></div>
+</div>`;
+}
+
+// ─── CARTERA ──────────────────────────────────────────────────
+function renderCartera(tipo){
+  const isQH = tipo==='qh';
+  const comp  = isQH ? (rawData.compQH||[])  : (rawData.comp10b||[]);
+  const rent  = isQH ? (rawData.rentQH||[])  : (rawData.rent10b||[]);
+
+  // Filtrar filas válidas (con ticker o empresa)
+  const posComp = comp.filter(r=>{
+    const e=r['Empresa']||r[''];
+    return e && !String(e).toLowerCase().includes('total') && String(e).trim()!=='';
+  });
+
+  // Posiciones con cotización (de la pestaña rentabilidad)
+  const posRent = rent.filter(r=>{
+    const t=r['Ticker'];
+    return t && !['RENTABILIDADES','EFECTO MONEDA','Ticker','NDX','.INX','10B','QH','USD/EUR'].includes(String(t));
+  });
+
+  const title = isQH ? 'Quality Hold' : '10Bagger';
+
+  const compRows = posComp.map(r=>{
+    const ticker=r['Ticker']||r['']||'';
+    const empresa=r['Empresa']||'';
+    const precio=r['Precio']||'—';
+    const po=r['P.O. Final 2028']||'—';
+    const cagr=r['CAGR 3 años']||'—';
+    const div=r['Div (%)']||'—';
+    const rentT=r['Rent. Total. Esp.']||'—';
+    const riesgo=r['Riesgo']||'—';
+    const riesgoKey=r['Principal']||'—';
+    const urlTesis=r['URL_Tesis']||r['Tesis']||'';
+    const urlModelo=r['URL_Modelo']||r['Modelo']||'';
+
+    // Google Finance link
+    const gfTicker=ticker.replace('NYSE:','').replace('NASDAQ:','').replace('LON:','LON:').replace('STO:','STO:');
+    const gfUrl=`https://www.google.com/finance/quote/${encodeURIComponent(ticker.replace(':','.'))}`;
+
+    // Tesis link — si la columna "Tesis" contiene "Disponible" no es URL; URL_Tesis sería la columna extra
+    const tesisFinal = urlTesis&&urlTesis.startsWith('http') ? urlTesis : '';
+    const modeloFinal = urlModelo&&urlModelo.startsWith('http') ? urlModelo : '';
+
+    const cagrNum=parseFloat(String(cagr).replace('%','').replace(',','.'));
+    const cagrClass=cagrNum>0?'pos':'';
+
+    return `<tr>
+      <td>
+        <span style="font-weight:600">${empresa}</span>
+        <span class="ticker-sub">${ticker}
+          <a href="${gfUrl}" target="_blank" class="icon-link" title="Google Finance" style="font-size:10px">GF</a>
+          ${tesisFinal?`<a href="${tesisFinal}" target="_blank" class="icon-link" title="Tesis Substack">✍</a>`:''}
+          ${modeloFinal?`<a href="${modeloFinal}" target="_blank" class="icon-link" title="Modelo financiero">📊</a>`:''}
+        </span>
+      </td>
+      <td>${precio}</td>
+      <td style="font-weight:600">${po}</td>
+      <td class="${cagrClass}" style="font-weight:600">${cagr}</td>
+      <td>${div}</td>
+      <td class="${cagrClass}" style="font-weight:600">${rentT}</td>
+      <td class="${riskClass(riesgo)}">${riesgo}</td>
+      <td style="text-align:left;color:var(--text2);font-size:11px;max-width:180px;white-space:normal">${riesgoKey}</td>
+    </tr>`;
+  }).join('');
+
+  const rentRows = posRent.map(r=>{
+    const ticker=r['Ticker']||'';
+    const empresa=r['Empresa']||'';
+    const cot=r['Cotización']||'—';
+    const ntit=r['Nº títulos']||'—';
+    const peso=r['Peso']||'—';
+    const riesgo=r['Riesgo']||'—';
+    const nat=r['Naturaleza']||'';
+
+    const gfUrl=`https://www.google.com/finance/quote/${encodeURIComponent(ticker.replace(':','.'))}`;
+
+    return `<tr>
+      <td>
+        <span style="font-weight:600">${empresa}</span>
+        <span class="ticker-sub">
+          <a href="${gfUrl}" target="_blank" style="color:var(--blue);text-decoration:none">${ticker}</a>
+        </span>
+      </td>
+      <td style="font-weight:600">${cot}</td>
+      <td>${ntit}</td>
+      <td style="font-weight:600">${peso}</td>
+      <td class="${riskClass(riesgo)}">${riesgo}</td>
+      ${!isQH?`<td>${natBadge(nat)}</td>`:''}
+    </tr>`;
+  }).join('');
+
+  return `
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Posiciones actuales — ${title}</span>
+    <span class="card-meta">${posRent.length} posiciones</span>
+  </div>
+  <div class="overflow-x"><table>
+    <thead><tr>
+      <th style="width:28%">Empresa</th>
+      <th>Cotización</th><th>Nº títulos</th><th>Peso</th><th>Riesgo</th>
+      ${!isQH?'<th>Naturaleza</th>':''}
+    </tr></thead>
+    <tbody>${rentRows||'<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">Cargando datos de rentabilidad...</td></tr>'}</tbody>
+  </table></div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Valoraciones y precio objetivo 2028 — ${title}</span>
+    <span class="card-meta">Los iconos ✍ y 📊 enlazan a la tesis y al modelo — añade las URLs en columnas M y N de tu sheet</span>
+  </div>
+  <div class="overflow-x"><table>
+    <thead><tr>
+      <th style="width:26%">Empresa</th>
+      <th>Precio</th><th>P.O. 2028</th><th>CAGR</th><th>Div.</th><th>Rent. total</th><th>Riesgo</th>
+      <th style="text-align:left">Riesgo principal</th>
+    </tr></thead>
+    <tbody>${compRows||'<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">Sin datos</td></tr>'}</tbody>
+  </table></div>
+</div>`;
+}
+
+// ─── WATCHLIST ────────────────────────────────────────────────
+function renderWatchlist(){
+  const data=(rawData.watchlist||[]).filter(r=>r['Ticker']&&r['Ticker']!=='Ticker');
+  const comprar=data.filter(r=>String(r['Señal']||'').toLowerCase().includes('comprar'));
+  const esperar=data.filter(r=>!String(r['Señal']||'').toLowerCase().includes('comprar'));
+
+  function rows(arr){
+    return arr.map(r=>{
+      const ticker=r['Ticker']||'';
+      const empresa=r['Empresa']||'';
+      const precio=r['Precio']||'—';
+      const entrada=r['Precio entrada']||'—';
+      const pctEnt=r['% sobre entrada']||'—';
+      const signal=r['Señal']||'—';
+      const semanas=r['52 semanas']||'—';
+      const urlTesis=r['Tesis']||'';
+      const tesisFinal=urlTesis&&urlTesis.startsWith('http')?urlTesis:'';
+      const gfUrl=`https://www.google.com/finance/quote/${encodeURIComponent(ticker.replace(':','.'))}`;
+      const pctNum=parseFloat(String(pctEnt).replace('%','').replace(',','.'));
+      return `<tr>
+        <td>
+          <span style="font-weight:600">${empresa}</span>
+          <span class="ticker-sub">
+            <a href="${gfUrl}" target="_blank" style="color:var(--blue);text-decoration:none">${ticker}</a>
+            ${tesisFinal?`<a href="${tesisFinal}" target="_blank" class="icon-link" title="Tesis">✍</a>`:''}
+          </span>
+        </td>
+        <td style="font-weight:600">${precio}</td>
+        <td>${entrada}</td>
+        <td class="${pctNum>0?'pos':'neg'}" style="font-weight:600">${pctEnt}</td>
+        <td>${semanas}</td>
+        <td><span class="${signal==='Comprar'?'signal-buy':'signal-wait'}">${signal}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  return `<div class="card">
+    <div class="card-header">
+      <span class="card-title">Watchlist</span>
+      <span class="card-meta">${data.length} empresas · ${comprar.length} con señal de compra</span>
+    </div>
+    <div class="overflow-x"><table>
+      <thead><tr>
+        <th style="width:30%">Empresa</th><th>Precio actual</th><th>Precio entrada</th>
+        <th>Potencial</th><th>52 semanas</th><th>Señal</th>
+      </tr></thead>
+      <tbody>
+        <tr class="divider-row"><td colspan="6">Señal de compra (${comprar.length})</td></tr>
+        ${rows(comprar)}
+        <tr class="divider-row"><td colspan="6">Esperar (${esperar.length})</td></tr>
+        ${rows(esperar)}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ─── HISTÓRICO ────────────────────────────────────────────────
+function renderHistorico(){
+  const data=(rawData.historico||[]).filter(r=>r['Empresa']||r['']);
+  return `<div class="card">
+    <div class="card-header">
+      <span class="card-title">Posiciones cerradas — Histórico</span>
+      <span class="card-meta">${data.length} posiciones</span>
+    </div>
+    <div class="overflow-x"><table>
+      <thead><tr>
+        <th style="width:30%">Empresa</th><th>Precio salida</th><th>P.O. era</th>
+        <th>CAGR esp.</th><th>Riesgo</th><th style="text-align:left">Riesgo principal</th>
+      </tr></thead>
+      <tbody>${data.map(r=>`<tr>
+        <td><span style="font-weight:600">${r['Empresa']||''}</span><span class="ticker-sub">${r['']||r['Ticker']||''}</span></td>
+        <td>${r['Precio']||'—'}</td>
+        <td>${r['P.O. Final 2028']||'—'}</td>
+        <td>${r['CAGR 3 años']||'—'}</td>
+        <td class="${riskClass(r['Riesgo'])}">${r['Riesgo']||'—'}</td>
+        <td style="text-align:left;color:var(--text2);font-size:11px">${r['Principal']||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ─── OPERACIONES ──────────────────────────────────────────────
+function renderOperaciones(){
+  const data=(rawData.rent10b||[]);
+  // Las operaciones están en columnas a partir de la col 10 (Últimas operaciones)
+  const ops=data.filter(r=>r['Fecha']&&r['Ticker']&&r['Operación']);
+  return `<div class="card">
+    <div class="card-header">
+      <span class="card-title">Últimas operaciones — 10Bagger</span>
+      <span class="card-meta">${ops.length} registradas</span>
+    </div>
+    <div class="overflow-x"><table>
+      <thead><tr>
+        <th style="text-align:left">Fecha</th><th style="text-align:left">Empresa</th>
+        <th>Ticker</th><th>Operación</th><th>% sobre ant.</th><th>Precio</th>
+      </tr></thead>
+      <tbody>${ops.map(r=>`<tr>
+        <td style="text-align:left;color:var(--text2)">${r['Fecha']||'—'}</td>
+        <td style="text-align:left;font-weight:600">${r['Últimas operaciones']||r['Empresa']||'—'}</td>
+        <td style="font-size:11px">${r['Ticker']||'—'}</td>
+        <td>${opBadge(r['Operación']||'')}</td>
+        <td>${r['% sobre anterior']||'—'}</td>
+        <td style="font-weight:600">${r['Precio']||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ─── CHARTS ───────────────────────────────────────────────────
+function buildCharts(tab){
+  if(tab!=='resumen') return;
+
+  const comp10b=(rawData.comp10b||[]).filter(r=>r['Empresa']&&!String(r['Empresa']).toLowerCase().includes('total')&&String(r['Empresa']).trim()!=='');
+  const compQH=(rawData.compQH||[]).filter(r=>r['Empresa']&&!String(r['Empresa']).toLowerCase().includes('total')&&String(r['Empresa']).trim()!=='');
+
+  // Donut 10B — usar pesos de la pestaña rentabilidad
+  const rent10b=(rawData.rent10b||[]).filter(r=>r['Ticker']&&!['RENTABILIDADES','EFECTO MONEDA','Ticker','NDX','.INX','10B','QH','USD/EUR'].includes(String(r['Ticker'])));
+  if(rent10b.length){
+    const labels=rent10b.map(r=>String(r['Ticker']||'').split(':').pop());
+    const vals=rent10b.map(r=>n(r['Peso']));
+    const leg=document.getElementById('leg-10b');
+    if(leg) leg.innerHTML=labels.map((l,i)=>`<span><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${l}</span>`).join('');
+    const c10b=document.getElementById('chart-10b');
+    if(c10b) charts.d10b=new Chart(c10b,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:COLORS,borderWidth:2,borderColor:'var(--bg2)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}});
+  }
+
+  // Donut QH
+  const rentQH=(rawData.rentQH||[]).filter(r=>r['Ticker']&&!['RENTABILIDADES','EFECTO MONEDA','Ticker','NDX','.INX','10B','QH','USD/EUR'].includes(String(r['Ticker'])));
+  if(rentQH.length){
+    const labels=rentQH.map(r=>String(r['Ticker']||'').split(':').pop());
+    const vals=rentQH.map(r=>n(r['Peso']));
+    const legqh=document.getElementById('leg-qh');
+    if(legqh) legqh.innerHTML=labels.map((l,i)=>`<span><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${l}</span>`).join('');
+    const cqh=document.getElementById('chart-qh');
+    if(cqh) charts.dqh=new Chart(cqh,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:COLORS,borderWidth:2,borderColor:'var(--bg2)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw.toFixed(1)+'%'}}}}});
+  }
+
+  // CAGR bar — de la composición
+  const cagrData=comp10b.map(r=>({
+    empresa:String(r['Empresa']||'').substring(0,18),
+    cagr:parseFloat(String(r['CAGR 3 años']||'0').replace('%','').replace(',','.'))
+  })).filter(d=>d.cagr>0).sort((a,b)=>b.cagr-a.cagr);
+
+  if(cagrData.length){
+    const cc=document.getElementById('chart-cagr');
+    if(cc) charts.cagr=new Chart(cc,{type:'bar',data:{labels:cagrData.map(d=>d.empresa),datasets:[{data:cagrData.map(d=>d.cagr),backgroundColor:'#378ADD',borderRadius:4,borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' CAGR: '+c.raw.toFixed(1)+'%'}}},scales:{x:{ticks:{font:{size:10},color:'var(--text2)',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,0.1)'}},y:{ticks:{font:{size:11},color:'var(--text)'},grid:{display:false}}}}});
+  }
+}
+</script>
+</body>
+</html>
