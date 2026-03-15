@@ -548,6 +548,17 @@ function buildCarteraHTML(pos, nombre, id) {
   const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ');
   const liq = (pos||[]).find(p => p.ticker === 'LIQUIDEZ');
 
+  // CAGR medio ponderado por peso (solo posiciones con PO)
+  const conCagr = activos.filter(p => p.cagr3y !== null && p.peso > 0);
+  const pesoTotal = conCagr.reduce((s, p) => s + p.peso, 0);
+  const cagrPonderado = pesoTotal > 0
+    ? conCagr.reduce((s, p) => s + p.cagr3y * (p.peso / pesoTotal), 0)
+    : null;
+  const cagrPondFmt = cagrPonderado !== null
+    ? (cagrPonderado >= 0 ? '+' : '') + cagrPonderado.toFixed(1) + '%'
+    : '—';
+  const pctConPO = pesoTotal > 0 ? pesoTotal.toFixed(1) + '% de la cartera' : '';
+
   const rows = (pos||[]).map(p => {
     const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
     const rv = parseInt(p.riesgo)||0;
@@ -571,6 +582,25 @@ function buildCarteraHTML(pos, nombre, id) {
   }).join('');
 
   return `
+<div class="mgrid" style="margin-bottom:16px">
+  ${cagrPonderado !== null ? `
+  <div class="metric">
+    <div class="mlbl">CAGR esperado ponderado</div>
+    <div class="mval ${cagrPonderado >= 0 ? 'pos' : 'neg'}">${cagrPondFmt}</div>
+    <div class="msub">${pctConPO} con P.O.</div>
+  </div>` : ''}
+  ${liq ? `
+  <div class="metric">
+    <div class="mlbl">Liquidez</div>
+    <div class="mval">${liq.pesoFmt}</div>
+    <div class="msub">${activos.length} posiciones activas</div>
+  </div>` : ''}
+  <div class="metric">
+    <div class="mlbl">Riesgo medio</div>
+    <div class="mval">${activos.filter(p=>p.riesgo!=='—').length ? (activos.filter(p=>p.riesgo!=='—').reduce((s,p)=>s+(parseInt(p.riesgo)||0),0)/activos.filter(p=>p.riesgo!=='—').length).toFixed(1) : '—'}<span style="font-size:13px;font-weight:400">/10</span></div>
+    <div class="msub">media simple</div>
+  </div>
+</div>
 <div class="cgrid">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
