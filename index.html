@@ -61,8 +61,12 @@ tbody tr:hover td{background:var(--bg3)}
 .tsub{font-size:10px;color:var(--text3);display:block;margin-top:1px;font-weight:400}
 .risk{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;font-size:11px;font-weight:600}
 .rlo{background:var(--gbg);color:var(--green)}.rmd{background:var(--abg);color:var(--amber)}.rhi{background:var(--rbg);color:var(--red)}
-.ilink{display:inline-flex;align-items:center;height:17px;padding:0 5px;border-radius:3px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:10px;font-weight:500;margin-left:3px;vertical-align:middle}
+.ilink{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:4px;border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;font-size:11px;font-weight:600;margin-left:4px;vertical-align:middle;gap:3px}
 .ilink:hover{background:var(--bbg);color:var(--blue);border-color:var(--blue)}
+.ilink-tesis{background:var(--gbg);color:var(--green);border-color:var(--green)}
+.ilink-tesis:hover{background:var(--green);color:#fff}
+.ilink-modelo{background:var(--bbg);color:var(--blue);border-color:var(--blue)}
+.ilink-modelo:hover{background:var(--blue);color:#fff}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:600px){.cgrid{grid-template-columns:1fr}}
 .cwrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
@@ -472,10 +476,10 @@ function buildCarteraHTML(pos, nombre, id) {
     const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
     const rv = parseInt(p.riesgo)||0;
     const rc = rv<=3?'rlo':rv<=6?'rmd':'rhi';
-    const tL = p.urlTesis ? `<a href="${p.urlTesis}" target="_blank" class="ilink">Tesis</a>`
-              : p.tieneTesis ? `<span class="ilink" style="opacity:.35">Tesis</span>` : '';
-    const mL = p.urlModelo ? `<a href="${p.urlModelo}" target="_blank" class="ilink">Modelo</a>`
-              : p.tieneModelo ? `<span class="ilink" style="opacity:.35">Modelo</span>` : '';
+    const tL = p.urlTesis ? `<a href="${p.urlTesis}" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>`
+              : p.tieneTesis ? `<span class="ilink" style="opacity:.3;cursor:default">✍ Tesis</span>` : '';
+    const mL = p.urlModelo ? `<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>`
+              : p.tieneModelo ? `<span class="ilink" style="opacity:.3;cursor:default">📊 Modelo</span>` : '';
     return `<tr>
       <td>${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
       <td>${p.moneda}</td><td>${p.ntit}</td><td>${p.precio}</td>
@@ -489,11 +493,11 @@ function buildCarteraHTML(pos, nombre, id) {
 <div class="cgrid">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
-    <div style="position:relative;height:260px"><canvas id="c-donut-${id}"></canvas></div>
+    <div style="position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
   </div>
-  <div class="cwrap" style="margin-bottom:0">
-    <div class="ctit">Peso por posición</div>
-    <div style="position:relative;height:${activos.length*26+50}px"><canvas id="c-bar-${id}"></canvas></div>
+  <div class="cwrap" style="margin-bottom:0;overflow-y:auto;max-height:340px">
+    <div class="ctit">Últimos movimientos</div>
+    <div id="movimientos-${id}"><div style="color:var(--text3);font-size:12px;padding:1rem 0">Añade una pestaña OPERACIONES en tu sheet con columnas: Fecha, Empresa, Ticker, Operación, Precio</div></div>
   </div>
 </div>
 <div class="card">
@@ -555,26 +559,7 @@ function buildCarteraCharts(id, pos) {
     });
   }
 
-  // Barras horizontales
-  const sorted = [...activos].sort((a,b)=>b.peso-a.peso);
-  const elB = document.getElementById(`c-bar-${id}`);
-  if (elB && sorted.length) {
-    CH[`b-${id}`] = new Chart(elB, {
-      type:'bar',
-      data:{
-        labels:sorted.map(p=>p.ticker.split(':').pop()),
-        datasets:[{data:sorted.map(p=>p.peso), backgroundColor:sorted.map((_,i)=>COLS[i%COLS.length]), borderRadius:3, borderWidth:0}]
-      },
-      options:{
-        indexAxis:'y', responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.raw.toFixed(1)}%`}}},
-        scales:{
-          x:{ticks:{font:{size:10},color:'#888',callback:v=>v+'%'}, grid:{color:'rgba(128,128,128,0.08)'}},
-          y:{ticks:{font:{size:11}}, grid:{display:false}}
-        }
-      }
-    });
-  }
+  // Placeholder para movimientos — se rellena cuando haya pestaña OPERACIONES
 }
 </script>
 </body>
