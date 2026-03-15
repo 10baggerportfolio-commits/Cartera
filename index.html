@@ -206,20 +206,31 @@ function parsePosiciones(rows) {
     const t = String(r[0]||'').trim();
     // Filtrar por ticker válido — cualquier fila con ticker no vacío y no cabecera
     return t && t.length > 1 && !skip.some(s => t.startsWith(s));
-  }).map(r => ({
-    ticker:    String(r[0]||'').trim(),
-    empresa:   fmt(r[1]),
-    moneda:    fmt(r[2]),
-    ntit:      fmt(r[3]),
-    precio:    fmt(r[4]),
-    peso:      typeof r[7]==='number' ? r[7]*100 : toNum(r[7]),
-    pesoFmt:   typeof r[7]==='number' ? (r[7]*100).toFixed(1)+'%' : fmt(r[7]),
-    riesgo:    r[9] ? String(r[9]).trim() : '—',
-    urlTesis:  r[10] && String(r[10]).startsWith('http') ? String(r[10]).trim() : '',
-    urlModelo: r[11] && String(r[11]).startsWith('http') ? String(r[11]).trim() : '',
-    tieneTesis:  r[10] && String(r[10]).trim() === 'Disponible',
-    tieneModelo: r[11] && String(r[11]).trim() === 'Disponible',
-  }));
+  }).map(r => {
+    const precioNum = typeof r[4]==='number' ? r[4] : toNum(r[4]);
+    const poNum     = r[12] ? (typeof r[12]==='number' ? r[12] : toNum(r[12])) : null;
+    const cagr3y    = precioNum && poNum && poNum > 0
+      ? (Math.pow(poNum / precioNum, 1/3) - 1) * 100
+      : null;
+    return {
+      ticker:    String(r[0]||'').trim(),
+      empresa:   fmt(r[1]),
+      moneda:    fmt(r[2]),
+      ntit:      fmt(r[3]),
+      precio:    fmt(r[4]),
+      precioNum,
+      peso:      typeof r[7]==='number' ? r[7]*100 : toNum(r[7]),
+      pesoFmt:   typeof r[7]==='number' ? (r[7]*100).toFixed(1)+'%' : fmt(r[7]),
+      riesgo:    r[9] ? String(r[9]).trim() : '—',
+      urlTesis:  r[10] && String(r[10]).startsWith('http') ? String(r[10]).trim() : '',
+      urlModelo: r[11] && String(r[11]).startsWith('http') ? String(r[11]).trim() : '',
+      tieneTesis:  r[10] && String(r[10]).trim() === 'Disponible',
+      tieneModelo: r[11] && String(r[11]).trim() === 'Disponible',
+      po:        poNum ? fmt(r[12]) : '—',
+      cagr3y,
+      resumen:   r[13] ? String(r[13]).trim() : '',
+    };
+  });
 }
 
 // REND_SIMPLE: cabecera en fila 0, datos en filas 1+
@@ -523,9 +534,10 @@ function renderOpsHTML() {
         <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div>
         <div style="font-size:10px;color:var(--text3)">${o.ticker} · ${o.fecha}</div>
       </div>
-      <div style="text-align:right;flex-shrink:0;min-width:80px">
+      <div style="text-align:right;flex-shrink:0;min-width:90px">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:1px">Precio</div>
         <div style="font-size:12px;font-weight:600">${o.precio}</div>
-        <div style="font-size:10px;color:var(--text2)">Δ peso: ${o.cambio}</div>
+        <div style="font-size:10px;color:var(--text2)">Δ ${o.cambio}</div>
       </div>
     </div>`;
   }).join('');
@@ -544,9 +556,14 @@ function buildCarteraHTML(pos, nombre, id) {
               : p.tieneTesis ? `<span class="ilink" style="opacity:.3;cursor:default">✍ Tesis</span>` : '';
     const mL = p.urlModelo ? `<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>`
               : p.tieneModelo ? `<span class="ilink" style="opacity:.3;cursor:default">📊 Modelo</span>` : '';
+    const cagrFmt = p.cagr3y !== null ? (p.cagr3y >= 0 ? '+' : '') + p.cagr3y.toFixed(1) + '%' : '—';
+    const cagrCls = p.cagr3y !== null ? (p.cagr3y >= 0 ? 'pos' : 'neg') : '';
+    const tooltip = p.resumen ? `title="${p.resumen.replace(/"/g, '&quot;')}"` : '';
     return `<tr>
-      <td>${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+      <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
       <td>${p.moneda}</td><td>${p.ntit}</td><td>${p.precio}</td>
+      <td style="font-weight:500">${p.po}</td>
+      <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
       <td style="font-weight:600">${p.pesoFmt}</td>
       <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
       <td style="text-align:right">${tL}${mL}</td>
@@ -571,8 +588,8 @@ function buildCarteraHTML(pos, nombre, id) {
   </div>
   <div class="ox"><table>
     <thead><tr>
-      <th style="width:28%;text-align:left">Empresa</th>
-      <th>Moneda</th><th>Nº títulos</th><th>Precio</th><th>Peso</th><th>Riesgo</th>
+      <th style="width:25%;text-align:left">Empresa</th>
+      <th>Moneda</th><th>Nº títulos</th><th>Precio</th><th>P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th>Riesgo</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
