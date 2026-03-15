@@ -264,6 +264,7 @@ async function loadAll() {
     ]);
 
     D.pos10b = parsePosiciones(r10b);
+    console.log('[POS10B]', D.pos10b.length, 'posiciones:', D.pos10b.map(function(p){return p.ticker}));
     D.posQH  = parsePosiciones(rQH);
     D.rend   = parseRend(rRend);
 
