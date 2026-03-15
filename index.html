@@ -260,6 +260,21 @@ function parseRend(rows) {
   }).filter(r => r.dias && r.dias > 0);
 }
 
+// ── PARSER HISTORICO MENSUAL ─────────────────────────────────
+// Cols: 0=Fecha, 1=Valor_10B, 2=Valor_QH, 3=NDX (4=SPX opcional)
+function parseHist(rows) {
+  return rows.filter(r => {
+    const f = String(r[0]||'').trim();
+    return f.match(/^\d{4}-\d{2}-\d{2}$/) && r[1];
+  }).map(r => ({
+    fecha: String(r[0]).trim(),
+    b10:   typeof r[1]==='number' ? r[1] : toNum(r[1]),
+    qh:    r[2] ? (typeof r[2]==='number' ? r[2] : toNum(r[2])) : null,
+    ndx:   r[3] ? (typeof r[3]==='number' ? r[3] : toNum(r[3])) : null,
+    spx:   r[4] ? (typeof r[4]==='number' ? r[4] : toNum(r[4])) : null,
+  })).filter(r => r.b10 && r.b10 > 0);
+}
+
 // ── PARSER OPERACIONES ───────────────────────────────────────
 function parseOps(rows) {
   const tipos = ['APERTURA','CIERRE','AUMENTO','RECORTE','RCORTE'];
@@ -281,17 +296,19 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rQH, rRend, rOps] = await Promise.all([
+    const [r10b, rQH, rRend, rOps, rHist] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('POSICIONES_QUALITY_HOLD'),
       gsheet('REND_SIMPLE'),
       gsheet('OPERACIONES'),
+      gsheet('HISTORICO_MENSUAL'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
+    D.hist   = parseHist(rHist);
 
     // Actualizar valor actual de 10Bagger desde fila TOTAL de posiciones
     const tot10b = r10b.find(r => String(r[0]||'').includes('TOTAL'));
@@ -413,6 +430,10 @@ function buildRentHTML() {
   <div style="position:relative;height:200px"><canvas id="c-comp"></canvas></div>
 </div>
 <div class="cwrap">
+  <div class="ctit">Evolución mensual</div>
+  <div style="position:relative;height:240px"><canvas id="c-linea"></canvas></div>
+</div>
+<div class="cwrap">
   <div class="ctit">Rentabilidad anual por año</div>
   <div style="display:flex;gap:12px;margin-bottom:10px;font-size:11px;color:var(--text2)">
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block"></span>10Bagger</span>
@@ -455,6 +476,43 @@ function buildRentCharts() {
         scales:{
           x:{ticks:{font:{size:11}}, grid:{display:false}},
           y:{ticks:{font:{size:10}, color:'#888', callback:v=>v+'%'}, grid:{color:'rgba(128,128,128,0.08)'}}
+        }
+      }
+    });
+  }
+
+  // Gráfico de líneas mensual
+  const elL = document.getElementById('c-linea');
+  if (elL && D.hist && D.hist.length) {
+    const hist = D.hist;
+    const labels = hist.map(h => h.fecha.slice(0,7)); // YYYY-MM
+
+    // Indexar todo a 100 desde el primer punto
+    const b10base = hist[0].b10;
+    const ndxbase = hist[0].ndx;
+    const b10idx  = hist.map(h => h.b10 ? +(h.b10/b10base*100).toFixed(2) : null);
+    const ndxIdx  = hist.map(h => h.ndx ? +(h.ndx/ndxbase*100).toFixed(2) : null);
+    const qhbase  = hist.find(h => h.qh);
+    const qhIdx   = qhbase ? hist.map(h => h.qh ? +(h.qh/qhbase.qh*100).toFixed(2) : null) : null;
+
+    const datasets = [
+      { label:'10Bagger', data:b10idx, borderColor:'#378ADD', backgroundColor:'rgba(55,138,221,0.08)', borderWidth:2, pointRadius:2, tension:0.3, fill:true },
+      { label:'Nasdaq-100', data:ndxIdx, borderColor:'#B4B2A9', backgroundColor:'transparent', borderWidth:1.5, pointRadius:1, tension:0.3, borderDash:[4,3] },
+    ];
+    if (qhIdx) datasets.splice(1, 0, { label:'Quality Hold', data:qhIdx, borderColor:'#1D9E75', backgroundColor:'transparent', borderWidth:1.5, pointRadius:1, tension:0.3 });
+
+    CH.linea = new Chart(elL, {
+      type:'line',
+      data:{ labels, datasets },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{ display:true, position:'top', labels:{ boxWidth:10, boxHeight:2, font:{size:11}, padding:12 } },
+          tooltip:{ callbacks:{ label:c=>` ${c.dataset.label}: ${c.raw ? c.raw.toFixed(1) : '—'}` } }
+        },
+        scales:{
+          x:{ ticks:{ font:{size:10}, color:'#888', maxTicksLimit:8, maxRotation:0 }, grid:{ display:false } },
+          y:{ ticks:{ font:{size:10}, color:'#888', callback:v=>v }, grid:{ color:'rgba(128,128,128,0.08)' } }
         }
       }
     });
