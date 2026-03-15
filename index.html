@@ -596,9 +596,13 @@ function buildCarteraHTML(pos, nombre, id) {
     <div class="msub">${activos.length} posiciones activas</div>
   </div>` : ''}
   <div class="metric">
-    <div class="mlbl">Riesgo medio</div>
-    <div class="mval">${activos.filter(p=>p.riesgo!=='—').length ? (activos.filter(p=>p.riesgo!=='—').reduce((s,p)=>s+(parseInt(p.riesgo)||0),0)/activos.filter(p=>p.riesgo!=='—').length).toFixed(1) : '—'}<span style="font-size:13px;font-weight:400">/10</span></div>
-    <div class="msub">media simple</div>
+    <div class="mlbl">Riesgo medio ponderado</div>
+    <div class="mval">${(() => {
+      const conR = activos.filter(p => p.riesgo !== '—' && p.peso > 0);
+      const pt = conR.reduce((s,p) => s + p.peso, 0);
+      return pt > 0 ? (conR.reduce((s,p) => s + (parseInt(p.riesgo)||0) * (p.peso/pt), 0)).toFixed(1) : '—';
+    })()}<span style="font-size:13px;font-weight:400">/10</span></div>
+    <div class="msub">ponderado por peso</div>
   </div>
 </div>
 <div class="cgrid">
