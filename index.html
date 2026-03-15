@@ -356,8 +356,8 @@ function calcPeriods() {
   function rentPeriodo(r) {
     return {
       b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null,
-      spx: r.spx_eur !== null && r.spx_eur !== undefined ? (r.spx_eur-1)*100 : null,
-      ndx: r.ndx_eur !== null && r.ndx_eur !== undefined ? (r.ndx_eur-1)*100 : null,
+      spx: r.spx_ini && r.spx_fin ? ((r.spx_fin/r.spx_ini)-1)*100 : null,
+      ndx: r.ndx_ini && r.ndx_fin ? ((r.ndx_fin/r.ndx_ini)-1)*100 : null,
     };
   }
 
@@ -366,8 +366,8 @@ function calcPeriods() {
     let b10=1, spx=1, ndx=1;
     for (const r of slice) {
       if (r.b10_ini && r.b10_fin) b10 *= r.b10_fin/r.b10_ini;
-      if (r.spx_eur) spx *= r.spx_eur;
-      if (r.ndx_eur) ndx *= r.ndx_eur;
+      if (r.spx_ini && r.spx_fin) spx *= r.spx_fin/r.spx_ini;
+      if (r.ndx_ini && r.ndx_fin) ndx *= r.ndx_fin/r.ndx_ini;
     }
     return { b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100 };
   }
@@ -376,13 +376,10 @@ function calcPeriods() {
     const totalDias = rend.reduce((s,r) => s+(r.dias||0), 0);
     const years = totalDias / 365.25;
     const f = rend[0], l = rend[rend.length-1];
-    // CAGR: encadenar todos los factores
-    let spxAcum=1, ndxAcum=1;
-    for (const r of rend) { if (r.spx_eur) spxAcum*=r.spx_eur; if (r.ndx_eur) ndxAcum*=r.ndx_eur; }
     return {
       b10: f.b10_ini && l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini, 1/years)-1)*100 : null,
-      spx: (Math.pow(spxAcum, 1/years)-1)*100,
-      ndx: (Math.pow(ndxAcum, 1/years)-1)*100,
+      spx: f.spx_ini && l.spx_fin ? (Math.pow(l.spx_fin/f.spx_ini, 1/years)-1)*100 : null,
+      ndx: f.ndx_ini && l.ndx_fin ? (Math.pow(l.ndx_fin/f.ndx_ini, 1/years)-1)*100 : null,
     };
   }
 
@@ -430,10 +427,6 @@ function buildRentHTML() {
   <div style="position:relative;height:200px"><canvas id="c-comp"></canvas></div>
 </div>
 <div class="cwrap">
-  <div class="ctit">Evolución mensual</div>
-  <div style="position:relative;height:240px"><canvas id="c-linea"></canvas></div>
-</div>
-<div class="cwrap">
   <div class="ctit">Rentabilidad anual por año</div>
   <div style="display:flex;gap:12px;margin-bottom:10px;font-size:11px;color:var(--text2)">
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block"></span>10Bagger</span>
@@ -476,43 +469,6 @@ function buildRentCharts() {
         scales:{
           x:{ticks:{font:{size:11}}, grid:{display:false}},
           y:{ticks:{font:{size:10}, color:'#888', callback:v=>v+'%'}, grid:{color:'rgba(128,128,128,0.08)'}}
-        }
-      }
-    });
-  }
-
-  // Gráfico de líneas mensual
-  const elL = document.getElementById('c-linea');
-  if (elL && D.hist && D.hist.length) {
-    const hist = D.hist;
-    const labels = hist.map(h => h.fecha.slice(0,7)); // YYYY-MM
-
-    // Indexar todo a 100 desde el primer punto
-    const b10base = hist[0].b10;
-    const ndxbase = hist[0].ndx;
-    const b10idx  = hist.map(h => h.b10 ? +(h.b10/b10base*100).toFixed(2) : null);
-    const ndxIdx  = hist.map(h => h.ndx ? +(h.ndx/ndxbase*100).toFixed(2) : null);
-    const qhbase  = hist.find(h => h.qh);
-    const qhIdx   = qhbase ? hist.map(h => h.qh ? +(h.qh/qhbase.qh*100).toFixed(2) : null) : null;
-
-    const datasets = [
-      { label:'10Bagger', data:b10idx, borderColor:'#378ADD', backgroundColor:'rgba(55,138,221,0.08)', borderWidth:2, pointRadius:2, tension:0.3, fill:true },
-      { label:'Nasdaq-100', data:ndxIdx, borderColor:'#B4B2A9', backgroundColor:'transparent', borderWidth:1.5, pointRadius:1, tension:0.3, borderDash:[4,3] },
-    ];
-    if (qhIdx) datasets.splice(1, 0, { label:'Quality Hold', data:qhIdx, borderColor:'#1D9E75', backgroundColor:'transparent', borderWidth:1.5, pointRadius:1, tension:0.3 });
-
-    CH.linea = new Chart(elL, {
-      type:'line',
-      data:{ labels, datasets },
-      options:{
-        responsive:true, maintainAspectRatio:false,
-        plugins:{
-          legend:{ display:true, position:'top', labels:{ boxWidth:10, boxHeight:2, font:{size:11}, padding:12 } },
-          tooltip:{ callbacks:{ label:c=>` ${c.dataset.label}: ${c.raw ? c.raw.toFixed(1) : '—'}` } }
-        },
-        scales:{
-          x:{ ticks:{ font:{size:10}, color:'#888', maxTicksLimit:8, maxRotation:0 }, grid:{ display:false } },
-          y:{ ticks:{ font:{size:10}, color:'#888', callback:v=>v }, grid:{ color:'rgba(128,128,128,0.08)' } }
         }
       }
     });
