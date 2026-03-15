@@ -71,6 +71,10 @@ tbody tr:hover td{background:var(--bg3)}
 @media(max-width:600px){.cgrid{grid-template-columns:1fr}}
 .cwrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
 .ctit{font-size:10px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2)}
+.op-ap{background:var(--gbg);color:var(--green);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap}
+.op-ci{background:var(--rbg);color:var(--red);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap}
+.op-au{background:var(--bbg);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap}
+.op-re{background:var(--abg);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap}
 .spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ebox{background:var(--abg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
@@ -256,20 +260,38 @@ function parseRend(rows) {
   }).filter(r => r.dias && r.dias > 0);
 }
 
+// ── PARSER OPERACIONES ───────────────────────────────────────
+function parseOps(rows) {
+  const tipos = ['APERTURA','CIERRE','AUMENTO','RECORTE','RCORTE'];
+  return rows.filter(r => {
+    const t = String(r[3]||'').trim().toUpperCase();
+    return r[0] && r[1] && tipos.some(x => t.includes(x));
+  }).map(r => ({
+    empresa: String(r[0]||'').trim(),
+    fecha:   String(r[1]||'').trim(),
+    ticker:  String(r[2]||'').trim(),
+    tipo:    String(r[3]||'').trim().toUpperCase().replace('RCORTE','RECORTE'),
+    cambio:  String(r[4]||'').trim(),
+    precio:  String(r[5]||'').trim(),
+  }));
+}
+
 // ── CARGA ─────────────────────────────────────────────────────
 async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rQH, rRend] = await Promise.all([
+    const [r10b, rQH, rRend, rOps] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('POSICIONES_QUALITY_HOLD'),
       gsheet('REND_SIMPLE'),
+      gsheet('OPERACIONES'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH);
     D.rend   = parseRend(rRend);
+    D.ops    = parseOps(rOps);
 
     // Actualizar valor actual de 10Bagger desde fila TOTAL de posiciones
     const tot10b = r10b.find(r => String(r[0]||'').includes('TOTAL'));
@@ -467,6 +489,34 @@ function buildRentCharts() {
   }
 }
 
+// ── OPERACIONES HTML ─────────────────────────────────────────
+function renderOpsHTML() {
+  const ops = D.ops || [];
+  if (!ops.length) return '<div style="color:var(--text3);font-size:12px;padding:.5rem 0">Sin operaciones registradas</div>';
+
+  const tipoCls = {
+    'APERTURA': 'op-ap',
+    'CIERRE':   'op-ci',
+    'AUMENTO':  'op-au',
+    'RECORTE':  'op-re',
+  };
+
+  return ops.slice(0, 20).map(o => {
+    const cls = tipoCls[o.tipo] || 'op-re';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)">
+      <span class="${cls}">${o.tipo}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div>
+        <div style="font-size:10px;color:var(--text3)">${o.ticker} · ${o.fecha}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;font-weight:600">${o.precio}</div>
+        <div style="font-size:10px;color:var(--text3)">${o.cambio}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ── CARTERA HTML ──────────────────────────────────────────────
 function buildCarteraHTML(pos, nombre, id) {
   const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ');
@@ -495,9 +545,9 @@ function buildCarteraHTML(pos, nombre, id) {
     <div class="ctit">Composición ${nombre}</div>
     <div style="position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
   </div>
-  <div class="cwrap" style="margin-bottom:0;overflow-y:auto;max-height:340px">
+  <div class="cwrap" style="margin-bottom:0;overflow-y:auto;max-height:340px;padding:14px">
     <div class="ctit">Últimos movimientos</div>
-    <div id="movimientos-${id}"><div style="color:var(--text3);font-size:12px;padding:1rem 0">Añade una pestaña OPERACIONES en tu sheet con columnas: Fecha, Empresa, Ticker, Operación, Precio</div></div>
+    ${renderOpsHTML()}
   </div>
 </div>
 <div class="card">
