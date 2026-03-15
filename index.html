@@ -196,7 +196,8 @@ function parsePosiciones(rows) {
   const skip = ['POSICIONES','Rellena','Ticker','TOTAL','CAGR','A'];
   return rows.filter(r => {
     const t = String(r[0]||'').trim();
-    return t && !skip.some(s => t.startsWith(s)) && r[6] !== null && r[6] !== undefined;
+    // Filtrar por ticker válido — cualquier fila con ticker no vacío y no cabecera
+    return t && t.length > 1 && !skip.some(s => t.startsWith(s));
   }).map(r => ({
     ticker:    String(r[0]||'').trim(),
     empresa:   fmt(r[1]),
