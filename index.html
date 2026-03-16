@@ -110,6 +110,7 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="tab active" onclick="showTab('rent')">Rentabilidad</div>
     <div class="tab" onclick="showTab('10b')">10Bagger</div>
     <div class="tab" onclick="showTab('est')">Estudiados</div>
+    <div class="tab" onclick="showTab('dev')">En desarrollo</div>
   </div>
   <div class="main" id="mc"><div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando...</div></div>
   <div class="sbar" id="sb"></div>
@@ -340,18 +341,20 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rEst, rRend, rOps, rHist] = await Promise.all([
+    const [r10b, rEst, rRend, rOps, rHist, rDev] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('ESTUDIADOS'),
       gsheet('REND_SIMPLE'),
       gsheet('OPERACIONES'),
       gsheet('HISTORICO_MENSUAL'),
+      gsheet('EN_DESARROLLO'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
     D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
+    D.dev    = parseDev(rDev);
     D.hist   = parseHist(rHist);
 
     // Actualizar valor actual de 10Bagger desde fila TOTAL de posiciones
@@ -389,6 +392,8 @@ function showTab(tab) {
     setTimeout(() => buildCarteraCharts('10b', D.pos10b), 80);
   } else if (tab === 'est') {
     mc.innerHTML = buildEstudiadosHTML(D.est || []);
+  } else if (tab === 'dev') {
+    mc.innerHTML = buildDevHTML(D.dev || []);
   }
 }
 
@@ -597,6 +602,76 @@ function renderOpsHTML() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ── PARSER EN DESARROLLO ────────────────────────────────────
+function parseDev(rows) {
+  return rows.filter(r => r[0] && String(r[0]).trim() && !String(r[0]).startsWith('Concepto'))
+    .map(r => ({
+      concepto: String(r[0]||'').trim(),
+      tipo:     String(r[1]||'').trim(),
+      pista:    String(r[2]||'').trim(),
+      fecha:    String(r[3]||'').trim(),
+      notas:    String(r[4]||'').trim(),
+    })).filter(r => r.tipo);
+}
+
+// ── EN DESARROLLO HTML ────────────────────────────────────────
+function buildDevHTML(items) {
+  if (!items.length) return '<div class="ebox">Sin datos en la pestaña EN_DESARROLLO del sheet.</div>';
+
+  const tipoConfig = {
+    'Tesis':           { icon:'🔍', color:'#185fa5', bg:'#e6f1fb' },
+    'Investigación':   { icon:'🧪', color:'#0f6e56', bg:'#e1f5ee' },
+    'Artículo':        { icon:'✍️',  color:'#854f0b', bg:'#faeeda' },
+    'Modelo financiero':{ icon:'📊', color:'#533AB7', bg:'#ede8fb' },
+    'Herramienta':     { icon:'🛠️',  color:'#D85A30', bg:'#fce8e0' },
+  };
+
+  const grupos = {};
+  items.forEach(i => {
+    const t = i.tipo.trim();
+    if (!grupos[t]) grupos[t] = [];
+    grupos[t].push(i);
+  });
+
+  const cards = items.map(item => {
+    const tipo = item.tipo.trim();
+    const cfg = tipoConfig[tipo] || { icon:'📌', color:'#6b6b66', bg:'#f0f0ed' };
+    const notasBadge = item.notas
+      ? `<div style="font-size:11px;color:var(--text2);margin-top:6px;font-style:italic">${item.notas}</div>`
+      : '';
+    return `
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="background:${cfg.bg};color:${cfg.color};font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px">
+          ${cfg.icon} ${tipo}
+        </span>
+        <span style="font-size:11px;color:var(--text3)">📅 ${item.fecha || '—'}</span>
+      </div>
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:2px">${item.pista || '—'}</div>
+      ${notasBadge}
+    </div>`;
+  }).join('');
+
+  // Contador por tipo
+  const resumen = Object.entries(grupos).map(([tipo, arr]) => {
+    const cfg = tipoConfig[tipo.trim()] || { icon:'📌', color:'#6b6b66', bg:'#f0f0ed' };
+    return `<div style="display:flex;align-items:center;gap:6px;font-size:12px">
+      <span style="background:${cfg.bg};color:${cfg.color};padding:2px 8px;border-radius:12px;font-weight:600">${cfg.icon} ${tipo}: ${arr.length}</span>
+    </div>`;
+  }).join('');
+
+  return `
+<div style="margin-bottom:16px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:600">${items.length} publicaciones en preparación</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${resumen}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+    ${cards}
+  </div>
+</div>`;
 }
 
 // ── ESTUDIADOS HTML ──────────────────────────────────────────
