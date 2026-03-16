@@ -109,7 +109,7 @@ tbody tr:hover td{background:var(--bg3)}
   <div class="tabs">
     <div class="tab active" onclick="showTab('rent')">Rentabilidad</div>
     <div class="tab" onclick="showTab('10b')">10Bagger</div>
-    <div class="tab" onclick="showTab('qh')">Quality Hold</div>
+    <div class="tab" onclick="showTab('est')">Estudiados</div>
   </div>
   <div class="main" id="mc"><div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando...</div></div>
   <div class="sbar" id="sb"></div>
@@ -318,16 +318,16 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rQH, rRend, rOps, rHist] = await Promise.all([
+    const [r10b, rEst, rRend, rOps, rHist] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
-      gsheet('POSICIONES_QUALITY_HOLD'),
+      gsheet('ESTUDIADOS'),
       gsheet('REND_SIMPLE'),
       gsheet('OPERACIONES'),
       gsheet('HISTORICO_MENSUAL'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
-    D.posQH  = parsePosiciones(rQH);
+    D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
     D.hist   = parseHist(rHist);
@@ -362,11 +362,11 @@ function showTab(tab) {
   if (tab === 'rent') {
     mc.innerHTML = buildRentHTML();
     setTimeout(buildRentCharts, 80);
-  } else {
-    const pos = tab === '10b' ? D.pos10b : D.posQH;
-    const nombre = tab === '10b' ? '10Bagger' : 'Quality Hold';
-    mc.innerHTML = buildCarteraHTML(pos, nombre, tab);
-    setTimeout(() => buildCarteraCharts(tab, pos), 80);
+  } else if (tab === '10b') {
+    mc.innerHTML = buildCarteraHTML(D.pos10b, '10Bagger', '10b');
+    setTimeout(() => buildCarteraCharts('10b', D.pos10b), 80);
+  } else if (tab === 'est') {
+    mc.innerHTML = buildEstudiadosHTML(D.est || []);
   }
 }
 
@@ -552,6 +552,51 @@ function renderOpsHTML() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ── ESTUDIADOS HTML ──────────────────────────────────────────
+function buildEstudiadosHTML(pos) {
+  const activos = (pos||[]).filter(p => p.ticker && p.ticker !== 'LIQUIDEZ' && p.empresa !== '—');
+  if (!activos.length) return '<div class="ebox">Sin datos en la pestaña ESTUDIADOS del sheet.</div>';
+
+  const conCagr = activos.filter(p => p.cagr3y !== null && p.cagr3y !== undefined);
+
+  const rows = activos.map(p => {
+    const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
+    const rv = parseInt(p.riesgo)||0;
+    const rc = rv<=3?'rlo':rv<=6?'rmd':'rhi';
+    const tL = p.urlTesis ? `<a href="${p.urlTesis}" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>` : '';
+    const mL = p.urlModelo ? `<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>` : '';
+    const cagrFmt = p.cagr3y !== null ? (p.cagr3y >= 0 ? '+' : '') + p.cagr3y.toFixed(1) + '%' : '—';
+    const cagrCls = p.cagr3y !== null ? (p.cagr3y >= 0 ? 'pos' : 'neg') : '';
+    const tooltip = p.resumen ? `title="${p.resumen.replace(/"/g, '&quot;')}"` : '';
+    return `<tr>
+      <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+      <td>${p.moneda}</td>
+      <td>${p.precio}</td>
+      <td style="font-weight:500">${p.po}</td>
+      <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
+      <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
+      <td style="text-align:right">${tL}${mL}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+<div class="card">
+  <div class="ch">
+    <span class="ct">Valores estudiados — fuera de cartera</span>
+    <span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span>
+  </div>
+  <div class="ox"><table>
+    <thead><tr>
+      <th style="width:28%;text-align:left">Empresa</th>
+      <th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th>
+      <th>CAGR 3a</th><th>Riesgo</th>
+      <th style="text-align:right">Links</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>
+</div>`;
 }
 
 // ── CARTERA HTML ──────────────────────────────────────────────
