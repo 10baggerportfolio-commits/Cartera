@@ -635,7 +635,28 @@ function buildDevHTML(items) {
     grupos[t].push(i);
   });
 
-  const cards = items.map(item => {
+  // Ordenar por fecha: primero los que tienen fecha (más próxima primero), luego sin fecha
+  const sorted = [...items].sort((a, b) => {
+    const parseF = f => {
+      if (!f || f === 'Sin decidir' || f === '—') return null;
+      // "Semana del 16", "Semana del 23" → extraer número
+      const semana = f.match(/Semana del (\d+)/i);
+      if (semana) return parseInt(semana[1]);
+      // "Comienzo abril" → 100 (mes próximo, después de semanas)
+      if (f.toLowerCase().includes('abril') || f.toLowerCase().includes('mayo')) return 200;
+      // fecha real AAAA-MM-DD
+      const d = new Date(f);
+      if (!isNaN(d)) return d.getTime() / 1000000;
+      return null;
+    };
+    const fa = parseF(a.fecha), fb = parseF(b.fecha);
+    if (fa === null && fb === null) return 0;
+    if (fa === null) return 1;
+    if (fb === null) return -1;
+    return fa - fb;
+  });
+
+  const cards = sorted.map(item => {
     const tipo = item.tipo.trim();
     const cfg = tipoConfig[tipo] || { icon:'📌', color:'#6b6b66', bg:'#f0f0ed' };
     const notasBadge = item.notas
