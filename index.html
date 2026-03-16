@@ -212,6 +212,25 @@ function parsePosiciones(rows) {
     const cagr3y    = precioNum && poNum && poNum > 0
       ? (Math.pow(poNum / precioNum, 1/3) - 1) * 100
       : null;
+    // Fecha entrada: puede venir como "12/02/2024" o Date object
+    const fechaRaw = r[14] ? String(r[14]).trim() : '';
+    let antiguedad = null;
+    if (fechaRaw) {
+      let d;
+      if (fechaRaw.includes('/')) {
+        const parts = fechaRaw.split('/');
+        // formato DD/MM/YYYY
+        d = new Date(parts[2], parts[1]-1, parts[0]);
+      } else if (fechaRaw.match(/Date\((\d+),(\d+),(\d+)\)/)) {
+        const m = fechaRaw.match(/Date\((\d+),(\d+),(\d+)\)/);
+        d = new Date(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+      } else {
+        d = new Date(fechaRaw);
+      }
+      if (!isNaN(d)) {
+        antiguedad = ((new Date() - d) / (1000 * 60 * 60 * 24 * 365.25));
+      }
+    }
     return {
       ticker:    String(r[0]||'').trim(),
       empresa:   fmt(r[1]),
@@ -228,7 +247,10 @@ function parsePosiciones(rows) {
       tieneModelo: r[11] && String(r[11]).trim() === 'Disponible',
       po:        poNum ? fmt(r[12]) : '—',
       cagr3y,
-      resumen:   r[13] ? String(r[13]).trim() : '',
+      geo:       r[13] ? String(r[13]).trim() : '',
+      fechaEntrada: fechaRaw,
+      antiguedad,
+      resumen:   r[15] ? String(r[15]).trim() : '',
     };
   });
 }
@@ -649,16 +671,30 @@ function buildCarteraHTML(pos, nombre, id) {
     const cagrFmt = p.cagr3y !== null ? (p.cagr3y >= 0 ? '+' : '') + p.cagr3y.toFixed(1) + '%' : '—';
     const cagrCls = p.cagr3y !== null ? (p.cagr3y >= 0 ? 'pos' : 'neg') : '';
     const tooltip = p.resumen ? `title="${p.resumen.replace(/"/g, '&quot;')}"` : '';
+    const antFmt = p.antiguedad !== null && p.antiguedad !== undefined
+      ? p.antiguedad < 1 ? p.antiguedad.toFixed(1) + 'a' : p.antiguedad.toFixed(1) + 'a'
+      : '—';
     return `<tr>
       <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
-      <td>${p.moneda}</td><td>${p.ntit}</td><td>${p.precio}</td>
+      <td style="color:var(--text2)">${p.geo || '—'}</td>
+      <td>${p.moneda}</td><td>${p.precio}</td>
       <td style="font-weight:500">${p.po}</td>
       <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
       <td style="font-weight:600">${p.pesoFmt}</td>
+      <td style="color:var(--text2);font-size:11px">${antFmt}</td>
       <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
       <td style="text-align:right">${tL}${mL}</td>
     </tr>`;
   }).join('');
+
+  // Donut geografía
+  const geoMap = {};
+  activos.forEach(p => {
+    if (!p.geo || !p.peso) return;
+    geoMap[p.geo] = (geoMap[p.geo]||0) + p.peso;
+  });
+  const geoLabels = Object.keys(geoMap);
+  const geoVals   = geoLabels.map(g => +geoMap[g].toFixed(1));
 
   return `
 <div class="mgrid" style="margin-bottom:16px">
@@ -689,9 +725,13 @@ function buildCarteraHTML(pos, nombre, id) {
     <div class="ctit">Composición ${nombre}</div>
     <div style="position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
   </div>
-  <div class="cwrap" style="margin-bottom:0;overflow-y:auto;max-height:340px;padding:14px">
-    <div class="ctit">Últimos movimientos</div>
-    ${renderOpsHTML()}
+  <div class="cwrap" style="margin-bottom:0">
+    <div class="ctit">Distribución geográfica</div>
+    <div style="position:relative;height:200px"><canvas id="c-geo-${id}"></canvas></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border);overflow-y:auto;max-height:160px">
+      <div class="ctit" style="margin-bottom:8px">Últimos movimientos</div>
+      ${renderOpsHTML()}
+    </div>
   </div>
 </div>
 <div class="card">
@@ -701,8 +741,8 @@ function buildCarteraHTML(pos, nombre, id) {
   </div>
   <div class="ox"><table>
     <thead><tr>
-      <th style="width:25%;text-align:left">Empresa</th>
-      <th>Moneda</th><th>Nº títulos</th><th>Precio</th><th>P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th>Riesgo</th>
+      <th style="width:22%;text-align:left">Empresa</th>
+      <th>Geografía</th><th>Moneda</th><th>Precio</th><th>P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th>Antigüedad</th><th>Riesgo</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
@@ -753,7 +793,43 @@ function buildCarteraCharts(id, pos) {
     });
   }
 
-  // Placeholder para movimientos — se rellena cuando haya pestaña OPERACIONES
+  // Donut geografía
+  const elG = document.getElementById('c-geo-' + id);
+  if (elG) {
+    const geoMap = {};
+    activos.forEach(p => { if (p.geo && p.peso) geoMap[p.geo] = (geoMap[p.geo]||0) + p.peso; });
+    const geoL = Object.keys(geoMap);
+    const geoV = geoL.map(g => +geoMap[g].toFixed(1));
+    const geoCols = ['#378ADD','#1D9E75','#EF9F27','#D4537E','#533AB7','#D85A30'];
+    CH['g-'+id] = new Chart(elG, {
+      type:'doughnut',
+      data:{ labels:geoL, datasets:[{ data:geoV, backgroundColor:geoCols, borderWidth:2, borderColor:'rgba(255,255,255,0.15)' }] },
+      options:{
+        responsive:true, maintainAspectRatio:false, cutout:'52%',
+        plugins:{
+          legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{size:11}, padding:10 } },
+          tooltip:{ callbacks:{ label:c=>` ${c.label}: ${c.raw.toFixed(1)}%` } }
+        }
+      },
+      plugins:[{
+        id:'geoLabels',
+        afterDraw(chart) {
+          const {ctx, chartArea:{left,right,top,bottom}} = chart;
+          const cx=(left+right)/2, cy=(top+bottom)/2;
+          chart.getDatasetMeta(0).data.forEach((arc,i) => {
+            if (geoV[i] < 8) return;
+            const angle=(arc.startAngle+arc.endAngle)/2;
+            const r=(arc.outerRadius+arc.innerRadius)/2;
+            ctx.save();
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
+            ctx.fillText(geoV[i].toFixed(1)+'%', cx+Math.cos(angle)*r, cy+Math.sin(angle)*r);
+            ctx.restore();
+          });
+        }
+      }]
+    });
+  }
 }
 </script>
 </body>
