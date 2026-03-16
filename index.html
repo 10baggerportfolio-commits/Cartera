@@ -375,33 +375,53 @@ function calcPeriods() {
   const rend = D.rend;
   if (!rend || !rend.length) return null;
 
+  // Factor de ajuste EUR por período: divide rentabilidad USD por variación fx (EUR/USD)
+  // Si el euro sube (fx_fin > fx_ini), rentabilidad en EUR < USD
+  function eurAdj(rentUSD, r) {
+    if (rentUSD === null || !r.fx_ini || !r.fx_fin) return null;
+    return ((1 + rentUSD/100) / (r.fx_fin/r.fx_ini) - 1) * 100;
+  }
+
   function rentPeriodo(r) {
+    const spx = r.spx_ini && r.spx_fin ? ((r.spx_fin/r.spx_ini)-1)*100 : null;
+    const ndx = r.ndx_ini && r.ndx_fin ? ((r.ndx_fin/r.ndx_ini)-1)*100 : null;
     return {
       b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null,
-      spx: r.spx_ini && r.spx_fin ? ((r.spx_fin/r.spx_ini)-1)*100 : null,
-      ndx: r.ndx_ini && r.ndx_fin ? ((r.ndx_fin/r.ndx_ini)-1)*100 : null,
+      spx, ndx,
+      spx_eur: eurAdj(spx, r),
+      ndx_eur: eurAdj(ndx, r),
     };
   }
 
   function acumN(n) {
     const slice = rend.slice(-n);
-    let b10=1, spx=1, ndx=1;
+    let b10=1, spx=1, ndx=1, spxE=1, ndxE=1;
     for (const r of slice) {
       if (r.b10_ini && r.b10_fin) b10 *= r.b10_fin/r.b10_ini;
-      if (r.spx_ini && r.spx_fin) spx *= r.spx_fin/r.spx_ini;
-      if (r.ndx_ini && r.ndx_fin) ndx *= r.ndx_fin/r.ndx_ini;
+      if (r.spx_ini && r.spx_fin) { const f=r.spx_fin/r.spx_ini; spx*=f; if(r.fx_ini&&r.fx_fin) spxE*=f/(r.fx_fin/r.fx_ini); }
+      if (r.ndx_ini && r.ndx_fin) { const f=r.ndx_fin/r.ndx_ini; ndx*=f; if(r.fx_ini&&r.fx_fin) ndxE*=f/(r.fx_fin/r.fx_ini); }
     }
-    return { b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100 };
+    return {
+      b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100,
+      spx_eur:(spxE-1)*100, ndx_eur:(ndxE-1)*100,
+    };
   }
 
   function cagrTotal() {
     const totalDias = rend.reduce((s,r) => s+(r.dias||0), 0);
     const years = totalDias / 365.25;
     const f = rend[0], l = rend[rend.length-1];
+    let spxAcum=1, ndxAcum=1, spxEAcum=1, ndxEAcum=1;
+    for (const r of rend) {
+      if (r.spx_ini&&r.spx_fin) { const v=r.spx_fin/r.spx_ini; spxAcum*=v; if(r.fx_ini&&r.fx_fin) spxEAcum*=v/(r.fx_fin/r.fx_ini); }
+      if (r.ndx_ini&&r.ndx_fin) { const v=r.ndx_fin/r.ndx_ini; ndxAcum*=v; if(r.fx_ini&&r.fx_fin) ndxEAcum*=v/(r.fx_fin/r.fx_ini); }
+    }
     return {
-      b10: f.b10_ini && l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini, 1/years)-1)*100 : null,
-      spx: f.spx_ini && l.spx_fin ? (Math.pow(l.spx_fin/f.spx_ini, 1/years)-1)*100 : null,
-      ndx: f.ndx_ini && l.ndx_fin ? (Math.pow(l.ndx_fin/f.ndx_ini, 1/years)-1)*100 : null,
+      b10: f.b10_ini&&l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini,1/years)-1)*100 : null,
+      spx: (Math.pow(spxAcum,1/years)-1)*100,
+      ndx: (Math.pow(ndxAcum,1/years)-1)*100,
+      spx_eur: (Math.pow(spxEAcum,1/years)-1)*100,
+      ndx_eur: (Math.pow(ndxEAcum,1/years)-1)*100,
     };
   }
 
@@ -429,9 +449,12 @@ function buildRentHTML() {
     `<button class="pbtn${k===curPeriod?' active':''}" onclick="setPeriod('${k}')">${v}</button>`
   ).join('');
 
-  function card(label, val) {
+  function card(label, val, valEur) {
     const cls = val===null ? '' : val>=0 ? 'pos' : 'neg';
-    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div></div>`;
+    const eurLine = valEur !== undefined && valEur !== null
+      ? `<div class="msub" style="color:${valEur>=0?'var(--green)':'var(--red)'}">EUR: ${fmtP(valEur)}</div>`
+      : '';
+    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div>${eurLine}</div>`;
   }
 
   // Años para el gráfico de barras
@@ -441,8 +464,8 @@ function buildRentHTML() {
 <div class="pbtns">${btns}</div>
 <div class="mgrid">
   ${card('10Bagger', p.b10)}
-  ${card('S&P 500', p.spx)}
-  ${card('Nasdaq-100', p.ndx)}
+  ${card('S&P 500', p.spx, p.spx_eur)}
+  ${card('Nasdaq-100', p.ndx, p.ndx_eur)}
 </div>
 <div class="cwrap">
   <div class="ctit">Comparativa — ${labels[curPeriod]||curPeriod}</div>
