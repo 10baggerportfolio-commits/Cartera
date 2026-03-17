@@ -78,6 +78,41 @@ tbody tr:hover td{background:var(--bg3)}
 .spin{display:inline-block;width:11px;height:11px;border:1.5px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ebox{background:var(--abg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
+
+/* ── MOBILE ────────────────────────────────────────────── */
+@media(max-width:640px){
+  .main{padding:12px 12px}
+  .topbar{padding:10px 12px}
+  .brand{font-size:13px}
+  .utime{display:none}
+  .tabs{padding:0 12px}
+  .tab{font-size:12px;padding:8px 12px}
+  .mgrid{grid-template-columns:1fr 1fr!important;gap:8px}
+  .metric{padding:10px 12px}
+  .mval{font-size:18px}
+  .cgrid{grid-template-columns:1fr!important}
+  .cwrap{padding:12px}
+  /* Tabla: scroll horizontal con columnas prioritarias */
+  .ox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:500px;font-size:11px}
+  th,td{padding:7px 10px}
+  /* Ocultar columnas menos importantes en móvil */
+  .col-hide-mobile{display:none}
+  /* Donut panel lateral → debajo en móvil */
+  .donut-wrapper{flex-direction:column!important}
+  .tesis-panel-mobile{width:100%!important;border-left:none!important;border-top:0.5px solid var(--border)!important;max-height:200px!important}
+  /* Gráficos más pequeños */
+  .chart-rent{height:160px!important}
+  /* Cards En desarrollo */
+  .dev-grid{grid-template-columns:1fr!important}
+  /* Botones período */
+  .pbtns{gap:4px}
+  .pbtn{font-size:10px;padding:4px 9px}
+  /* Links más compactos */
+  .ilink{font-size:10px;padding:0 6px;height:20px}
+  /* Topbar compacto */
+  .bsm{font-size:11px;padding:4px 8px}
+}
 </style>
 </head>
 <body>
@@ -496,7 +531,7 @@ function buildRentHTML() {
 </div>
 <div class="cwrap">
   <div class="ctit">Comparativa — ${labels[curPeriod]||curPeriod}</div>
-  <div style="position:relative;height:200px"><canvas id="c-comp"></canvas></div>
+  <div class="chart-rent" style="position:relative;height:200px"><canvas id="c-comp"></canvas></div>
 </div>
 <div class="cwrap">
   <div class="ctit">Rentabilidad anual por año</div>
@@ -505,7 +540,7 @@ function buildRentHTML() {
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#B4B2A9;display:inline-block"></span>S&P 500</span>
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#D3D1C7;display:inline-block"></span>Nasdaq-100</span>
   </div>
-  <div style="position:relative;height:220px"><canvas id="c-anual"></canvas></div>
+  <div class="chart-rent" style="position:relative;height:220px"><canvas id="c-anual"></canvas></div>
 </div>`;
 }
 
@@ -689,7 +724,7 @@ function buildDevHTML(items) {
     <div style="font-size:13px;font-weight:600">${items.length} publicaciones en preparación</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">${resumen}</div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+  <div class="dev-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
     ${cards}
   </div>
 </div>`;
@@ -772,12 +807,12 @@ function buildCarteraHTML(pos, nombre, id) {
       : '—';
     return `<tr>
       <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
-      <td style="color:var(--text2)">${p.geo || '—'}</td>
-      <td>${p.moneda}</td><td>${p.precio}</td>
-      <td style="font-weight:500">${p.po}</td>
+      <td class="col-hide-mobile" style="color:var(--text2)">${p.geo || '—'}</td>
+      <td class="col-hide-mobile">${p.moneda}</td><td class="col-hide-mobile">${p.precio}</td>
+      <td class="col-hide-mobile" style="font-weight:500">${p.po}</td>
       <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
       <td style="font-weight:600">${p.pesoFmt}</td>
-      <td style="color:var(--text2);font-size:11px">${antFmt}</td>
+      <td class="col-hide-mobile" style="color:var(--text2);font-size:11px">${antFmt}</td>
       <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
       <td style="text-align:right">${tL}${mL}</td>
     </tr>`;
@@ -819,9 +854,9 @@ function buildCarteraHTML(pos, nombre, id) {
 <div class="cgrid">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
-    <div style="display:flex;gap:0;align-items:stretch">
+    <div class="donut-wrapper" style="display:flex;gap:0;align-items:stretch">
       <div style="flex:1;position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
-      <div id="tesis-panel-${id}" style="display:none;width:220px;padding:14px 14px 14px 12px;border-left:0.5px solid var(--border);overflow-y:auto;max-height:340px"></div>
+      <div id="tesis-panel-${id}" class="tesis-panel-mobile" style="display:none;width:220px;padding:14px 14px 14px 12px;border-left:0.5px solid var(--border);overflow-y:auto;max-height:340px"></div>
     </div>
     <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Haz clic en un segmento para ver la tesis</div>
   </div>
@@ -842,7 +877,7 @@ function buildCarteraHTML(pos, nombre, id) {
   <div class="ox"><table>
     <thead><tr>
       <th style="width:22%;text-align:left">Empresa</th>
-      <th>Geografía</th><th>Moneda</th><th>Precio</th><th>P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th>Antigüedad</th><th>Riesgo</th>
+      <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th class="col-hide-mobile">Antigüedad</th><th>Riesgo</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
