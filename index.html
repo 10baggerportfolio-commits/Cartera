@@ -852,11 +852,12 @@ function buildCarteraCharts(id, pos) {
   // Donut con labels dentro
   const elD = document.getElementById(`c-donut-${id}`);
   if (elD && activos.length) {
+    const activosSorted = [...activos].sort((a,b) => b.peso - a.peso);
     CH[`d-${id}`] = new Chart(elD, {
       type:'doughnut',
       data:{
-        labels: activos.map(p=>p.ticker.split(':').pop()),
-        datasets:[{data:activos.map(p=>p.peso), backgroundColor:COLS, borderWidth:2, borderColor:'rgba(255,255,255,0.15)'}]
+        labels: activosSorted.map(p=>p.ticker.split(':').pop()),
+        datasets:[{data:activosSorted.map(p=>p.peso), backgroundColor:COLS, borderWidth:2, borderColor:'rgba(255,255,255,0.15)'}]
       },
       options:{
         responsive:true, maintainAspectRatio:false, cutout:'52%',
@@ -872,16 +873,16 @@ function buildCarteraCharts(id, pos) {
           const cx=(left+right)/2, cy=(top+bottom)/2;
           const meta = chart.getDatasetMeta(0);
           meta.data.forEach((arc,i) => {
-            if (activos[i].peso < 3.5) return;
+            if (activosSorted[i].peso < 3.5) return;
             const angle = (arc.startAngle+arc.endAngle)/2;
             const r = (arc.outerRadius+arc.innerRadius)/2;
             const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
             ctx.save();
             ctx.textAlign='center'; ctx.textBaseline='middle';
             ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
-            ctx.fillText(activos[i].ticker.split(':').pop(), x, y-6);
+            ctx.fillText(activosSorted[i].ticker.split(':').pop(), x, y-6);
             ctx.font='10px -apple-system,sans-serif';
-            ctx.fillText(activos[i].peso.toFixed(1)+'%', x, y+6);
+            ctx.fillText(activosSorted[i].peso.toFixed(1)+'%', x, y+6);
             ctx.restore();
           });
         }
