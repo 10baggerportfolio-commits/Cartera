@@ -819,7 +819,11 @@ function buildCarteraHTML(pos, nombre, id) {
 <div class="cgrid">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
-    <div style="position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
+    <div style="display:flex;gap:0;align-items:stretch">
+      <div style="flex:1;position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
+      <div id="tesis-panel-${id}" style="display:none;width:220px;padding:14px 14px 14px 12px;border-left:0.5px solid var(--border);overflow-y:auto;max-height:340px"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Haz clic en un segmento para ver la tesis</div>
   </div>
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Distribución geográfica</div>
@@ -853,6 +857,31 @@ function buildCarteraCharts(id, pos) {
   const elD = document.getElementById(`c-donut-${id}`);
   if (elD && activos.length) {
     const activosSorted = [...activos].sort((a,b) => b.peso - a.peso);
+
+    const donutClick = (evt) => {
+      const chart = CH[`d-${id}`];
+      if (!chart) return;
+      const pts = chart.getElementsAtEventForMode(evt, 'nearest', {intersect:true}, false);
+      if (!pts.length) return;
+      const idx = pts[0].index;
+      const pos = activosSorted[idx];
+      const panel = document.getElementById('tesis-panel-' + id);
+      if (!panel || !pos.resumen) return;
+      const tL = pos.urlTesis ? `<a href="${pos.urlTesis}" target="_blank" class="ilink ilink-tesis" style="margin-top:8px;display:inline-flex">✍ Tesis completa</a>` : '';
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:13px;font-weight:700">${pos.empresa.split(' ').slice(0,2).join(' ')}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">${pos.ticker} · ${pos.pesoFmt}</div>
+          </div>
+          <button onclick="document.getElementById('tesis-panel-${id}').style.display='none'"
+            style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0">×</button>
+        </div>
+        <div style="font-size:11px;line-height:1.7;color:var(--text2)">${pos.resumen}</div>
+        <div style="margin-top:12px">${tL}</div>`;
+    };
+
     CH[`d-${id}`] = new Chart(elD, {
       type:'doughnut',
       data:{
@@ -861,9 +890,13 @@ function buildCarteraCharts(id, pos) {
       },
       options:{
         responsive:true, maintainAspectRatio:false, cutout:'52%',
+        onClick: donutClick,
         plugins:{
           legend:{display:false},
-          tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toFixed(1)}%`}}
+          tooltip:{callbacks:{label:c=>{
+            const p = activosSorted[c.dataIndex];
+            return ` ${c.label}: ${c.raw.toFixed(1)}%${p && p.resumen ? ' · clic para tesis' : ''}`;
+          }}}
         }
       },
       plugins:[{
