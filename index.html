@@ -449,9 +449,12 @@ function parsePM(rows) {
 // ── POPUP DETALLE ─────────────────────────────────────────────
 function showDetalle(ticker, empresa, precioNum) {
   // Buscar datos PM por ticker o empresa
-  const key = ticker.split(':').pop().toLowerCase();
+  const key = ticker.split(':').pop().toLowerCase().trim();
   const keyEmpresa = empresa.trim().toLowerCase();
-  const pm = D.pm[key] || D.pm[keyEmpresa] || null;
+  const pm = D.pm[key] || D.pm[keyEmpresa] ||
+    Object.values(D.pm).find(v => v.ticker && v.ticker.toLowerCase().trim() === key) ||
+    Object.values(D.pm).find(v => v.empresa && v.empresa.toLowerCase().trim() === keyEmpresa) ||
+    null;
 
   const overlay = document.createElement('div');
   overlay.className = 'pm-overlay';
