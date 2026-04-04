@@ -504,6 +504,19 @@ function showDetalle(ticker, empresa, precioNum) {
         <div class="pm-row"><span class="pm-lbl">Total recuperado</span><span class="pm-val">${fmtE(Math.abs(pm.totalRecuperado))}</span></div>
         <div class="pm-row"><span class="pm-lbl">Dinero neto en juego</span><span class="pm-val ${pm.dineroNeto<=0?'pos':'neg'}">${fmtE(pm.dineroNeto)}</span></div>
         <div class="pm-row" style="margin-top:4px"><span class="pm-lbl">Estado</span>${tagHTML}</div>
+        ${(() => {
+          const compras = pm.ops.filter(o => o.tipo === 'Compra');
+          const ventas  = pm.ops.filter(o => o.tipo === 'Venta');
+          if (!compras.length || !ventas.length) return '';
+          const minCompra = Math.min(...compras.map(o => o.precio));
+          const maxVenta  = Math.max(...ventas.map(o => o.precio));
+          const multiplo  = maxVenta / minCompra;
+          const pct       = (multiplo - 1) * 100;
+          return '<div style="border-top:0.5px solid var(--border);padding-top:8px;margin-top:8px">'
+            + '<div class="pm-row"><span class="pm-lbl" style="font-weight:700">Mejor operación</span><span class="pm-val pos" style="font-size:15px">' + multiplo.toFixed(2) + 'x (+' + pct.toFixed(0) + '%)</span></div>'
+            + '<div class="pm-row" style="margin-top:2px"><span style="font-size:11px;color:var(--text3)">Mín. compra ' + minCompra.toFixed(2) + ' € → Máx. venta ' + maxVenta.toFixed(2) + ' €</span></div>'
+            + '</div>';
+        })()}
       </div>
       <div class="pm-section">
         <div class="pm-section-title">Operaciones (${pm.ops.length})</div>
