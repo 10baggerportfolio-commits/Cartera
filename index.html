@@ -782,9 +782,10 @@ function buildCarteraHTML(pos, nombre, id) {
       <td class="col-hide-mobile" style="font-weight:500">${p.po}</td>
       <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
       <td style="font-weight:600">${p.pesoFmt}</td>
+      <td class="col-hide-mobile" style="text-align:right">${detBtn}</td>
       <td class="col-hide-mobile" style="color:var(--text2);font-size:11px">${antFmt}</td>
       <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
-      <td style="text-align:right">${tL}${mL}${detBtn}</td>
+      <td style="text-align:right">${tL}${mL}</td>
     </tr>`;
   }).join('');
 
@@ -821,7 +822,7 @@ function buildCarteraHTML(pos, nombre, id) {
     <thead><tr>
       <th style="width:22%;text-align:left">Empresa</th>
       <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th>
-      <th>CAGR 3a</th><th>Peso</th><th class="col-hide-mobile">Antigüedad</th><th>Riesgo</th>
+      <th>CAGR 3a</th><th>Peso</th><th class="col-hide-mobile">Detalle</th><th class="col-hide-mobile">Antigüedad</th><th>Riesgo</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
