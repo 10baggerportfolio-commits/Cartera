@@ -491,7 +491,6 @@ function showDetalle(ticker, empresa, precioNum) {
         <div class="pm-row"><span class="pm-lbl">Precio medio móvil</span><span class="pm-val" style="color:var(--text2)">${pm.pmMovil ? pm.pmMovil.toFixed(2)+' €' : '—'}</span></div>
         <div class="pm-row"><span class="pm-lbl">Precio actual</span><span class="pm-val">${precioNum ? precioNum.toFixed(2)+' €' : '—'}</span></div>
         ${latente !== null ? `
-        <div class="pm-row"><span class="pm-lbl">Ganancia latente</span><span class="pm-val ${latente>=0?'pos':'neg'}">${fmtE(latente)} (${fmtP(latenteP)})</span></div>
         <div class="pm-row"><span class="pm-lbl">Valor cartera actual</span><span class="pm-val">${fmtE(Math.abs(precioNum * pm.titulosActuales))}</span></div>` : ''}
       </div>
       <div class="pm-section">
