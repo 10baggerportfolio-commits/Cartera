@@ -861,7 +861,8 @@ function buildCarteraHTML(pos, nombre, id) {
     // Botón detalle — azul si tiene datos PM, gris si no
     const pmKey = p.ticker.split(':').pop().toLowerCase();
     const hasPM = !!(D.pm[pmKey] || D.pm[p.empresa.trim().toLowerCase()]);
-    const detBtn = `<button class="det-btn${hasPM?' has-data':''}" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\\'")}',${p.precioNum||'null'})">📊 Detalle</button>`;
+    const precioDetalle = p.precioEur || p.precioNum || null;
+    const detBtn = `<button class="det-btn${hasPM?' has-data':''}" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\\'")}',${precioDetalle||'null'})">📊 Detalle</button>`;
     return `<tr>
       <td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
       <td class="col-hide-mobile" style="color:var(--text2)">${p.geo||'—'}</td>
