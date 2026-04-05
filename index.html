@@ -829,8 +829,8 @@ function buildContribHTML() {
   if (!conDatos.length) return '<div style="font-size:11px;color:var(--text3);font-style:italic;padding:8px 0">Sin datos en PRECIO_MEDIO</div>';
 
   const sorted = [...conDatos].sort((a,b) => b.totalCombinado - a.totalCombinado);
-  const top6   = sorted.slice(0, 6);
-  const bot6   = [...conDatos].sort((a,b) => a.totalCombinado - b.totalCombinado).slice(0, 6);
+  const top8   = sorted.slice(0, 8);
+  const bot8   = [...conDatos].sort((a,b) => a.totalCombinado - b.totalCombinado).slice(0, 8);
 
   function row(item) {
     const cls = item.totalCombinado >= 0 ? 'pos' : 'neg';
@@ -843,12 +843,16 @@ function buildContribHTML() {
 
   return `
     <div style="margin-bottom:10px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);margin-bottom:4px">▲ Top 5 que más aportan</div>
-      ${top6.map(row).join('')}
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);margin-bottom:4px">▲ Top 8 que más aportan</div>
+      <div style="overflow-y:auto;max-height:155px;scrollbar-width:thin;">
+        ${top8.map(row).join('')}
+      </div>
     </div>
     <div>
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--red);margin-bottom:4px">▼ Top 5 que menos aportan</div>
-      ${bot6.map(row).join('')}
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--red);margin-bottom:4px">▼ Top 8 que menos aportan</div>
+      <div style="overflow-y:auto;max-height:155px;scrollbar-width:thin;">
+        ${bot8.map(row).join('')}
+      </div>
     </div>`;
 }
 
