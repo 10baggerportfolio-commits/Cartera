@@ -803,7 +803,7 @@ function buildEstudiadosHTML(pos) {
     const pmKeyEst = p.ticker.split(':').pop().toLowerCase();
     const hasPMEst = !!(D.pm[pmKeyEst] || D.pm[p.empresa.trim().toLowerCase()]);
     const precioDetalleEst = p.precioEur || p.precioNum || null;
-    const detBtnEst = `<button class="det-btn${hasPMEst?' has-data':''}" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\'")}',${precioDetalleEst||'null'},false)">📊 Detalle</button>`;
+    const detBtnEst = hasPMEst ? `<button class="det-btn has-data" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\'")}',${precioDetalleEst||'null'},false)">📊 Detalle</button>` : '';
     return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td>${p.moneda}</td><td>${p.precio}</td><td style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td style="text-align:right">${detBtnEst}</td><td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}</td></tr>`;
   }).join('');
   return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th><th>CAGR 3a</th><th style="text-align:right">Detalle</th><th>Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
@@ -881,7 +881,7 @@ function buildCarteraHTML(pos, nombre, id) {
     const pmKey = p.ticker.split(':').pop().toLowerCase();
     const hasPM = !!(D.pm[pmKey] || D.pm[p.empresa.trim().toLowerCase()]);
     const precioDetalle = p.precioEur || p.precioNum || null;
-    const detBtn = `<button class="det-btn${hasPM?' has-data':''}" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\\'")}',${precioDetalle||'null'},true)">📊 Detalle</button>`;
+    const detBtn = hasPM ? `<button class="det-btn has-data" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\\'")}',${precioDetalle||'null'},true)">📊 Detalle</button>` : '';
     return `<tr>
       <td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
       <td class="col-hide-mobile" style="color:var(--text2)">${p.geo||'—'}</td>
