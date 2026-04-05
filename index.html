@@ -733,13 +733,15 @@ function buildRentCharts() {
 function renderOpsHTML() {
   const ops = D.ops || [];
   if (!ops.length) return '<div style="color:var(--text3);font-size:12px;padding:.5rem 0">Sin operaciones registradas</div>';
-  const tipoCls = {'APERTURA':'op-ap','CIERRE':'op-ci','AUMENTO':'op-au','RECORTE':'op-re'};
+  const esAlcista = t => ['APERTURA','AUMENTO'].includes(t);
   return ops.slice(0,20).map(o => {
-    const cls = tipoCls[o.tipo] || 'op-re';
-    return `<div style="display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
-      <span class="${cls}" style="text-align:center;width:72px">${o.tipo}</span>
+    const alcista = esAlcista(o.tipo);
+    const triangulo = alcista ? '▲' : '▼';
+    const color = alcista ? 'var(--green)' : 'var(--red)';
+    return `<div style="display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <span style="font-size:14px;color:${color};text-align:center;font-weight:700">${triangulo}</span>
       <div style="min-width:0"><div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div><div style="font-size:10px;color:var(--text3)">${o.ticker} · ${o.fecha}</div></div>
-      <div style="text-align:right;flex-shrink:0;min-width:90px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:1px">Precio</div><div style="font-size:12px;font-weight:600">${o.precio}</div><div style="font-size:10px;color:var(--text2)">Δ ${o.cambio}</div></div>
+      <div style="text-align:right;flex-shrink:0;min-width:90px"><div style="font-size:12px;font-weight:600">${o.precio}</div><div style="font-size:10px;color:var(--text2)">Δ ${o.cambio}</div></div>
     </div>`;
   }).join('');
 }
