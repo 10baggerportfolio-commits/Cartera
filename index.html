@@ -869,7 +869,7 @@ function buildCarteraHTML(pos, nombre, id) {
   ${liq?`<div class="metric"><div class="mlbl">Liquidez</div><div class="mval">${liq.pesoFmt}</div><div class="msub">${activos.length} posiciones activas</div></div>`:''}
   <div class="metric"><div class="mlbl">Riesgo medio ponderado</div><div class="mval">${(()=>{const conR=activos.filter(p=>p.riesgo!=='—'&&p.peso>0);const pt=conR.reduce((s,p)=>s+p.peso,0);return pt>0?(conR.reduce((s,p)=>s+(parseInt(p.riesgo)||0)*(p.peso/pt),0)).toFixed(1):'—';})()}<span style="font-size:13px;font-weight:400">/10</span></div><div class="msub">ponderado por peso</div></div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 260px 220px;gap:14px;margin-bottom:16px">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:16px">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
     <div class="donut-wrapper" style="display:flex;gap:0;align-items:stretch">
