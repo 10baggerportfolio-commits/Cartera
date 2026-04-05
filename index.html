@@ -285,7 +285,7 @@ function parsePosiciones(rows) {
       ntit:      fmt(r[3]),
       precio:    fmt(r[4]),
       precioNum,
-      precioEur: r[18] ? (typeof r[18]==='number' ? r[18] : toNum(r[18])) : null,
+      precioEur: r[18] ? (typeof r[18]==='number' ? r[18] : toNum(r[18])) : (r[13] && typeof r[13]==='number' ? r[13] : null),
       peso:      typeof r[7]==='number' ? r[7]*100 : toNum(r[7]),
       pesoFmt:   typeof r[7]==='number' ? (r[7]*100).toFixed(1)+'%' : fmt(r[7]),
       riesgo:    r[9] ? String(r[9]).trim() : '—',
@@ -797,7 +797,11 @@ function buildEstudiadosHTML(pos) {
     const cagrFmt=p.cagr3y!==null?(p.cagr3y>=0?'+':'')+p.cagr3y.toFixed(1)+'%':'—';
     const cagrCls=p.cagr3y!==null?(p.cagr3y>=0?'pos':'neg'):'';
     const tooltip=p.resumen?`title="${p.resumen.replace(/"/g,'&quot;')}"` :'';
-    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td>${p.moneda}</td><td>${p.precio}</td><td style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}</td></tr>`;
+    const pmKeyEst = p.ticker.split(':').pop().toLowerCase();
+    const hasPMEst = !!(D.pm[pmKeyEst] || D.pm[p.empresa.trim().toLowerCase()]);
+    const precioDetalleEst = p.precioEur || p.precioNum || null;
+    const detBtnEst = `<button class="det-btn${hasPMEst?' has-data':''}" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\'")}',${precioDetalleEst||'null'})">📊 Detalle</button>`;
+    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td>${p.moneda}</td><td>${p.precio}</td><td style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}${detBtnEst}</td></tr>`;
   }).join('');
   return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th><th>CAGR 3a</th><th>Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
@@ -810,6 +814,14 @@ function buildContribHTML() {
     if (seen.has(v.empresa)) return false;
     seen.add(v.empresa);
     return true;
+  });
+  // Incluir también valores de Estudiados que tengan precio en el mapa
+  [...(D.est||[])].forEach(p => {
+    if (!seen.has(p.empresa)) {
+      const key = p.ticker.split(':').pop().toLowerCase();
+      const pm = D.pm[key] || D.pm[p.empresa.trim().toLowerCase()];
+      if (pm) { seen.add(p.empresa); items.push(pm); }
+    }
   });
   const conDatos = items.filter(i => i.totalCombinado !== null && i.totalCombinado !== undefined);
   if (!conDatos.length) return '<div style="font-size:11px;color:var(--text3);font-style:italic;padding:8px 0">Sin datos en PRECIO_MEDIO</div>';
