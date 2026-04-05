@@ -285,6 +285,7 @@ function parsePosiciones(rows) {
       ntit:      fmt(r[3]),
       precio:    fmt(r[4]),
       precioNum,
+      precioEur: r[18] ? (typeof r[18]==='number' ? r[18] : toNum(r[18])) : null,
       peso:      typeof r[7]==='number' ? r[7]*100 : toNum(r[7]),
       pesoFmt:   typeof r[7]==='number' ? (r[7]*100).toFixed(1)+'%' : fmt(r[7]),
       riesgo:    r[9] ? String(r[9]).trim() : '—',
@@ -572,10 +573,12 @@ async function loadAll() {
     // Cruzar D.pm con precios actuales de pos10b y est para calcular totalCombinado
     const precioMap = {};
     [...(D.pos10b||[]), ...(D.est||[])].forEach(p => {
-      if (p.ticker && p.precioNum) {
-        precioMap[p.ticker.toLowerCase()] = p.precioNum;
-        precioMap[p.ticker.split(':').pop().toLowerCase()] = p.precioNum;
-        precioMap[p.empresa.trim().toLowerCase()] = p.precioNum;
+      // Usar precioEur si existe, si no usar precioNum (que puede ser en moneda local)
+      const precio = p.precioEur || p.precioNum;
+      if (p.ticker && precio) {
+        precioMap[p.ticker.toLowerCase()] = precio;
+        precioMap[p.ticker.split(':').pop().toLowerCase()] = precio;
+        precioMap[p.empresa.trim().toLowerCase()] = precio;
       }
     });
     Object.values(D.pm).forEach(pm => {
