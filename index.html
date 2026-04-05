@@ -299,6 +299,7 @@ function parsePosiciones(rows) {
       fechaEntrada: fechaRaw,
       antiguedad,
       resumen:   r[15] ? String(r[15]).trim() : '',
+      ocultar:   r[14] ? ['si','1','true','yes'].includes(String(r[14]).trim().toLowerCase()) : false,
     };
   });
 }
@@ -788,7 +789,7 @@ function buildDevHTML(items) {
 
 // ── ESTUDIADOS HTML ──────────────────────────────────────────
 function buildEstudiadosHTML(pos) {
-  const activos = (pos||[]).filter(p => p.ticker && p.ticker !== 'LIQUIDEZ' && p.empresa !== '—');
+  const activos = (pos||[]).filter(p => p.ticker && p.ticker !== 'LIQUIDEZ' && p.empresa !== '—' && !p.ocultar);
   if (!activos.length) return '<div class="ebox">Sin datos en la pestaña ESTUDIADOS del sheet.</div>';
   const conCagr = activos.filter(p => p.cagr3y !== null && p.cagr3y !== undefined);
   const rows = activos.map(p => {
