@@ -372,8 +372,11 @@ function parsePM(rows) {
     const ticker  = String(r[1]||'').trim();
     const fecha   = String(r[2]||'').trim();
     const tipo    = String(r[3]||'').trim().toLowerCase();
-    const titulos = typeof r[4]==='number' ? r[4] : toNum(r[4]);
-    const precio  = typeof r[5]==='number' ? r[5] : toNum(r[5]);
+    const titulos  = typeof r[4]==='number' ? r[4] : toNum(r[4]);
+    const precioRaw = typeof r[5]==='number' ? r[5] : toNum(r[5]);
+    const importeEur = r[6] ? (typeof r[6]==='number' ? r[6] : toNum(r[6])) : null;
+    // Si hay importe en €, calcular precio efectivo en € para el FIFO
+    const precio = importeEur && titulos ? importeEur / titulos : precioRaw;
     if (!empresa || empresa === 'Empresa' || !titulos || !precio) return;
     const esCompra = tipo.includes('compra') || tipo.includes('apertura') || tipo.includes('aumento');
     const esVenta  = tipo.includes('venta')  || tipo.includes('cierre')   || tipo.includes('recorte');
