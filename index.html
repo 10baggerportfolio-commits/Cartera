@@ -801,9 +801,9 @@ function buildEstudiadosHTML(pos) {
     const hasPMEst = !!(D.pm[pmKeyEst] || D.pm[p.empresa.trim().toLowerCase()]);
     const precioDetalleEst = p.precioEur || p.precioNum || null;
     const detBtnEst = `<button class="det-btn${hasPMEst?' has-data':''}" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\'")}',${precioDetalleEst||'null'})">📊 Detalle</button>`;
-    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td>${p.moneda}</td><td>${p.precio}</td><td style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}${detBtnEst}</td></tr>`;
+    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td>${p.moneda}</td><td>${p.precio}</td><td style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td style="text-align:right">${detBtnEst}</td><td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}</td></tr>`;
   }).join('');
-  return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th><th>CAGR 3a</th><th>Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th><th>CAGR 3a</th><th style="text-align:right">Detalle</th><th>Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 // ── CONTRIBUCIÓN HTML ────────────────────────────────────────
@@ -827,14 +827,14 @@ function buildContribHTML() {
   if (!conDatos.length) return '<div style="font-size:11px;color:var(--text3);font-style:italic;padding:8px 0">Sin datos en PRECIO_MEDIO</div>';
 
   const sorted = [...conDatos].sort((a,b) => b.totalCombinado - a.totalCombinado);
-  const top5   = sorted.slice(0, 5);
-  const bot5   = [...conDatos].sort((a,b) => a.totalCombinado - b.totalCombinado).slice(0, 5);
+  const top6   = sorted.slice(0, 6);
+  const bot6   = [...conDatos].sort((a,b) => a.totalCombinado - b.totalCombinado).slice(0, 6);
 
   function row(item) {
     const cls = item.totalCombinado >= 0 ? 'pos' : 'neg';
     const val = item.totalCombinado >= 0 ? '+' : '';
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border)">
-      <span style="font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%">${item.empresa.split(' ').slice(0,2).join(' ')}</span>
+      <span style="font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%">${item.empresa.length > 14 ? item.empresa.substring(0,14).trim() + '…' : item.empresa}</span>
       <span style="font-size:12px;font-weight:700" class="${cls}">${val}${Math.round(item.totalCombinado).toLocaleString('es-ES')} €</span>
     </div>`;
   }
@@ -842,11 +842,11 @@ function buildContribHTML() {
   return `
     <div style="margin-bottom:10px">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);margin-bottom:4px">▲ Top 5 que más aportan</div>
-      ${top5.map(row).join('')}
+      ${top6.map(row).join('')}
     </div>
     <div>
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--red);margin-bottom:4px">▼ Top 5 que menos aportan</div>
-      ${bot5.map(row).join('')}
+      ${bot6.map(row).join('')}
     </div>`;
 }
 
