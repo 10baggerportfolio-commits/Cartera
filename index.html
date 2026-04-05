@@ -82,6 +82,7 @@ tbody tr:hover td{background:var(--bg3)}
 /* ── POPUP DETALLE ─────────────────────────────────────── */
 .pm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
 .pm-box{background:var(--bg2);border-radius:var(--r);width:100%;max-width:460px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.pm-overlay{padding:12px}
 .pm-box-header{padding:16px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
 .pm-box-title{font-size:15px;font-weight:700;letter-spacing:-0.3px}
 .pm-box-sub{font-size:11px;color:var(--text3);margin-top:2px}
@@ -115,10 +116,10 @@ tbody tr:hover td{background:var(--bg3)}
   .metric{padding:10px 12px}
   .mval{font-size:18px}
   .cgrid{grid-template-columns:1fr!important}
-  [style*="grid-template-columns:1fr 200px 1fr"]{grid-template-columns:1fr!important}
+  [style*="grid-template-columns:2fr 1fr 1fr"]{grid-template-columns:1fr!important}
   .cwrap{padding:12px}
   .ox{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:500px;font-size:11px}
+  table{min-width:320px;font-size:11px}
   th,td{padding:7px 10px}
   .col-hide-mobile{display:none}
   .donut-wrapper{flex-direction:column!important}
@@ -804,9 +805,9 @@ function buildEstudiadosHTML(pos) {
     const hasPMEst = !!(D.pm[pmKeyEst] || D.pm[p.empresa.trim().toLowerCase()]);
     const precioDetalleEst = p.precioEur || p.precioNum || null;
     const detBtnEst = hasPMEst ? `<button class="det-btn has-data" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\'")}',${precioDetalleEst||'null'},false)">📊 Detalle</button>` : '';
-    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td>${p.moneda}</td><td>${p.precio}</td><td style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td style="text-align:right">${detBtnEst}</td><td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}</td></tr>`;
+    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td class="col-hide-mobile">${p.moneda}</td><td class="col-hide-mobile">${p.precio}</td><td class="col-hide-mobile" style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td style="text-align:right">${detBtnEst}</td><td class="col-hide-mobile">${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}</td></tr>`;
   }).join('');
-  return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th><th>CAGR 3a</th><th style="text-align:right">Detalle</th><th>Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio actual</th><th class="col-hide-mobile">P.O. 3a</th><th>CAGR 3a</th><th style="text-align:right">Detalle</th><th class="col-hide-mobile">Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 // ── CONTRIBUCIÓN HTML ────────────────────────────────────────
@@ -889,10 +890,10 @@ function buildCarteraHTML(pos, nombre, id) {
       <td class="col-hide-mobile">${p.precio}</td>
       <td class="col-hide-mobile" style="font-weight:500">${p.po}</td>
       <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
-      <td style="font-weight:600">${p.pesoFmt}</td>
-      <td class="col-hide-mobile" style="text-align:right">${detBtn}</td>
+      <td style="text-align:right">${detBtn}</td>
+      <td class="col-hide-mobile" style="font-weight:600">${p.pesoFmt}</td>
       <td class="col-hide-mobile" style="color:var(--text2);font-size:11px">${antFmt}</td>
-      <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
+      <td class="col-hide-mobile">${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
       <td style="text-align:right">${tL}${mL}</td>
     </tr>`;
   }).join('');
@@ -932,7 +933,7 @@ function buildCarteraHTML(pos, nombre, id) {
     <thead><tr>
       <th style="width:22%;text-align:left">Empresa</th>
       <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th>
-      <th>CAGR 3a</th><th>Peso</th><th class="col-hide-mobile">Detalle</th><th class="col-hide-mobile">Antigüedad</th><th>Riesgo</th>
+      <th>CAGR 3a</th><th>Detalle</th><th class="col-hide-mobile">Peso</th><th class="col-hide-mobile">Antigüedad</th><th class="col-hide-mobile">Riesgo</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
