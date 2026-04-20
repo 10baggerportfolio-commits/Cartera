@@ -415,8 +415,10 @@ async function loadAll() {
 // ── TABS ─────────────────────────────────────────────────────
 function showTab(tab) {
   CUR = tab;
-  document.querySelectorAll('.tab').forEach((el,i) =>
-    el.classList.toggle('active', ['rent','10b','qh'][i] === tab));
+  document.querySelectorAll('.tab').forEach(el => {
+    const m = el.getAttribute('onclick') && el.getAttribute('onclick').match(/showTab\('([^']+)'\)/);
+    el.classList.toggle('active', m && m[1] === tab);
+  });
   killCharts();
   const mc = document.getElementById('mc');
   if (tab === 'rent') {
@@ -694,10 +696,36 @@ function buildDevHTML(items) {
       const notaBadge = r.notas
         ? `<span style="font-size:10px;background:var(--abg);color:var(--amber);padding:1px 6px;border-radius:8px;margin-left:6px">${r.notas}</span>`
         : '';
+
+      // Cuenta atrás solo para fechas exactas
+      let countdownBadge = '';
+      if (esExacta) {
+        let fechaDate;
+        if (r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+          const [d,m,y] = r.fecha.split('/');
+          fechaDate = new Date(y, m-1, d);
+        } else {
+          fechaDate = new Date(r.fecha);
+        }
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        fechaDate.setHours(0,0,0,0);
+        const dias = Math.round((fechaDate - hoy) / (1000*60*60*24));
+        if (dias === 0) {
+          countdownBadge = `<span style="font-size:10px;background:var(--gbg);color:var(--green);padding:1px 8px;border-radius:8px;font-weight:700;margin-left:6px">¡Hoy!</span>`;
+        } else if (dias > 0) {
+          const col = dias <= 7 ? 'var(--amber)' : dias <= 30 ? 'var(--blue)' : 'var(--text3)';
+          const bg  = dias <= 7 ? 'var(--abg)'   : dias <= 30 ? 'var(--bbg)'  : 'var(--bg3)';
+          countdownBadge = `<span style="font-size:10px;background:${bg};color:${col};padding:1px 8px;border-radius:8px;font-weight:600;margin-left:6px">${dias}d</span>`;
+        } else {
+          countdownBadge = `<span style="font-size:10px;background:var(--bg3);color:var(--text3);padding:1px 8px;border-radius:8px;margin-left:6px">Publicado</span>`;
+        }
+      }
+
       return `<tr>
         <td style="font-weight:600">${r.empresa}<span class="tsub">${r.ticker}</span></td>
         <td style="${fechaStyle};text-align:right">
-          ${esExacta ? '📅' : '~'} ${r.fecha}${notaBadge}
+          ${esExacta ? '📅' : '~'} ${r.fecha}${countdownBadge}${notaBadge}
         </td>
       </tr>`;
     }).join('');
