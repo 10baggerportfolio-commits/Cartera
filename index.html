@@ -647,7 +647,7 @@ function parseDev(rows) {
     .map(r => ({
       ticker:   String(r[0]||'').replace('$','').trim().toUpperCase(),
       empresa:  String(r[1]||'').trim(),
-      estado:   String(r[2]||'').trim(),
+      estado:   String(r[2]||'').trim(), // 10Bagger | Quality Hold | Ambas | Seguimiento
       fecha:    String(r[3]||'').trim(),
       notas:    String(r[4]||'').trim(),
     })).filter(r => r.empresa);
@@ -722,8 +722,22 @@ function buildDevHTML(items) {
         }
       }
 
+      // Situación badge
+      const sitMap = {
+        '10Bagger':    '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:700;title:10Bagger">B</span>',
+        'Quality Hold':'<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#faeeda;color:#854f0b;font-size:10px;font-weight:700">Q</span>',
+        'Ambas':       '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:700">B</span><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#faeeda;color:#854f0b;font-size:10px;font-weight:700;margin-left:2px">Q</span>',
+        'Seguimiento': '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--bg3);color:var(--text3);font-size:10px;font-weight:700">S</span>',
+      };
+      const sitBadge = sitMap[r.estado] || '';
+
       return `<tr>
-        <td style="font-weight:600">${r.empresa}<span class="tsub">${r.ticker}</span></td>
+        <td style="font-weight:600">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="display:flex;gap:2px">${sitBadge}</div>
+            <div>${r.empresa}<span class="tsub">${r.ticker}</span></div>
+          </div>
+        </td>
         <td style="${fechaStyle};text-align:right">
           ${esExacta ? '📅' : '~'} ${r.fecha}${countdownBadge}${notaBadge}
         </td>
