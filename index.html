@@ -377,19 +377,33 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rEst, rRend, rOps, rHist, rDev] = await Promise.all([
+    const [r10b, rEst, rRend, rOps, rHist, rDev, rPubs] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('ESTUDIADOS'),
       gsheet('REND_SIMPLE'),
       gsheet('OPERACIONES'),
       gsheet('HISTORICO_MENSUAL'),
       gsheet('RESULTADOS'),
+      gsheet('PUBLICACIONES'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
     D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
+    D.pubs   = (rPubs || []).filter(r => r[0] && String(r[0]).startsWith('http')).map(r => {
+      const f = String(r[2]||'').trim();
+      const pts = f.split('/');
+      const fi = pts.length===3 ? pts[2]+'-'+pts[1]+'-'+pts[0] : '';
+      const imgFile = String(r[3]||'').trim();
+      return {
+        url:      String(r[0]).trim(),
+        tickers:  String(r[1]||'').split(',').map(t=>t.trim().toUpperCase()).filter(Boolean),
+        fecha:    f,
+        fechaIso: fi,
+        img:      imgFile ? 'https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/' + imgFile : '',
+      };
+    });
     D.dev    = parseDev(rDev);
     D.hist   = parseHist(rHist);
 
@@ -1049,7 +1063,7 @@ let rssCache = null; // url → {titulo, fecha, resumen}
 
 function buildBuscarHTML() {
   // Mostrar todos los tickers con conteo
-  const tickerList = Object.entries(TICKER_COUNTS)
+  const tickerList = Object.entries((function(){var c={};(D.pubs||[]).forEach(function(p){p.tickers.forEach(function(t){c[t]=(c[t]||0)+1})});return c;})())
     .sort((a,b) => b[1]-a[1])
     .map(([t,n]) => `<span onclick="document.getElementById('buscar-input').value='${t}';filtrarArticulos()"
       style="cursor:pointer;font-size:10px;color:var(--text2);padding:2px 6px;border:0.5px solid var(--border2);border-radius:4px;display:inline-flex;align-items:center;gap:3px;margin:2px"
@@ -1140,8 +1154,8 @@ function filtrarArticulos() {
 
   // Filtrar publicaciones del sheet por ticker
   const resultados = q
-    ? PUBS_DATA.filter(p => p.tickers.some(t => t.includes(q) || q.includes(t)))
-    : PUBS_DATA;
+    ? (D.pubs||[]).filter(p => p.tickers.some(t => t.includes(q) || q.includes(t)))
+    : (D.pubs||[]);
 
   if (!resultados.length) {
     el.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text3)">Sin publicaciones para "<strong>${q}</strong>"</div>`;
