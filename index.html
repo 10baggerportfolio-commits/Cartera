@@ -683,8 +683,8 @@ function buildDevHTML(items) {
     return fa - fb;
   });
 
-  const enCartera = sorted.filter(r => r.estado === 'En cartera');
-  const seguimiento = sorted.filter(r => r.estado !== 'En cartera');
+  const enCartera = sorted.filter(r => r.estado === '10Bagger' || r.estado === 'Quality Hold' || r.estado === 'Ambas');
+  const seguimiento = sorted.filter(r => r.estado === 'Seguimiento');
 
   function renderGrupo(lista, titulo) {
     if (!lista.length) return '';
@@ -722,23 +722,25 @@ function buildDevHTML(items) {
         }
       }
 
-      // Situación badge
+      // Situación badge — texto completo después del nombre
       const sitMap = {
-        '10Bagger':    '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:700;title:10Bagger">B</span>',
-        'Quality Hold':'<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#faeeda;color:#854f0b;font-size:10px;font-weight:700">Q</span>',
-        'Ambas':       '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:700">B</span><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#faeeda;color:#854f0b;font-size:10px;font-weight:700;margin-left:2px">Q</span>',
-        'Seguimiento': '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--bg3);color:var(--text3);font-size:10px;font-weight:700">S</span>',
+        '10Bagger':     {txt:'10Bagger',     bg:'#e6f1fb', color:'#185fa5'},
+        'Quality Hold': {txt:'Quality Hold', bg:'#faeeda', color:'#854f0b'},
+        'Ambas':        {txt:'Ambas',        bg:'#e8f5e9', color:'#0f6e56'},
+        'Seguimiento':  {txt:'Seguimiento',  bg:'var(--bg3)', color:'var(--text3)'},
       };
-      const sitBadge = sitMap[r.estado] || '';
+      const sit = sitMap[r.estado];
+      const sitBadge = sit
+        ? `<span style="font-size:10px;background:${sit.bg};color:${sit.color};padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap">${sit.txt}</span>`
+        : '';
 
       return `<tr>
         <td style="font-weight:600">
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="display:flex;gap:2px">${sitBadge}</div>
-            <div>${r.empresa}<span class="tsub">${r.ticker}</span></div>
-          </div>
+          ${r.empresa}
+          <span class="tsub">${r.ticker}</span>
+          <span style="display:block;margin-top:2px">${sitBadge}</span>
         </td>
-        <td style="${fechaStyle};text-align:right">
+        <td style="${fechaStyle};text-align:right;vertical-align:top;padding-top:10px">
           ${esExacta ? '📅' : '~'} ${r.fecha}${countdownBadge}${notaBadge}
         </td>
       </tr>`;
@@ -762,7 +764,7 @@ function buildDevHTML(items) {
       ${seguimiento.length ? `<span style="font-size:11px;background:var(--bbg);color:var(--blue);padding:2px 8px;border-radius:10px;font-weight:600">👁 Seguimiento: ${seguimiento.length}</span>` : ''}
     </div>
   </div>
-  ${renderGrupo(enCartera, 'En cartera')}
+  ${renderGrupo(enCartera, 'En cartera — 10Bagger y Quality Hold')}
   ${renderGrupo(seguimiento, 'En seguimiento')}
 </div>`;
 }
