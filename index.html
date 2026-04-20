@@ -4,167 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>10Bagger Portfolio</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
-// ── BÚSQUEDA POR VALOR ───────────────────────────────────────
-// Datos del sheet PUBLICACIONES (precargados)
-let rssCache = null; // url → {titulo, fecha, resumen}
-
-const PUBS_DATA = [{"url": "https://10baggerportfolio.substack.com/p/tesis-el-sueno-americano-top-1-en", "tickers": ["TTT"], "fecha": "18/04/2026", "fechaIso": "2026-04-18"}, {"url": "https://10baggerportfolio.substack.com/t/aprendizajes-semanales", "tickers": ["TTT"], "fecha": "14/04/2026", "fechaIso": "2026-04-14"}, {"url": "https://10baggerportfolio.substack.com/p/anatomia-de-un-x5-horroroso", "tickers": ["NIO"], "fecha": "10/04/2026", "fechaIso": "2026-04-10"}, {"url": "https://10baggerportfolio.substack.com/p/sofi-y-su-short-report", "tickers": ["SOFI"], "fecha": "18/03/2026", "fechaIso": "2026-03-18"}, {"url": "https://10baggerportfolio.substack.com/p/nueva-posicion-en-cartera", "tickers": ["FRSH"], "fecha": "11/03/2026", "fechaIso": "2026-03-11"}, {"url": "https://10baggerportfolio.substack.com/p/el-competidor-de-hims-tiene-solo", "tickers": ["HIMS"], "fecha": "06/04/0206", "fechaIso": "0206-04-06"}, {"url": "https://10baggerportfolio.substack.com/p/hims-tras-la-union-a-novo", "tickers": ["HIMS"], "fecha": "11/03/2026", "fechaIso": "2026-03-11"}, {"url": "https://10baggerportfolio.substack.com/p/asts-fy-2025-va-a-suceder-demasiado", "tickers": ["ASTS"], "fecha": "04/03/2026", "fechaIso": "2026-03-04"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-fy-2025-a-que-precio-se", "tickers": ["RKLB"], "fecha": "27/02/2026", "fechaIso": "2026-02-27"}, {"url": "https://10baggerportfolio.substack.com/p/abcellera-fy2025-y-cuanto-vale-hoy", "tickers": ["ABCL"], "fecha": "26/02/2026", "fechaIso": "2026-02-26"}, {"url": "https://10baggerportfolio.substack.com/p/mapa-completo-de-roper-tech-contenido", "tickers": ["ROP"], "fecha": "25/02/2026", "fechaIso": "2026-02-25"}, {"url": "https://10baggerportfolio.substack.com/p/tasmea-hy-2026-la-tesis-mejora-60", "tickers": ["TEA"], "fecha": "24/02/2026", "fechaIso": "2026-02-24"}, {"url": "https://10baggerportfolio.substack.com/p/hims-eucalyptus", "tickers": ["HIMS"], "fecha": "20/02/2026", "fechaIso": "2026-02-20"}, {"url": "https://10baggerportfolio.substack.com/p/equasens-estudio-de-caso", "tickers": ["EQS"], "fecha": "26/01/2026", "fechaIso": "2026-01-26"}, {"url": "https://10baggerportfolio.substack.com/p/nueva-primera-posicion-en-cartera", "tickers": ["HIMS"], "fecha": "29/12/2025", "fechaIso": "2025-12-29"}, {"url": "https://10baggerportfolio.substack.com/p/tesis-free-tesis-de-pago-ademas-repasamos", "tickers": ["DELIA"], "fecha": "10/12/2025", "fechaIso": "2025-12-10"}, {"url": "https://10baggerportfolio.substack.com/p/hims-te-lo-explico-todo", "tickers": ["HIMS"], "fecha": "04/12/2025", "fechaIso": "2025-12-04"}, {"url": "https://10baggerportfolio.substack.com/p/todo-sobre-tasmea-y-el-valor-de-cartera", "tickers": ["TEA"], "fecha": "21/11/2025", "fechaIso": "2025-11-21"}, {"url": "https://10baggerportfolio.substack.com/p/talkpool-q3-2025-lo-bueno-de-no-esperar", "tickers": ["TALK"], "fecha": "17/11/2025", "fechaIso": "2025-11-17"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-q3-como-se-valora-la-excelencia", "tickers": ["RKLB"], "fecha": "13/11/2025", "fechaIso": "2025-11-13"}, {"url": "https://10baggerportfolio.substack.com/p/hims-q3-no-necesitas-numeros-para", "tickers": ["HIMS"], "fecha": "10/11/2025", "fechaIso": "2025-11-10"}, {"url": "https://10baggerportfolio.substack.com/p/propel-holdings-q325-el-mercado-no", "tickers": ["PRL"], "fecha": "05/11/2025", "fechaIso": "2025-11-05"}, {"url": "https://10baggerportfolio.substack.com/p/situaciones-de-msil-dnpwa-y-hume", "tickers": ["MSI", "DNP", "HUME"], "fecha": "07/10/2025", "fechaIso": "2025-10-07"}, {"url": "https://10baggerportfolio.substack.com/p/vieja-conocida-vuelve-a-la-cartera", "tickers": ["KSPI"], "fecha": "30/09/2025", "fechaIso": "2025-09-30"}, {"url": "https://10baggerportfolio.substack.com/p/elixirr-h1-25-nueva-adquisicion-donde", "tickers": ["ELIX"], "fecha": "22/09/2025", "fechaIso": "2025-09-22"}, {"url": "https://10baggerportfolio.substack.com/p/actualizacion-de-la-tesis-pequeno", "tickers": ["DIG"], "fecha": "05/09/2025", "fechaIso": "2025-09-05"}, {"url": "https://10baggerportfolio.substack.com/p/hims-pensemos-que-piensa-el-mercado", "tickers": ["HIMS"], "fecha": "16/08/2025", "fechaIso": "2025-08-16"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-rocket-lab-q2-2025", "tickers": ["RKLB"], "fecha": "14/08/2025", "fechaIso": "2025-08-14"}, {"url": "https://10baggerportfolio.substack.com/p/tenemos-nueva-primera-posicion", "tickers": ["PRL"], "fecha": "13/08/2025", "fechaIso": "2025-08-13"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-propel-q2-2025", "tickers": ["PRL"], "fecha": "11/08/2025", "fechaIso": "2025-08-11"}, {"url": "https://10baggerportfolio.substack.com/p/hims-test-at-home-parte-ii", "tickers": ["HIMS"], "fecha": "18/07/2025", "fechaIso": "2025-07-18"}, {"url": "https://10baggerportfolio.substack.com/p/hims-test-at-home-parte-i", "tickers": ["HIMS"], "fecha": "14/07/2025", "fechaIso": "2025-07-14"}, {"url": "https://10baggerportfolio.substack.com/p/por-que-oscar-health-no-es-una-opcion", "tickers": ["OSCR"], "fecha": "20/06/2025", "fechaIso": "2025-06-20"}, {"url": "https://10baggerportfolio.substack.com/p/mi-interpretacion-sobre-la-nueva", "tickers": ["HIMS"], "fecha": "03/06/2025", "fechaIso": "2025-06-03"}, {"url": "https://10baggerportfolio.substack.com/p/la-nueva-posicion-en-cartera-es-esta", "tickers": ["TALK"], "fecha": "30/05/2025", "fechaIso": "2025-05-30"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-y-ast-spacemobile-valoracion", "tickers": ["ASTS", "RKLB"], "fecha": "15/05/2025", "fechaIso": "2025-05-15"}, {"url": "https://10baggerportfolio.substack.com/p/nuevo-valor-oculto-en-nicho-de-calidad", "tickers": ["TAYD"], "fecha": "07/05/2025", "fechaIso": "2025-05-07"}, {"url": "https://10baggerportfolio.substack.com/p/mi-modelo-de-hims-video-explicativo", "tickers": ["HIMS"], "fecha": "22/04/2025", "fechaIso": "2025-04-22"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-lo-que-cambia-el-nuevo", "tickers": ["RKLB"], "fecha": "28/03/2025", "fechaIso": "2025-03-28"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-lo-que-cambia-el-nuevo", "tickers": ["GRG", "JOE"], "fecha": "21/03/2025", "fechaIso": "2025-03-21"}, {"url": "https://10baggerportfolio.substack.com/p/propel-holdings-el-mercado-no-ha", "tickers": ["PRL"], "fecha": "13/03/2025", "fechaIso": "2025-03-13"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-meli-kspi-tea-y-conocemos", "tickers": ["MELI", "TEA", "KSPI"], "fecha": "27/02/2025", "fechaIso": "2025-02-27"}, {"url": "https://10baggerportfolio.substack.com/p/hims-nunca-habia-sido-mejor", "tickers": ["HIMS"], "fecha": "25/02/2025", "fechaIso": "2025-02-25"}, {"url": "https://10baggerportfolio.substack.com/p/38-ytd-1-tesis-subiendo-nueva-posicion", "tickers": ["ELIX", "GOOG"], "fecha": "18/02/2025", "fechaIso": "2025-02-18"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-sofi-y-una-idea-en", "tickers": ["SOFI", "GRG"], "fecha": "29/01/2025", "fechaIso": "2025-01-29"}, {"url": "https://10baggerportfolio.substack.com/p/te-cuento-la-clave-sobre-hims-que", "tickers": ["HIMS"], "fecha": "21/01/2025", "fechaIso": "2025-01-21"}, {"url": "https://10baggerportfolio.substack.com/p/evolution-inpost-hims-y-una-idea", "tickers": ["EVO", "INPST", "HIMS"], "fecha": "08/01/2025", "fechaIso": "2025-01-08"}, {"url": "https://10baggerportfolio.substack.com/p/un-monopolio-en-construccion-una", "tickers": ["TMDX"], "fecha": "26/12/2024", "fechaIso": "2024-12-26"}, {"url": "https://10baggerportfolio.substack.com/p/propel-holdings-un-modelo-de-crecimiento", "tickers": ["PRL"], "fecha": "18/08/2024", "fechaIso": "2024-08-18"}, {"url": "https://10baggerportfolio.substack.com/p/tesis-de-badger-meter-crecimiento", "tickers": ["BMI"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-el-pico-y-la-pala-de-la-proxima", "tickers": ["NXT"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-el-mayor-gap-de-valoracion", "tickers": ["LODE"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-de-roper-technologies", "tickers": ["ROP"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-esta-podria-ser-mi-mejor-idea", "tickers": ["DELIA"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/mini-tesis-cortar-pegar-y-componer", "tickers": ["ROKO"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/msci-entra-en-la-cartera-quality", "tickers": ["MSCI"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-pequeno-monopolio-zonal-de", "tickers": ["DIG"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-lider-que-domina-su-sector", "tickers": ["ZTS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-la-perla-europea-parte-2", "tickers": ["VYT"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-la-perla-europea-parte-1", "tickers": ["VYT"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/abcellera-2-parte", "tickers": ["ABCL"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/abcellera-1-parte-cortoplacismo-activa", "tickers": ["ABCL"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/la-nueva-posicion-en-cartera-es-esta", "tickers": ["TALK"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/un-nuevo-valor-entra-en-nuestra-cartera", "tickers": ["AMZN"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-en-profundidad-de-ast-parte-4b9", "tickers": ["ASTS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-en-profundidad-de-ast-parte", "tickers": ["ASTS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-una-de-las-mejores-serial-acquirer", "tickers": ["IBP"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-compounder-de-extrema-calidad", "tickers": ["ELIX"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-nos-vemos-en-10-anos", "tickers": ["RKLB"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/la-oportunidad-mas-clara-en-mis-5", "tickers": ["TEA"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/nueva-compra-en-la-cartera-quality", "tickers": ["RMS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-feb-posiciones", "tickers": ["ASTS", "RKLB", "GRG", "TEA", "ZTS", "SOFI", "KSPI", "HIMS", "NXT", "LODE"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-nov-posiciones", "tickers": ["HIMS", "ASTS", "RKLB", "MELI", "ABCL", "DIG"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-posiciones-7", "tickers": ["EVO", "ELIX", "HIMS", "DIG", "ASTS", "PRL"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-posiciones-13", "tickers": ["TALK", "TEA", "SOFI", "DELIA", "KSPI"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-posiciones-19", "tickers": ["VHI", "OPEN", "ABCL", "VYT", "MELI", "GRG"], "fecha": "", "fechaIso": ""}];
-const TICKER_COUNTS = {"HIMS": 17, "RKLB": 8, "ASTS": 7, "TEA": 6, "PRL": 6, "ABCL": 5, "SOFI": 4, "TALK": 4, "KSPI": 4, "ELIX": 4, "DIG": 4, "GRG": 4, "DELIA": 3, "MELI": 3, "VYT": 3, "TTT": 2, "ROP": 2, "EVO": 2, "NXT": 2, "LODE": 2, "ZTS": 2, "NIO": 1, "FRSH": 1, "EQS": 1, "MSI": 1, "DNP": 1, "HUME": 1, "OSCR": 1, "TAYD": 1, "JOE": 1, "GOOG": 1, "INPST": 1, "TMDX": 1, "BMI": 1, "ROKO": 1, "MSCI": 1, "AMZN": 1, "IBP": 1, "RMS": 1, "VHI": 1, "OPEN": 1};
-const SUBSTACK_RSS = 'https://10baggerportfolio.substack.com/feed';
-
-function buildBuscarHTML() {
-  // Mostrar todos los tickers con conteo
-  const tickerList = Object.entries(TICKER_COUNTS)
-    .sort((a,b) => b[1]-a[1])
-    .map(([t,n]) => `<span onclick="document.getElementById('buscar-input').value='${t}';filtrarArticulos()"
-      style="cursor:pointer;font-size:10px;color:var(--text2);padding:2px 6px;border:0.5px solid var(--border2);border-radius:4px;display:inline-flex;align-items:center;gap:3px;margin:2px"
-      onmouseover="this.style.background='var(--bbg)'" onmouseout="this.style.background=''"
-      >${t} <span style="color:var(--text3)">(${n})</span></span>`)
-    .join('');
-
-  return `
-<div style="margin-bottom:16px">
-  <div style="font-size:13px;font-weight:600;margin-bottom:4px">Buscar publicaciones por valor</div>
-  <div style="font-size:10px;color:var(--text3);margin-bottom:12px">Escribe el ticker sin sufijo de mercado · ej: <em>TEA</em> en lugar de TEA.AX · <em>SOFI</em> en lugar de NASDAQ:SOFI · También puedes hacer clic en cualquier ticker de abajo</div>
-  <div style="display:flex;gap:8px;margin-bottom:10px">
-    <input type="text" id="buscar-input" placeholder="Buscar ticker..."
-      style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:14px;outline:none;font-family:inherit"
-      oninput="filtrarArticulos()" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
-    <button onclick="document.getElementById('buscar-input').value='';filtrarArticulos()"
-      style="padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--rs);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-size:13px">✕</button>
-  </div>
-  <div style="margin-bottom:14px;line-height:1.8">${tickerList}</div>
-  <div id="buscar-resultados"><div style="text-align:center;padding:2rem;color:var(--text3)"><span class="spin"></span> Cargando títulos...</div></div>
-</div>`;
-}
-
-async function initBuscar() {
-  if (!rssCache) {
-    rssCache = {};
-    // Intentar varios proxies CORS
-    const proxies = [
-      'https://api.allorigins.win/get?url=' + encodeURIComponent(SUBSTACK_RSS),
-      'https://corsproxy.io/?' + encodeURIComponent(SUBSTACK_RSS),
-    ];
-    for (const proxy of proxies) {
-      try {
-        const res = await fetch(proxy);
-        if (!res.ok) continue;
-        const text = await res.text();
-        // allorigins devuelve JSON, corsproxy devuelve XML directo
-        let xmlStr;
-        try { xmlStr = JSON.parse(text).contents; } catch(e) { xmlStr = text; }
-        if (!xmlStr) continue;
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlStr, 'text/xml');
-        const items = xml.querySelectorAll('item');
-        if (!items.length) continue;
-        items.forEach(item => {
-          const url = item.querySelector('link')?.textContent?.trim() || '';
-          if (!url) return;
-          // Imagen: buscar en enclosure, media:content o dentro del content
-          let img = '';
-          const enc = item.querySelector('enclosure');
-          if (enc && enc.getAttribute('type')?.startsWith('image')) img = enc.getAttribute('url') || '';
-          if (!img) {
-            const mc = item.querySelector('content');
-            if (mc) {
-              const m = (mc.textContent||'').match(/src="(https:\/\/substackcdn[^"]+)"/);
-              if (m) img = m[1];
-            }
-          }
-          if (!img) {
-            const desc = item.querySelector('description')?.textContent || '';
-            const m = desc.match(/src="(https:\/\/substackcdn[^"]+)"/);
-            if (m) img = m[1];
-          }
-          // Resumen: limpiar HTML y coger más texto
-          const desc = item.querySelector('description')?.textContent || '';
-          const resumen = desc.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, 400);
-          rssCache[url] = {
-            titulo:  item.querySelector('title')?.textContent?.trim() || '',
-            fecha:   item.querySelector('pubDate')?.textContent || '',
-            resumen,
-            img,
-          };
-        });
-        console.log('[RSS] Cargados', Object.keys(rssCache).length, 'artículos');
-        break;
-      } catch(e) {
-        console.warn('[RSS] Proxy falló:', proxy, e);
-      }
-    }
-  }
-  filtrarArticulos();
-}
-
-function filtrarArticulos() {
-  const q = (document.getElementById('buscar-input')?.value || '').trim().toUpperCase();
-  const el = document.getElementById('buscar-resultados');
-  if (!el) return;
-
-  // Filtrar publicaciones del sheet por ticker
-  const resultados = q
-    ? PUBS_DATA.filter(p => p.tickers.some(t => t.includes(q) || q.includes(t)))
-    : PUBS_DATA;
-
-  if (!resultados.length) {
-    el.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text3)">Sin publicaciones para "<strong>${q}</strong>"</div>`;
-    return;
-  }
-
-  // Ordenar por fecha del sheet (más reciente primero)
-  const sorted = [...resultados].sort((a, b) => {
-    const fa = a.fechaIso ? new Date(a.fechaIso) : new Date(0);
-    const fb = b.fechaIso ? new Date(b.fechaIso) : new Date(0);
-    return fb - fa;
-  });
-
-  const html = sorted.map(p => {
-    const rss = rssCache[p.url] || {};
-    const tituloRaw = rss.titulo || p.url.split('/p/').pop().replace(/-/g,' ');
-    const titulo = tituloRaw.charAt(0).toUpperCase() + tituloRaw.slice(1);
-    // Fecha del sheet siempre
-    const fechaFmt = p.fecha ? (() => {
-      const pts = p.fecha.split('/');
-      if (pts.length === 3) return new Date(pts[2],pts[1]-1,pts[0]).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
-      return p.fecha;
-    })() : '';
-    const resumen = rss.resumen || '';
-    const tickerBadges = p.tickers.map(t =>
-      `<span style="font-size:10px;background:var(--bg3);color:var(--text2);padding:1px 5px;border-radius:3px;margin-right:3px">${t}</span>`
-    ).join('');
-    const mainTicker = p.tickers[0] || '';
-    const logoUrl = mainTicker ? `https://assets.parqet.com/logos/symbol/${mainTicker}?format=jpg` : '';
-    return `
-    <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
-      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:10px;display:flex;flex-direction:column"
-        onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:100%;height:100px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden">
-          ${logoUrl ? `<img src="${logoUrl}" alt="${mainTicker}" style="max-height:68px;max-width:160px;object-fit:contain" onerror="this.outerHTML='<span style=\'font-size:26px;font-weight:800;color:var(--text2)\'>${mainTicker}</span>'">` : `<span style="font-size:26px;font-weight:800;color:var(--text2)">${mainTicker}</span>`}
-        </div>
-        <div style="padding:12px 14px;flex:1;display:flex;flex-direction:column">
-          ${fechaFmt ? `<div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">${fechaFmt}</div>` : ''}
-          <div style="font-size:13px;font-weight:700;line-height:1.4;color:var(--text);margin-bottom:7px">${titulo}</div>
-          <div style="margin-bottom:7px">${tickerBadges}</div>
-          ${resumen ? `<div style="font-size:11px;color:var(--text2);line-height:1.6;flex:1">${resumen}${resumen.length >= 400 ? '...' : ''}</div>` : ''}
-          <div style="font-size:11px;color:var(--blue);margin-top:10px;font-weight:600">Leer en Substack →</div>
-        </div>
-      </div>
-    </a>`;
-  }).join('');
-
-  el.innerHTML = `
-    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">
-      ${q ? `${resultados.length} publicación${resultados.length!==1?'es':''} sobre ${q}` : `${resultados.length} publicaciones totales`}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-width:100%">
-      ${html}
-    </div>`;
-}
-
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{--bg:#f7f7f5;--bg2:#fff;--bg3:#f0f0ed;--text:#1a1a18;--text2:#6b6b66;--text3:#9e9e99;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--green:#0f6e56;--gbg:#e1f5ee;--blue:#185fa5;--bbg:#e6f1fb;--amber:#854f0b;--abg:#faeeda;--red:#a32d2d;--rbg:#fcebeb;--r:10px;--rs:6px}
 @media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#242422;--bg3:#2e2e2b;--text:#e8e8e4;--text2:#9e9e99;--text3:#6b6b66;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--green:#5dcaa5;--gbg:#04342c;--blue:#85b7eb;--bbg:#042c53;--amber:#ef9f27;--abg:#412402;--red:#f09595;--rbg:#501313}}
@@ -1202,12 +1042,10 @@ function buildCarteraCharts(id, pos) {
 
 // ── BÚSQUEDA POR VALOR ───────────────────────────────────────
 // Datos del sheet PUBLICACIONES (precargados)
-
-let rssCache = null; // url → {titulo, fecha, resumen}
-
-
+const PUBS_DATA = [{"url": "https://10baggerportfolio.substack.com/p/tesis-el-sueno-americano-top-1-en", "tickers": ["TTT"], "fecha": "18/04/2026", "fechaIso": "2026-04-18"}, {"url": "https://10baggerportfolio.substack.com/t/aprendizajes-semanales", "tickers": ["TTT"], "fecha": "14/04/2026", "fechaIso": "2026-04-14"}, {"url": "https://10baggerportfolio.substack.com/p/anatomia-de-un-x5-horroroso", "tickers": ["NIO"], "fecha": "10/04/2026", "fechaIso": "2026-04-10"}, {"url": "https://10baggerportfolio.substack.com/p/sofi-y-su-short-report", "tickers": ["SOFI"], "fecha": "18/03/2026", "fechaIso": "2026-03-18"}, {"url": "https://10baggerportfolio.substack.com/p/nueva-posicion-en-cartera", "tickers": ["FRSH"], "fecha": "11/03/2026", "fechaIso": "2026-03-11"}, {"url": "https://10baggerportfolio.substack.com/p/el-competidor-de-hims-tiene-solo", "tickers": ["HIMS"], "fecha": "06/04/0206", "fechaIso": "0206-04-06"}, {"url": "https://10baggerportfolio.substack.com/p/hims-tras-la-union-a-novo", "tickers": ["HIMS"], "fecha": "11/03/2026", "fechaIso": "2026-03-11"}, {"url": "https://10baggerportfolio.substack.com/p/asts-fy-2025-va-a-suceder-demasiado", "tickers": ["ASTS"], "fecha": "04/03/2026", "fechaIso": "2026-03-04"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-fy-2025-a-que-precio-se", "tickers": ["RKLB"], "fecha": "27/02/2026", "fechaIso": "2026-02-27"}, {"url": "https://10baggerportfolio.substack.com/p/abcellera-fy2025-y-cuanto-vale-hoy", "tickers": ["ABCL"], "fecha": "26/02/2026", "fechaIso": "2026-02-26"}, {"url": "https://10baggerportfolio.substack.com/p/mapa-completo-de-roper-tech-contenido", "tickers": ["ROP"], "fecha": "25/02/2026", "fechaIso": "2026-02-25"}, {"url": "https://10baggerportfolio.substack.com/p/tasmea-hy-2026-la-tesis-mejora-60", "tickers": ["TEA"], "fecha": "24/02/2026", "fechaIso": "2026-02-24"}, {"url": "https://10baggerportfolio.substack.com/p/hims-eucalyptus", "tickers": ["HIMS"], "fecha": "20/02/2026", "fechaIso": "2026-02-20"}, {"url": "https://10baggerportfolio.substack.com/p/equasens-estudio-de-caso", "tickers": ["EQS"], "fecha": "26/01/2026", "fechaIso": "2026-01-26"}, {"url": "https://10baggerportfolio.substack.com/p/nueva-primera-posicion-en-cartera", "tickers": ["HIMS"], "fecha": "29/12/2025", "fechaIso": "2025-12-29"}, {"url": "https://10baggerportfolio.substack.com/p/tesis-free-tesis-de-pago-ademas-repasamos", "tickers": ["DELIA"], "fecha": "10/12/2025", "fechaIso": "2025-12-10"}, {"url": "https://10baggerportfolio.substack.com/p/hims-te-lo-explico-todo", "tickers": ["HIMS"], "fecha": "04/12/2025", "fechaIso": "2025-12-04"}, {"url": "https://10baggerportfolio.substack.com/p/todo-sobre-tasmea-y-el-valor-de-cartera", "tickers": ["TEA"], "fecha": "21/11/2025", "fechaIso": "2025-11-21"}, {"url": "https://10baggerportfolio.substack.com/p/talkpool-q3-2025-lo-bueno-de-no-esperar", "tickers": ["TALK"], "fecha": "17/11/2025", "fechaIso": "2025-11-17"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-q3-como-se-valora-la-excelencia", "tickers": ["RKLB"], "fecha": "13/11/2025", "fechaIso": "2025-11-13"}, {"url": "https://10baggerportfolio.substack.com/p/hims-q3-no-necesitas-numeros-para", "tickers": ["HIMS"], "fecha": "10/11/2025", "fechaIso": "2025-11-10"}, {"url": "https://10baggerportfolio.substack.com/p/propel-holdings-q325-el-mercado-no", "tickers": ["PRL"], "fecha": "05/11/2025", "fechaIso": "2025-11-05"}, {"url": "https://10baggerportfolio.substack.com/p/situaciones-de-msil-dnpwa-y-hume", "tickers": ["MSI", "DNP", "HUME"], "fecha": "07/10/2025", "fechaIso": "2025-10-07"}, {"url": "https://10baggerportfolio.substack.com/p/vieja-conocida-vuelve-a-la-cartera", "tickers": ["KSPI"], "fecha": "30/09/2025", "fechaIso": "2025-09-30"}, {"url": "https://10baggerportfolio.substack.com/p/elixirr-h1-25-nueva-adquisicion-donde", "tickers": ["ELIX"], "fecha": "22/09/2025", "fechaIso": "2025-09-22"}, {"url": "https://10baggerportfolio.substack.com/p/actualizacion-de-la-tesis-pequeno", "tickers": ["DIG"], "fecha": "05/09/2025", "fechaIso": "2025-09-05"}, {"url": "https://10baggerportfolio.substack.com/p/hims-pensemos-que-piensa-el-mercado", "tickers": ["HIMS"], "fecha": "16/08/2025", "fechaIso": "2025-08-16"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-rocket-lab-q2-2025", "tickers": ["RKLB"], "fecha": "14/08/2025", "fechaIso": "2025-08-14"}, {"url": "https://10baggerportfolio.substack.com/p/tenemos-nueva-primera-posicion", "tickers": ["PRL"], "fecha": "13/08/2025", "fechaIso": "2025-08-13"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-propel-q2-2025", "tickers": ["PRL"], "fecha": "11/08/2025", "fechaIso": "2025-08-11"}, {"url": "https://10baggerportfolio.substack.com/p/hims-test-at-home-parte-ii", "tickers": ["HIMS"], "fecha": "18/07/2025", "fechaIso": "2025-07-18"}, {"url": "https://10baggerportfolio.substack.com/p/hims-test-at-home-parte-i", "tickers": ["HIMS"], "fecha": "14/07/2025", "fechaIso": "2025-07-14"}, {"url": "https://10baggerportfolio.substack.com/p/por-que-oscar-health-no-es-una-opcion", "tickers": ["OSCR"], "fecha": "20/06/2025", "fechaIso": "2025-06-20"}, {"url": "https://10baggerportfolio.substack.com/p/mi-interpretacion-sobre-la-nueva", "tickers": ["HIMS"], "fecha": "03/06/2025", "fechaIso": "2025-06-03"}, {"url": "https://10baggerportfolio.substack.com/p/la-nueva-posicion-en-cartera-es-esta", "tickers": ["TALK"], "fecha": "30/05/2025", "fechaIso": "2025-05-30"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-y-ast-spacemobile-valoracion", "tickers": ["ASTS", "RKLB"], "fecha": "15/05/2025", "fechaIso": "2025-05-15"}, {"url": "https://10baggerportfolio.substack.com/p/nuevo-valor-oculto-en-nicho-de-calidad", "tickers": ["TAYD"], "fecha": "07/05/2025", "fechaIso": "2025-05-07"}, {"url": "https://10baggerportfolio.substack.com/p/mi-modelo-de-hims-video-explicativo", "tickers": ["HIMS"], "fecha": "22/04/2025", "fechaIso": "2025-04-22"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-lo-que-cambia-el-nuevo", "tickers": ["RKLB"], "fecha": "28/03/2025", "fechaIso": "2025-03-28"}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-lo-que-cambia-el-nuevo", "tickers": ["GRG", "JOE"], "fecha": "21/03/2025", "fechaIso": "2025-03-21"}, {"url": "https://10baggerportfolio.substack.com/p/propel-holdings-el-mercado-no-ha", "tickers": ["PRL"], "fecha": "13/03/2025", "fechaIso": "2025-03-13"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-meli-kspi-tea-y-conocemos", "tickers": ["MELI", "TEA", "KSPI"], "fecha": "27/02/2025", "fechaIso": "2025-02-27"}, {"url": "https://10baggerportfolio.substack.com/p/hims-nunca-habia-sido-mejor", "tickers": ["HIMS"], "fecha": "25/02/2025", "fechaIso": "2025-02-25"}, {"url": "https://10baggerportfolio.substack.com/p/38-ytd-1-tesis-subiendo-nueva-posicion", "tickers": ["ELIX", "GOOG"], "fecha": "18/02/2025", "fechaIso": "2025-02-18"}, {"url": "https://10baggerportfolio.substack.com/p/resultados-de-sofi-y-una-idea-en", "tickers": ["SOFI", "GRG"], "fecha": "29/01/2025", "fechaIso": "2025-01-29"}, {"url": "https://10baggerportfolio.substack.com/p/te-cuento-la-clave-sobre-hims-que", "tickers": ["HIMS"], "fecha": "21/01/2025", "fechaIso": "2025-01-21"}, {"url": "https://10baggerportfolio.substack.com/p/evolution-inpost-hims-y-una-idea", "tickers": ["EVO", "INPST", "HIMS"], "fecha": "08/01/2025", "fechaIso": "2025-01-08"}, {"url": "https://10baggerportfolio.substack.com/p/un-monopolio-en-construccion-una", "tickers": ["TMDX"], "fecha": "26/12/2024", "fechaIso": "2024-12-26"}, {"url": "https://10baggerportfolio.substack.com/p/propel-holdings-un-modelo-de-crecimiento", "tickers": ["PRL"], "fecha": "18/08/2024", "fechaIso": "2024-08-18"}, {"url": "https://10baggerportfolio.substack.com/p/tesis-de-badger-meter-crecimiento", "tickers": ["BMI"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-el-pico-y-la-pala-de-la-proxima", "tickers": ["NXT"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-el-mayor-gap-de-valoracion", "tickers": ["LODE"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-de-roper-technologies", "tickers": ["ROP"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-esta-podria-ser-mi-mejor-idea", "tickers": ["DELIA"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/mini-tesis-cortar-pegar-y-componer", "tickers": ["ROKO"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/msci-entra-en-la-cartera-quality", "tickers": ["MSCI"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-pequeno-monopolio-zonal-de", "tickers": ["DIG"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-lider-que-domina-su-sector", "tickers": ["ZTS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-la-perla-europea-parte-2", "tickers": ["VYT"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-la-perla-europea-parte-1", "tickers": ["VYT"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/abcellera-2-parte", "tickers": ["ABCL"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/abcellera-1-parte-cortoplacismo-activa", "tickers": ["ABCL"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/la-nueva-posicion-en-cartera-es-esta", "tickers": ["TALK"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/un-nuevo-valor-entra-en-nuestra-cartera", "tickers": ["AMZN"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-en-profundidad-de-ast-parte-4b9", "tickers": ["ASTS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-en-profundidad-de-ast-parte", "tickers": ["ASTS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-una-de-las-mejores-serial-acquirer", "tickers": ["IBP"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/tesis-compounder-de-extrema-calidad", "tickers": ["ELIX"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/rocket-lab-nos-vemos-en-10-anos", "tickers": ["RKLB"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/la-oportunidad-mas-clara-en-mis-5", "tickers": ["TEA"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/nueva-compra-en-la-cartera-quality", "tickers": ["RMS"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-feb-posiciones", "tickers": ["ASTS", "RKLB", "GRG", "TEA", "ZTS", "SOFI", "KSPI", "HIMS", "NXT", "LODE"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-nov-posiciones", "tickers": ["HIMS", "ASTS", "RKLB", "MELI", "ABCL", "DIG"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-posiciones-7", "tickers": ["EVO", "ELIX", "HIMS", "DIG", "ASTS", "PRL"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-posiciones-13", "tickers": ["TALK", "TEA", "SOFI", "DELIA", "KSPI"], "fecha": "", "fechaIso": ""}, {"url": "https://10baggerportfolio.substack.com/p/repaso-a-la-cartera-posiciones-19", "tickers": ["VHI", "OPEN", "ABCL", "VYT", "MELI", "GRG"], "fecha": "", "fechaIso": ""}];
 const TICKER_COUNTS = {"HIMS": 17, "RKLB": 8, "ASTS": 7, "TEA": 6, "PRL": 6, "ABCL": 5, "SOFI": 4, "TALK": 4, "KSPI": 4, "ELIX": 4, "DIG": 4, "GRG": 4, "DELIA": 3, "MELI": 3, "VYT": 3, "TTT": 2, "ROP": 2, "EVO": 2, "NXT": 2, "LODE": 2, "ZTS": 2, "NIO": 1, "FRSH": 1, "EQS": 1, "MSI": 1, "DNP": 1, "HUME": 1, "OSCR": 1, "TAYD": 1, "JOE": 1, "GOOG": 1, "INPST": 1, "TMDX": 1, "BMI": 1, "ROKO": 1, "MSCI": 1, "AMZN": 1, "IBP": 1, "RMS": 1, "VHI": 1, "OPEN": 1};
 const SUBSTACK_RSS = 'https://10baggerportfolio.substack.com/feed';
+let rssCache = null; // url → {titulo, fecha, resumen}
 
 function buildBuscarHTML() {
   // Mostrar todos los tickers con conteo
@@ -1363,4 +1201,3 @@ function filtrarArticulos() {
 </script>
 </body>
 </html>
-
