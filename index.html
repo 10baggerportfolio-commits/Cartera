@@ -134,7 +134,7 @@ function filtrarArticulos() {
     <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
       <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:10px"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        ${img ? `<img src="${img}" alt="" style="width:100%;height:160px;object-fit:cover;display:block">` : ''}
+        ${img ? `<img src="${img}" alt="" style="width:100%;height:140px;object-fit:cover;display:block">` : ''}
         <div style="padding:14px 16px">
           ${fecha ? `<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px">${fecha}</div>` : ''}
           <div style="font-size:14px;font-weight:700;line-height:1.5;color:var(--text);margin-bottom:8px">${titulo}</div>
@@ -150,7 +150,9 @@ function filtrarArticulos() {
     <div style="font-size:11px;color:var(--text3);margin-bottom:10px">
       ${q ? `${resultados.length} publicación${resultados.length!==1?'es':''} sobre ${q}` : `${resultados.length} publicaciones totales`}
     </div>
-    ${html}`;
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-width:100%">
+      ${html}
+    </div>`;
 }
 
 </script>
@@ -1318,7 +1320,7 @@ function filtrarArticulos() {
     <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
       <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:10px"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        ${img ? `<img src="${img}" alt="" style="width:100%;height:160px;object-fit:cover;display:block">` : ''}
+        ${img ? `<img src="${img}" alt="" style="width:100%;height:140px;object-fit:cover;display:block">` : ''}
         <div style="padding:14px 16px">
           ${fecha ? `<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px">${fecha}</div>` : ''}
           <div style="font-size:14px;font-weight:700;line-height:1.5;color:var(--text);margin-bottom:8px">${titulo}</div>
@@ -1334,7 +1336,9 @@ function filtrarArticulos() {
     <div style="font-size:11px;color:var(--text3);margin-bottom:10px">
       ${q ? `${resultados.length} publicación${resultados.length!==1?'es':''} sobre ${q}` : `${resultados.length} publicaciones totales`}
     </div>
-    ${html}`;
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-width:100%">
+      ${html}
+    </div>`;
 }
 
 </script>
