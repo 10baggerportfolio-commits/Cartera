@@ -41,22 +41,58 @@ function buildBuscarHTML() {
 async function initBuscar() {
   if (!rssCache) {
     rssCache = {};
-    try {
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SUBSTACK_RSS);
-      const res = await fetch(proxy);
-      const data = await res.json();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(data.contents, 'text/xml');
-      Array.from(xml.querySelectorAll('item')).forEach(item => {
-        const url = item.querySelector('link')?.textContent?.trim() || '';
-        if (url) rssCache[url] = {
-          titulo:  item.querySelector('title')?.textContent || '',
-          fecha:   item.querySelector('pubDate')?.textContent || '',
-          resumen: (item.querySelector('description')?.textContent || '').replace(/<[^>]+>/g,'').slice(0,180),
-        };
-      });
-    } catch(e) {
-      console.warn('RSS no disponible:', e);
+    // Intentar varios proxies CORS
+    const proxies = [
+      'https://api.allorigins.win/get?url=' + encodeURIComponent(SUBSTACK_RSS),
+      'https://corsproxy.io/?' + encodeURIComponent(SUBSTACK_RSS),
+    ];
+    for (const proxy of proxies) {
+      try {
+        const res = await fetch(proxy);
+        if (!res.ok) continue;
+        const text = await res.text();
+        // allorigins devuelve JSON, corsproxy devuelve XML directo
+        let xmlStr;
+        try { xmlStr = JSON.parse(text).contents; } catch(e) { xmlStr = text; }
+        if (!xmlStr) continue;
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlStr, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        if (!items.length) continue;
+        items.forEach(item => {
+          const url = item.querySelector('link')?.textContent?.trim() || '';
+          if (!url) return;
+          // Imagen: buscar en enclosure, media:content o dentro del content
+          let img = '';
+          const enc = item.querySelector('enclosure');
+          if (enc && enc.getAttribute('type')?.startsWith('image')) img = enc.getAttribute('url') || '';
+          if (!img) {
+            const mc = item.querySelector('content');
+            if (mc) {
+              const m = (mc.textContent||'').match(/src="(https:\/\/substackcdn[^"]+)"/);
+              if (m) img = m[1];
+            }
+          }
+          if (!img) {
+            const desc = item.querySelector('description')?.textContent || '';
+            const m = desc.match(/src="(https:\/\/substackcdn[^"]+)"/);
+            if (m) img = m[1];
+          }
+          // Resumen: limpiar HTML y coger más texto
+          const desc = item.querySelector('description')?.textContent || '';
+          const resumen = desc.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, 400);
+          rssCache[url] = {
+            titulo:  item.querySelector('title')?.textContent?.trim() || '',
+            fecha:   item.querySelector('pubDate')?.textContent || '',
+            resumen,
+            img,
+          };
+        });
+        console.log('[RSS] Cargados', Object.keys(rssCache).length, 'artículos');
+        break;
+      } catch(e) {
+        console.warn('[RSS] Proxy falló:', proxy, e);
+      }
     }
   }
   filtrarArticulos();
@@ -93,15 +129,19 @@ function filtrarArticulos() {
     const tickerBadges = p.tickers.map(t =>
       `<span style="font-size:10px;background:var(--bg3);color:var(--text2);padding:1px 5px;border-radius:3px;margin-right:3px">${t}</span>`
     ).join('');
+    const img = rss.img || '';
     return `
     <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
-      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:16px;margin-bottom:8px"
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:10px"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        ${fecha ? `<div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px">${fecha}</div>` : ''}
-        <div style="font-size:14px;font-weight:600;line-height:1.5;color:var(--text);margin-bottom:8px">${titulo}</div>
-        <div style="margin-bottom:6px">${tickerBadges}</div>
-        ${resumen ? `<div style="font-size:11px;color:var(--text2);line-height:1.6">${resumen}...</div>` : ''}
-        <div style="font-size:11px;color:var(--blue);margin-top:10px;font-weight:500">Leer en Substack →</div>
+        ${img ? `<img src="${img}" alt="" style="width:100%;height:160px;object-fit:cover;display:block">` : ''}
+        <div style="padding:14px 16px">
+          ${fecha ? `<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px">${fecha}</div>` : ''}
+          <div style="font-size:14px;font-weight:700;line-height:1.5;color:var(--text);margin-bottom:8px">${titulo}</div>
+          <div style="margin-bottom:8px">${tickerBadges}</div>
+          ${resumen ? `<div style="font-size:12px;color:var(--text2);line-height:1.7">${resumen}${resumen.length >= 400 ? '...' : ''}</div>` : ''}
+          <div style="font-size:12px;color:var(--blue);margin-top:12px;font-weight:600">Leer en Substack →</div>
+        </div>
       </div>
     </a>`;
   }).join('');
@@ -1185,22 +1225,58 @@ function buildBuscarHTML() {
 async function initBuscar() {
   if (!rssCache) {
     rssCache = {};
-    try {
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SUBSTACK_RSS);
-      const res = await fetch(proxy);
-      const data = await res.json();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(data.contents, 'text/xml');
-      Array.from(xml.querySelectorAll('item')).forEach(item => {
-        const url = item.querySelector('link')?.textContent?.trim() || '';
-        if (url) rssCache[url] = {
-          titulo:  item.querySelector('title')?.textContent || '',
-          fecha:   item.querySelector('pubDate')?.textContent || '',
-          resumen: (item.querySelector('description')?.textContent || '').replace(/<[^>]+>/g,'').slice(0,180),
-        };
-      });
-    } catch(e) {
-      console.warn('RSS no disponible:', e);
+    // Intentar varios proxies CORS
+    const proxies = [
+      'https://api.allorigins.win/get?url=' + encodeURIComponent(SUBSTACK_RSS),
+      'https://corsproxy.io/?' + encodeURIComponent(SUBSTACK_RSS),
+    ];
+    for (const proxy of proxies) {
+      try {
+        const res = await fetch(proxy);
+        if (!res.ok) continue;
+        const text = await res.text();
+        // allorigins devuelve JSON, corsproxy devuelve XML directo
+        let xmlStr;
+        try { xmlStr = JSON.parse(text).contents; } catch(e) { xmlStr = text; }
+        if (!xmlStr) continue;
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlStr, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        if (!items.length) continue;
+        items.forEach(item => {
+          const url = item.querySelector('link')?.textContent?.trim() || '';
+          if (!url) return;
+          // Imagen: buscar en enclosure, media:content o dentro del content
+          let img = '';
+          const enc = item.querySelector('enclosure');
+          if (enc && enc.getAttribute('type')?.startsWith('image')) img = enc.getAttribute('url') || '';
+          if (!img) {
+            const mc = item.querySelector('content');
+            if (mc) {
+              const m = (mc.textContent||'').match(/src="(https:\/\/substackcdn[^"]+)"/);
+              if (m) img = m[1];
+            }
+          }
+          if (!img) {
+            const desc = item.querySelector('description')?.textContent || '';
+            const m = desc.match(/src="(https:\/\/substackcdn[^"]+)"/);
+            if (m) img = m[1];
+          }
+          // Resumen: limpiar HTML y coger más texto
+          const desc = item.querySelector('description')?.textContent || '';
+          const resumen = desc.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0, 400);
+          rssCache[url] = {
+            titulo:  item.querySelector('title')?.textContent?.trim() || '',
+            fecha:   item.querySelector('pubDate')?.textContent || '',
+            resumen,
+            img,
+          };
+        });
+        console.log('[RSS] Cargados', Object.keys(rssCache).length, 'artículos');
+        break;
+      } catch(e) {
+        console.warn('[RSS] Proxy falló:', proxy, e);
+      }
     }
   }
   filtrarArticulos();
@@ -1237,15 +1313,19 @@ function filtrarArticulos() {
     const tickerBadges = p.tickers.map(t =>
       `<span style="font-size:10px;background:var(--bg3);color:var(--text2);padding:1px 5px;border-radius:3px;margin-right:3px">${t}</span>`
     ).join('');
+    const img = rss.img || '';
     return `
     <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
-      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:16px;margin-bottom:8px"
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:10px"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        ${fecha ? `<div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px">${fecha}</div>` : ''}
-        <div style="font-size:14px;font-weight:600;line-height:1.5;color:var(--text);margin-bottom:8px">${titulo}</div>
-        <div style="margin-bottom:6px">${tickerBadges}</div>
-        ${resumen ? `<div style="font-size:11px;color:var(--text2);line-height:1.6">${resumen}...</div>` : ''}
-        <div style="font-size:11px;color:var(--blue);margin-top:10px;font-weight:500">Leer en Substack →</div>
+        ${img ? `<img src="${img}" alt="" style="width:100%;height:160px;object-fit:cover;display:block">` : ''}
+        <div style="padding:14px 16px">
+          ${fecha ? `<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px">${fecha}</div>` : ''}
+          <div style="font-size:14px;font-weight:700;line-height:1.5;color:var(--text);margin-bottom:8px">${titulo}</div>
+          <div style="margin-bottom:8px">${tickerBadges}</div>
+          ${resumen ? `<div style="font-size:12px;color:var(--text2);line-height:1.7">${resumen}${resumen.length >= 400 ? '...' : ''}</div>` : ''}
+          <div style="font-size:12px;color:var(--blue);margin-top:12px;font-weight:600">Leer en Substack →</div>
+        </div>
       </div>
     </a>`;
   }).join('');
