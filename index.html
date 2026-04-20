@@ -79,31 +79,6 @@ tbody tr:hover td{background:var(--bg3)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ebox{background:var(--abg);border:0.5px solid var(--amber);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px;line-height:1.7}
 
-/* ── POPUP DETALLE ─────────────────────────────────────── */
-.pm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
-.pm-box{background:var(--bg2);border-radius:var(--r);width:100%;max-width:460px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
-.pm-overlay{padding:12px}
-.pm-box-header{padding:16px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
-.pm-box-title{font-size:15px;font-weight:700;letter-spacing:-0.3px}
-.pm-box-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.pm-box-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3);line-height:1;padding:0}
-.pm-box-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
-.pm-section{display:flex;flex-direction:column;gap:6px}
-.pm-section-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);padding-bottom:4px;border-bottom:0.5px solid var(--border)}
-.pm-row{display:flex;align-items:center;justify-content:space-between}
-.pm-lbl{font-size:12px;color:var(--text2)}
-.pm-val{font-size:13px;font-weight:700}
-.pm-tag{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px}
-.pm-tag-casa{background:var(--gbg);color:var(--green)}
-.pm-tag-riesgo{background:var(--rbg);color:var(--red)}
-.pm-op-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:11px}
-.pm-op-row:last-child{border-bottom:none}
-.pm-op-tipo{font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700;min-width:52px;text-align:center}
-.pm-no-data{font-size:12px;color:var(--text3);font-style:italic;padding:8px 0}
-.det-btn{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:4px;border:0.5px solid var(--border2);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;background:transparent;font-family:inherit;gap:4px}
-.det-btn:hover{background:var(--bbg);color:var(--blue);border-color:var(--blue)}
-.det-btn.has-data{background:var(--bbg);color:var(--blue);border-color:var(--blue)}
-
 /* ── MOBILE ────────────────────────────────────────────── */
 @media(max-width:640px){
   .main{padding:12px 12px}
@@ -116,21 +91,27 @@ tbody tr:hover td{background:var(--bg3)}
   .metric{padding:10px 12px}
   .mval{font-size:18px}
   .cgrid{grid-template-columns:1fr!important}
-  [style*="grid-template-columns:2fr 1fr 1fr"]{grid-template-columns:1fr!important}
   .cwrap{padding:12px}
+  /* Tabla: scroll horizontal con columnas prioritarias */
   .ox{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:320px;font-size:11px}
+  table{min-width:500px;font-size:11px}
   th,td{padding:7px 10px}
+  /* Ocultar columnas menos importantes en móvil */
   .col-hide-mobile{display:none}
+  /* Donut panel lateral → debajo en móvil */
   .donut-wrapper{flex-direction:column!important}
   .tesis-panel-mobile{width:100%!important;border-left:none!important;border-top:0.5px solid var(--border)!important;max-height:200px!important}
+  /* Gráficos más pequeños */
   .chart-rent{height:160px!important}
+  /* Cards En desarrollo */
   .dev-grid{grid-template-columns:1fr!important}
+  /* Botones período */
   .pbtns{gap:4px}
   .pbtn{font-size:10px;padding:4px 9px}
+  /* Links más compactos */
   .ilink{font-size:10px;padding:0 6px;height:20px}
+  /* Topbar compacto */
   .bsm{font-size:11px;padding:4px 8px}
-  .pm-box{max-width:100%;max-height:90vh}
 }
 </style>
 </head>
@@ -164,7 +145,7 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="tab active" onclick="showTab('rent')">Rentabilidad</div>
     <div class="tab" onclick="showTab('10b')">10Bagger</div>
     <div class="tab" onclick="showTab('est')">Estudiados</div>
-    <div class="tab" onclick="showTab('dev')">En desarrollo</div>
+    <div class="tab" onclick="showTab('dev')">Próximos resultados</div>
   </div>
   <div class="main" id="mc"><div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Conectando...</div></div>
   <div class="sbar" id="sb"></div>
@@ -174,22 +155,28 @@ tbody tr:hover td{background:var(--bg3)}
 const PWD = "suscriptores2026";
 const COLS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#C55A11","#4472C4","#ED7D31","#A9D18E"];
 let SID = "1sRkg-yB94zBcvlBuwPsR8DAOpAL-06YB5MCcuQ4wmQc";
-let D = {pos10b:[], posQH:[], rend:[], pm:{}};
+let D = {pos10b:[], posQH:[], rend:[]};
 let CH = {};
 let CUR = 'rent';
 let curPeriod = 'ytd';
 
+// ── NÚMEROS ───────────────────────────────────────────────────
+// Convierte cualquier formato numérico a float
+// "70000" → 70000, "70.000" → 70000, "1.670,00" → 1670, "9,2%" → 9.2
 function toNum(v) {
   if (v === null || v === undefined) return null;
   const s = String(v).trim().replace(/[€$£%\s]/g, '').replace(/[^\d,.\-]/g, '');
   if (!s || s === '—') return null;
   let n;
   if (s.includes('.') && s.includes(',')) {
+    // 1.670,00 → punto=miles, coma=decimal
     n = parseFloat(s.replace(/\./g,'').replace(',','.'));
   } else if (s.includes(',')) {
+    // 9,2 → decimal español
     n = parseFloat(s.replace(',','.'));
   } else if (s.includes('.')) {
     const parts = s.split('.');
+    // 70.000 → solo punto, 3 decimales = miles
     if (parts.length === 2 && parts[1].length === 3) {
       n = parseFloat(parts[0] + parts[1]);
     } else {
@@ -204,13 +191,6 @@ function toNum(v) {
 function fmtP(v, d=1) {
   if (v === null || v === undefined) return '—';
   return (v >= 0 ? '+' : '') + v.toFixed(d) + '%';
-}
-function fmtE(v, d=2) {
-  if (v === null || v === undefined) return '—';
-  const abs = Math.abs(v);
-  const sign = v >= 0 ? '+' : '-';
-  const str = abs >= 1000 ? abs.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0}) : abs.toFixed(d);
-  return sign + str + ' €';
 }
 function nowStr() { return new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }
 function setSt(m) { document.getElementById('sb').innerHTML = m; }
@@ -244,9 +224,12 @@ async function gsheet(sheetName) {
   if (!m) throw new Error('Sin respuesta para hoja: ' + sheetName);
   const tbl = JSON.parse(m[1]).table;
   if (!tbl || !tbl.rows) return [];
+  // Devolver filas como arrays: primero f (formateado), luego v (valor bruto)
   return tbl.rows.map(row => row.c.map(c => {
     if (!c) return null;
+    // Para números: usar v (valor numérico bruto) directamente
     if (c.v !== null && c.v !== undefined && typeof c.v === 'number') return c.v;
+    // Para strings: usar f si existe, si no v
     if (c.f !== null && c.f !== undefined) return c.f;
     return c.v !== null && c.v !== undefined ? c.v : null;
   }));
@@ -257,6 +240,7 @@ function parsePosiciones(rows) {
   const skip = ['POSICIONES','Rellena','Ticker','TOTAL','CAGR'];
   return rows.filter(r => {
     const t = String(r[0]||'').trim();
+    // Filtrar por ticker válido — cualquier fila con ticker no vacío y no cabecera
     return t && t.length > 1 && !skip.some(s => t.startsWith(s));
   }).map(r => {
     const precioNum = typeof r[4]==='number' ? r[4] : toNum(r[4]);
@@ -264,12 +248,14 @@ function parsePosiciones(rows) {
     const cagr3y    = precioNum && poNum && poNum > 0
       ? (Math.pow(poNum / precioNum, 1/3) - 1) * 100
       : null;
+    // Fecha entrada: puede venir como "12/02/2024" o Date object
     const fechaRaw = r[14] ? String(r[14]).trim() : '';
     let antiguedad = null;
     if (fechaRaw) {
       let d;
       if (fechaRaw.includes('/')) {
         const parts = fechaRaw.split('/');
+        // formato DD/MM/YYYY
         d = new Date(parts[2], parts[1]-1, parts[0]);
       } else if (fechaRaw.match(/Date\((\d+),(\d+),(\d+)\)/)) {
         const m = fechaRaw.match(/Date\((\d+),(\d+),(\d+)\)/);
@@ -277,7 +263,9 @@ function parsePosiciones(rows) {
       } else {
         d = new Date(fechaRaw);
       }
-      if (!isNaN(d)) antiguedad = ((new Date() - d) / (1000*60*60*24*365.25));
+      if (!isNaN(d)) {
+        antiguedad = ((new Date() - d) / (1000 * 60 * 60 * 24 * 365.25));
+      }
     }
     return {
       ticker:    String(r[0]||'').trim(),
@@ -286,7 +274,6 @@ function parsePosiciones(rows) {
       ntit:      fmt(r[3]),
       precio:    fmt(r[4]),
       precioNum,
-      precioEur: r[18] ? (typeof r[18]==='number' ? r[18] : toNum(r[18])) : (r[13] && typeof r[13]==='number' ? r[13] : null),
       peso:      typeof r[7]==='number' ? r[7]*100 : toNum(r[7]),
       pesoFmt:   typeof r[7]==='number' ? (r[7]*100).toFixed(1)+'%' : fmt(r[7]),
       riesgo:    r[9] ? String(r[9]).trim() : '—',
@@ -300,11 +287,14 @@ function parsePosiciones(rows) {
       fechaEntrada: fechaRaw,
       antiguedad,
       resumen:   r[15] ? String(r[15]).trim() : '',
-      ocultar:   r[14] ? ['si','1','true','yes'].includes(String(r[14]).trim().toLowerCase()) : false,
     };
   });
 }
 
+// REND_SIMPLE: cabecera en fila 0, datos en filas 1+
+// Cols: Periodo, Dias, b10_ini, b10_fin, spx_ini, spx_fin, ndx_ini, ndx_fin, fx_ini, fx_fin
+// fx = EUR/USD (cuántos dólares vale 1 euro)
+// Ajuste EUR: rent_eur = (1 + rent_usd) / (1 + var_fx) - 1
 function parseRend(rows) {
   const años = ['2022','2023','2024','2025','2026'];
   return rows.filter(r => {
@@ -314,8 +304,14 @@ function parseRend(rows) {
   }).map(r => {
     const v = i => typeof r[i]==='number' ? r[i] : toNum(r[i]);
     const fx_ini = v(8), fx_fin = v(9);
+    // Rentabilidad de índices ajustada a EUR
+    // Si fx sube (dólar se debilita), rentabilidad EUR < USD
     const spx_ini = v(4), spx_fin = v(5);
     const ndx_ini = v(6), ndx_fin = v(7);
+    // Rentabilidad ajustada a EUR por período:
+    // rent_eur = (1 + rent_usd) / (1 + var_fx_eurusd) - 1
+    // var_fx = fx_fin/fx_ini - 1  (fx en EUR/USD)
+    // Si el euro se aprecia (fx sube), la rentabilidad en EUR baja
     const var_fx = fx_ini && fx_fin ? fx_fin / fx_ini : 1;
     const spx_rent_eur = spx_ini && spx_fin ? ((spx_fin/spx_ini) / var_fx) : null;
     const ndx_rent_eur = ndx_ini && ndx_fin ? ((ndx_fin/ndx_ini) / var_fx) : null;
@@ -323,12 +319,18 @@ function parseRend(rows) {
       label:   String(r[0]).trim(),
       dias:    v(1),
       b10_ini: v(2), b10_fin: v(3),
-      spx_ini, spx_fin, ndx_ini, ndx_fin, fx_ini, fx_fin,
-      spx_eur: spx_rent_eur, ndx_eur: ndx_rent_eur,
+      spx_ini, spx_fin,
+      ndx_ini, ndx_fin,
+      fx_ini,  fx_fin,
+      // Rentabilidades ajustadas EUR (factores multiplicativos, no %)
+      spx_eur: spx_rent_eur,
+      ndx_eur: ndx_rent_eur,
     };
   }).filter(r => r.dias && r.dias > 0);
 }
 
+// ── PARSER HISTORICO MENSUAL ─────────────────────────────────
+// Cols: 0=Fecha, 1=Valor_10B, 2=Valor_QH, 3=NDX (4=SPX opcional)
 function parseHist(rows) {
   return rows.filter(r => {
     const f = String(r[0]||'').trim();
@@ -342,6 +344,7 @@ function parseHist(rows) {
   })).filter(r => r.b10 && r.b10 > 0);
 }
 
+// ── PARSER OPERACIONES ───────────────────────────────────────
 function parseOps(rows) {
   const tipos = ['APERTURA','CIERRE','AUMENTO','RECORTE','RCORTE'];
   return rows.filter(r => {
@@ -355,200 +358,17 @@ function parseOps(rows) {
     cambio:  (() => {
       const v = r[4];
       if (v === null || v === undefined) return '—';
+      // Si viene como número decimal (0.196 = 19.6%)
       if (typeof v === 'number') return (v * 100).toFixed(1) + '%';
+      // Si ya viene como string con % ("19,6%")
       const s = String(v).trim();
       if (s.includes('%')) return s;
+      // String sin % — convertir
       const n = parseFloat(s.replace(',','.'));
       return isNaN(n) ? s : (n * 100).toFixed(1) + '%';
     })(),
-    precio: String(r[5]||'').trim(),
+    precio:  String(r[5]||'').trim(),
   }));
-}
-
-// ── PARSER PRECIO MEDIO ───────────────────────────────────────
-// Hoja PRECIO_MEDIO: Empresa | Ticker | Fecha | Tipo | Títulos | Precio
-function parsePM(rows) {
-  const map = {};
-  rows.forEach(r => {
-    if (!r[0] || !r[3]) return;
-    const empresa = String(r[0]||'').trim();
-    const ticker  = String(r[1]||'').trim();
-    const fecha   = String(r[2]||'').trim();
-    const tipo    = String(r[3]||'').trim().toLowerCase();
-    const titulos  = typeof r[4]==='number' ? r[4] : toNum(r[4]);
-    const precioRaw = typeof r[5]==='number' ? r[5] : toNum(r[5]);
-    const importeEur = r[6] ? (typeof r[6]==='number' ? r[6] : toNum(r[6])) : null;
-    // Si hay importe en €, calcular precio efectivo en € para el FIFO
-    const precio = importeEur && titulos ? importeEur / titulos : precioRaw;
-    if (!empresa || empresa === 'Empresa' || !titulos || !precio) return;
-    const esCompra = tipo.includes('compra') || tipo.includes('apertura') || tipo.includes('aumento');
-    const esVenta  = tipo.includes('venta')  || tipo.includes('cierre')   || tipo.includes('recorte');
-    if (!esCompra && !esVenta) return;
-    if (!map[empresa]) map[empresa] = { empresa, ticker, ops: [] };
-    map[empresa].ops.push({ fecha, tipo: esCompra ? 'Compra' : 'Venta', titulos, precio });
-  });
-
-  const result = {};
-  Object.values(map).forEach(v => {
-    // Ordenar por fecha
-    v.ops.sort((a, b) => {
-      const parse = f => {
-        if (!f) return 0;
-        const p = f.includes('/') ? f.split('/').reverse().join('-') : f;
-        return new Date(p).getTime() || 0;
-      };
-      return parse(a.fecha) - parse(b.fecha);
-    });
-
-    // FIFO
-    const fifo = [];
-    let ganRealizada = 0, totalInvertido = 0, totalRecuperado = 0;
-    // Media móvil
-    let pmQty = 0, pmPrice = 0;
-
-    v.ops.forEach(op => {
-      if (op.tipo === 'Compra') {
-        fifo.push({ qty: op.titulos, price: op.precio });
-        totalInvertido += op.titulos * op.precio;
-        pmPrice = (pmQty * pmPrice + op.titulos * op.precio) / (pmQty + op.titulos);
-        pmQty += op.titulos;
-      } else {
-        totalRecuperado += op.titulos * op.precio;
-        let rem = op.titulos;
-        while (rem > 0 && fifo.length > 0) {
-          if (fifo[0].qty <= rem) {
-            ganRealizada += fifo[0].qty * (op.precio - fifo[0].price);
-            rem -= fifo[0].qty;
-            fifo.shift();
-          } else {
-            ganRealizada += rem * (op.precio - fifo[0].price);
-            fifo[0].qty -= rem;
-            rem = 0;
-          }
-        }
-        pmQty -= op.titulos;
-      }
-    });
-
-    const titulosActuales = fifo.reduce((s, l) => s + l.qty, 0);
-    const costeCartera    = fifo.reduce((s, l) => s + l.qty * l.price, 0);
-    const pmFIFO  = titulosActuales > 0 ? costeCartera / titulosActuales : null;
-    const pmMovil = titulosActuales > 0 ? pmPrice : null;
-    const dineroNeto = totalInvertido - totalRecuperado;
-
-    // Guardar con clave = empresa normalizada y ticker
-    const key = v.empresa.trim().toLowerCase();
-    const data = {
-      empresa: v.empresa, ticker: v.ticker, ops: v.ops,
-      titulosActuales, pmFIFO, pmMovil,
-      ganRealizada, totalInvertido, totalRecuperado,
-      dineroNeto, enCasa: dineroNeto <= 0, costeCartera,
-      totalCombinado: null, // se calcula después de cruzar con precios
-    };
-    result[key] = data;
-    if (v.ticker) result[v.ticker.toLowerCase()] = data;
-    // También ticker corto sin exchange
-    const short = v.ticker.split(':').pop().toLowerCase();
-    if (short) result[short] = data;
-  });
-  return result;
-}
-
-// ── POPUP DETALLE ─────────────────────────────────────────────
-function showDetalle(ticker, empresa, precioNum, enCartera=true) {
-  // Buscar datos PM por ticker o empresa
-  const key = ticker.split(':').pop().toLowerCase().trim();
-  const keyEmpresa = empresa.trim().toLowerCase();
-  const pm = D.pm[key] || D.pm[keyEmpresa] ||
-    Object.values(D.pm).find(v => v.ticker && v.ticker.toLowerCase().trim() === key) ||
-    Object.values(D.pm).find(v => v.empresa && v.empresa.toLowerCase().trim() === keyEmpresa) ||
-    null;
-
-  const overlay = document.createElement('div');
-  overlay.className = 'pm-overlay';
-  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-
-  let bodyHTML = '';
-
-  if (pm) {
-    // Ganancia latente con precio actual
-    let latente = null, latenteP = null;
-    if (precioNum && pm.pmFIFO && pm.titulosActuales > 0) {
-      latente  = (precioNum - pm.pmFIFO) * pm.titulosActuales;
-      latenteP = ((precioNum / pm.pmFIFO) - 1) * 100;
-    }
-    const tagHTML = !enCartera
-      ? `<span class="pm-tag" style="background:var(--bbg);color:var(--blue)">✓ Operación cerrada</span>`
-      : pm.enCasa
-      ? `<span class="pm-tag pm-tag-casa">🏠 En casa</span>`
-      : `<span class="pm-tag pm-tag-riesgo">Capital en riesgo</span>`;
-
-    const opsHTML = [...pm.ops].reverse().map(op => {
-      const cls = op.tipo === 'Compra' ? 'op-au' : 'op-re';
-      const signo = op.tipo === 'Compra' ? '+' : '-';
-      return `<div class="pm-op-row">
-        <span class="pm-op-tipo ${cls}">${op.tipo}</span>
-        <span style="color:var(--text2);flex:1">${op.fecha}</span>
-        <span>${signo}${op.titulos} @ <strong>${op.precio.toFixed(2)} €</strong></span>
-      </div>`;
-    }).join('');
-
-    bodyHTML = `
-      <div class="pm-section">
-        <div class="pm-section-title">Posición actual</div>
-        <div class="pm-row"><span class="pm-lbl">Títulos en cartera</span><span class="pm-val">${pm.titulosActuales}</span></div>
-        <div class="pm-row"><span class="pm-lbl">Precio medio FIFO</span><span class="pm-val">${pm.pmFIFO ? pm.pmFIFO.toFixed(2)+' €' : '—'}</span></div>
-        <div class="pm-row"><span class="pm-lbl">Precio medio móvil</span><span class="pm-val" style="color:var(--text2)">${pm.pmMovil ? pm.pmMovil.toFixed(2)+' €' : '—'}</span></div>
-        <div class="pm-row"><span class="pm-lbl">Precio actual</span><span class="pm-val">${precioNum ? precioNum.toFixed(2)+' €' : '—'}</span></div>
-        ${latente !== null ? `
-        <div class="pm-row"><span class="pm-lbl">Ganancia latente</span><span class="pm-val ${latente>=0?'pos':'neg'}">${fmtE(latente)} (${fmtP(latenteP)})</span></div>
-        <div class="pm-row"><span class="pm-lbl">Valor cartera actual</span><span class="pm-val">${fmtE(Math.abs(precioNum * pm.titulosActuales))}</span></div>` : ''}
-      </div>
-      <div class="pm-section">
-        <div class="pm-section-title">Historial completo</div>
-        <div class="pm-row"><span class="pm-lbl">Ganancias realizadas</span><span class="pm-val ${pm.ganRealizada>=0?'pos':'neg'}">${fmtE(pm.ganRealizada)}</span></div>
-        ${latente !== null ? `
-        <div class="pm-row"><span class="pm-lbl">Ganancia latente</span><span class="pm-val ${latente>=0?'pos':'neg'}">${fmtE(latente)}</span></div>
-        <div class="pm-row" style="border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px"><span class="pm-lbl" style="font-weight:700">Total combinado</span><span class="pm-val ${(pm.ganRealizada+(latente||0))>=0?'pos':'neg'}">${fmtE(pm.ganRealizada+(latente||0))}</span></div>` : ''}
-        <div class="pm-row"><span class="pm-lbl">Total invertido</span><span class="pm-val">${fmtE(Math.abs(pm.totalInvertido))}</span></div>
-        <div class="pm-row"><span class="pm-lbl">Total recuperado</span><span class="pm-val">${fmtE(Math.abs(pm.totalRecuperado))}</span></div>
-        <div class="pm-row"><span class="pm-lbl">Dinero neto en juego</span><span class="pm-val ${pm.dineroNeto<=0?'pos':'neg'}">${fmtE(pm.dineroNeto)}</span></div>
-        <div class="pm-row" style="margin-top:4px"><span class="pm-lbl">Estado</span>${tagHTML}</div>
-        ${(() => {
-          const compras = pm.ops.filter(o => o.tipo === 'Compra');
-          const ventas  = pm.ops.filter(o => o.tipo === 'Venta');
-          if (!compras.length || !ventas.length) return '';
-          const minCompra = Math.min(...compras.map(o => o.precio));
-          const maxVenta  = Math.max(...ventas.map(o => o.precio));
-          const multiplo  = maxVenta / minCompra;
-          const pct       = (multiplo - 1) * 100;
-          return '<div style="border-top:0.5px solid var(--border);padding-top:8px;margin-top:8px">'
-            + '<div class="pm-row"><span class="pm-lbl" style="font-weight:700">Mejor operación</span><span class="pm-val pos" style="font-size:15px">' + multiplo.toFixed(2) + 'x (+' + pct.toFixed(0) + '%)</span></div>'
-            + '<div class="pm-row" style="margin-top:2px"><span style="font-size:11px;color:var(--text3)">Mín. compra ' + minCompra.toFixed(2) + ' € → Máx. venta ' + maxVenta.toFixed(2) + ' €</span></div>'
-            + '</div>';
-        })()}
-      </div>
-      <div class="pm-section">
-        <div class="pm-section-title">Operaciones (${pm.ops.length})</div>
-        ${opsHTML}
-      </div>`;
-  } else {
-    bodyHTML = `<div class="pm-no-data">Sin datos en la hoja PRECIO_MEDIO para este valor.<br><br>Añade las operaciones de <strong>${empresa}</strong> en la hoja PRECIO_MEDIO de tu Google Sheet.</div>`;
-  }
-
-  overlay.innerHTML = `
-    <div class="pm-box">
-      <div class="pm-box-header">
-        <div>
-          <div class="pm-box-title">${empresa}</div>
-          <div class="pm-box-sub">${ticker}</div>
-        </div>
-        <button class="pm-box-close" onclick="this.closest('.pm-overlay').remove()">×</button>
-      </div>
-      <div class="pm-box-body">${bodyHTML}</div>
-    </div>`;
-
-  document.body.appendChild(overlay);
 }
 
 // ── CARGA ─────────────────────────────────────────────────────
@@ -556,14 +376,13 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rEst, rRend, rOps, rHist, rDev, rPM] = await Promise.all([
+    const [r10b, rEst, rRend, rOps, rHist, rDev] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('ESTUDIADOS'),
       gsheet('REND_SIMPLE'),
       gsheet('OPERACIONES'),
       gsheet('HISTORICO_MENSUAL'),
-      gsheet('EN_DESARROLLO'),
-      gsheet('PRECIO_MEDIO').catch(() => []),
+      gsheet('RESULTADOS'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
@@ -572,34 +391,8 @@ async function loadAll() {
     D.ops    = parseOps(rOps);
     D.dev    = parseDev(rDev);
     D.hist   = parseHist(rHist);
-    D.pm     = parsePM(rPM);
 
-    // Cruzar D.pm con precios actuales de pos10b y est para calcular totalCombinado
-    const precioMap = {};
-    [...(D.pos10b||[]), ...(D.est||[])].forEach(p => {
-      // Usar precioEur si existe, si no usar precioNum (que puede ser en moneda local)
-      const precio = p.precioEur || p.precioNum;
-      if (p.ticker && precio) {
-        precioMap[p.ticker.toLowerCase()] = precio;
-        precioMap[p.ticker.split(':').pop().toLowerCase()] = precio;
-        precioMap[p.empresa.trim().toLowerCase()] = precio;
-      }
-    });
-    Object.values(D.pm).forEach(pm => {
-      if (!pm.titulosActuales || !pm.pmFIFO) { pm.totalCombinado = pm.ganRealizada; return; }
-      const key = (pm.ticker||'').toLowerCase();
-      const keyE = pm.empresa.trim().toLowerCase();
-      const precio = precioMap[key] || precioMap[pm.ticker?.split(':').pop().toLowerCase()] || precioMap[keyE] || null;
-      if (precio) {
-        const latente = (precio - pm.pmFIFO) * pm.titulosActuales;
-        pm.totalCombinado = pm.ganRealizada + latente;
-        pm.precioLive = precio;
-      } else {
-        pm.totalCombinado = pm.ganRealizada;
-        pm.precioLive = null;
-      }
-    });
-
+    // Actualizar valor actual de 10Bagger desde fila TOTAL de posiciones
     const tot10b = r10b.find(r => String(r[0]||'').includes('TOTAL'));
     if (tot10b && D.rend.length) {
       const v = typeof tot10b[6]==='number' ? tot10b[6] : toNum(tot10b[6]);
@@ -644,15 +437,24 @@ function calcPeriods() {
   const rend = D.rend;
   if (!rend || !rend.length) return null;
 
+  // Factor de ajuste EUR por período: divide rentabilidad USD por variación fx (EUR/USD)
+  // Si el euro sube (fx_fin > fx_ini), rentabilidad en EUR < USD
   function eurAdj(rentUSD, r) {
     if (rentUSD === null || !r.fx_ini || !r.fx_fin) return null;
     return ((1 + rentUSD/100) / (r.fx_fin/r.fx_ini) - 1) * 100;
   }
+
   function rentPeriodo(r) {
     const spx = r.spx_ini && r.spx_fin ? ((r.spx_fin/r.spx_ini)-1)*100 : null;
     const ndx = r.ndx_ini && r.ndx_fin ? ((r.ndx_fin/r.ndx_ini)-1)*100 : null;
-    return { b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null, spx, ndx, spx_eur: eurAdj(spx,r), ndx_eur: eurAdj(ndx,r) };
+    return {
+      b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null,
+      spx, ndx,
+      spx_eur: eurAdj(spx, r),
+      ndx_eur: eurAdj(ndx, r),
+    };
   }
+
   function acumN(n) {
     const slice = rend.slice(-n);
     let b10=1, spx=1, ndx=1, spxE=1, ndxE=1;
@@ -661,8 +463,12 @@ function calcPeriods() {
       if (r.spx_ini && r.spx_fin) { const f=r.spx_fin/r.spx_ini; spx*=f; if(r.fx_ini&&r.fx_fin) spxE*=f/(r.fx_fin/r.fx_ini); }
       if (r.ndx_ini && r.ndx_fin) { const f=r.ndx_fin/r.ndx_ini; ndx*=f; if(r.fx_ini&&r.fx_fin) ndxE*=f/(r.fx_fin/r.fx_ini); }
     }
-    return { b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100, spx_eur:(spxE-1)*100, ndx_eur:(ndxE-1)*100 };
+    return {
+      b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100,
+      spx_eur:(spxE-1)*100, ndx_eur:(ndxE-1)*100,
+    };
   }
+
   function cagrTotal() {
     const totalDias = rend.reduce((s,r) => s+(r.dias||0), 0);
     const years = totalDias / 365.25;
@@ -672,25 +478,50 @@ function calcPeriods() {
       if (r.spx_ini&&r.spx_fin) { const v=r.spx_fin/r.spx_ini; spxAcum*=v; if(r.fx_ini&&r.fx_fin) spxEAcum*=v/(r.fx_fin/r.fx_ini); }
       if (r.ndx_ini&&r.ndx_fin) { const v=r.ndx_fin/r.ndx_ini; ndxAcum*=v; if(r.fx_ini&&r.fx_fin) ndxEAcum*=v/(r.fx_fin/r.fx_ini); }
     }
-    return { b10: f.b10_ini&&l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini,1/years)-1)*100 : null, spx:(Math.pow(spxAcum,1/years)-1)*100, ndx:(Math.pow(ndxAcum,1/years)-1)*100, spx_eur:(Math.pow(spxEAcum,1/years)-1)*100, ndx_eur:(Math.pow(ndxEAcum,1/years)-1)*100 };
+    return {
+      b10: f.b10_ini&&l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini,1/years)-1)*100 : null,
+      spx: (Math.pow(spxAcum,1/years)-1)*100,
+      ndx: (Math.pow(ndxAcum,1/years)-1)*100,
+      spx_eur: (Math.pow(spxEAcum,1/years)-1)*100,
+      ndx_eur: (Math.pow(ndxEAcum,1/years)-1)*100,
+    };
   }
+
   const totalDiasAcum = rend.reduce((s,r) => s+(r.dias||0), 0);
-  return { ytd: rentPeriodo(rend[rend.length-1]), '1y': rend.length>=2?rentPeriodo(rend[rend.length-2]):null, '2y': totalDiasAcum>=2*365?acumN(2):null, '3y': totalDiasAcum>=3*365?acumN(3):null, '4y': totalDiasAcum>=4*365?acumN(4):null, all: acumN(rend.length), cagr: cagrTotal() };
+  const ytd = rentPeriodo(rend[rend.length-1]);
+  const a1  = rend.length >= 2 ? rentPeriodo(rend[rend.length-2]) : null;
+  const a2  = totalDiasAcum >= 2*365 ? acumN(2) : null;
+  const a3  = totalDiasAcum >= 3*365 ? acumN(3) : null;
+  const a4  = totalDiasAcum >= 4*365 ? acumN(4) : null;
+  const all = acumN(rend.length);
+  const cr  = cagrTotal();
+
+  return { ytd, '1y':a1, '2y':a2, '3y':a3, '4y':a4, all, cagr:cr };
 }
 
 // ── RENTABILIDAD HTML ─────────────────────────────────────────
 function buildRentHTML() {
   const periods = calcPeriods();
   if (!periods) return '<div class="ebox">Sin datos de rentabilidad. Comprueba la pestaña REND_SIMPLE en el sheet.</div>';
+
   const p = periods[curPeriod] || periods.ytd;
   const labels = {ytd:'Año en curso','1y':'Año anterior','2y':'2 años','3y':'3 años','4y':'4 años',all:'Desde inicio',cagr:'CAGR anualizada'};
+
   const btns = Object.entries(labels).filter(([k]) => periods[k]).map(([k,v]) =>
-    `<button class="pbtn${k===curPeriod?' active':''}" onclick="setPeriod('${k}')">${v}</button>`).join('');
+    `<button class="pbtn${k===curPeriod?' active':''}" onclick="setPeriod('${k}')">${v}</button>`
+  ).join('');
+
   function card(label, val, valEur) {
-    const cls = val===null?'':val>=0?'pos':'neg';
-    const eurLine = valEur!==undefined&&valEur!==null ? `<div class="msub" style="color:${valEur>=0?'var(--green)':'var(--red)'}">EUR: ${fmtP(valEur)}</div>` : '';
+    const cls = val===null ? '' : val>=0 ? 'pos' : 'neg';
+    const eurLine = valEur !== undefined && valEur !== null
+      ? `<div class="msub" style="color:${valEur>=0?'var(--green)':'var(--red)'}">EUR: ${fmtP(valEur)}</div>`
+      : '';
     return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div>${eurLine}</div>`;
   }
+
+  // Años para el gráfico de barras
+  const años = D.rend.map(r => r.label);
+
   return `
 <div class="pbtns">${btns}</div>
 <div class="mgrid">
@@ -725,17 +556,57 @@ function buildRentCharts() {
   if (!periods) return;
   const p = periods[curPeriod] || periods.ytd;
   if (!p) return;
+
+  // Comparativa
   const elC = document.getElementById('c-comp');
   if (elC) {
-    CH.comp = new Chart(elC, { type:'bar', data:{ labels:['10Bagger','S&P 500','Nasdaq-100'], datasets:[{ data:[p.b10,p.spx,p.ndx], backgroundColor:['#378ADD','#888780','#B4B2A9'], borderRadius:4, borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmtP(c.raw)}`}}}, scales:{ x:{ticks:{font:{size:11}},grid:{display:false}}, y:{ticks:{font:{size:10},color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,0.08)'}} } } });
+    CH.comp = new Chart(elC, {
+      type:'bar',
+      data:{
+        labels:['10Bagger','S&P 500','Nasdaq-100'],
+        datasets:[{
+          data:[p.b10, p.spx, p.ndx],
+          backgroundColor:['#378ADD','#888780','#B4B2A9'],
+          borderRadius:4, borderWidth:0
+        }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${fmtP(c.raw)}`}}},
+        scales:{
+          x:{ticks:{font:{size:11}}, grid:{display:false}},
+          y:{ticks:{font:{size:10}, color:'#888', callback:v=>v+'%'}, grid:{color:'rgba(128,128,128,0.08)'}}
+        }
+      }
+    });
   }
+
+  // Barras anuales
   const elA = document.getElementById('c-anual');
   if (elA) {
     const años = D.rend.map(r => r.label);
     const d10b = D.rend.map(r => r.b10_ini&&r.b10_fin ? +((r.b10_fin/r.b10_ini-1)*100).toFixed(2) : null);
     const dSPX = D.rend.map(r => r.spx_ini&&r.spx_fin ? +((r.spx_fin/r.spx_ini-1)*100).toFixed(2) : null);
     const dNDX = D.rend.map(r => r.ndx_ini&&r.ndx_fin ? +((r.ndx_fin/r.ndx_ini-1)*100).toFixed(2) : null);
-    CH.anual = new Chart(elA, { type:'bar', data:{ labels:años, datasets:[ {label:'10Bagger',data:d10b,backgroundColor:'#378ADD',borderRadius:3,borderWidth:0}, {label:'S&P 500',data:dSPX,backgroundColor:'#B4B2A9',borderRadius:3,borderWidth:0}, {label:'Nasdaq-100',data:dNDX,backgroundColor:'#D3D1C7',borderRadius:3,borderWidth:0} ] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmtP(c.raw)}`}}}, scales:{ x:{ticks:{font:{size:11}},grid:{display:false}}, y:{ticks:{font:{size:10},color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,0.08)'}} } } });
+    CH.anual = new Chart(elA, {
+      type:'bar',
+      data:{
+        labels:años,
+        datasets:[
+          {label:'10Bagger',   data:d10b, backgroundColor:'#378ADD', borderRadius:3, borderWidth:0},
+          {label:'S&P 500',    data:dSPX, backgroundColor:'#B4B2A9', borderRadius:3, borderWidth:0},
+          {label:'Nasdaq-100', data:dNDX, backgroundColor:'#D3D1C7', borderRadius:3, borderWidth:0},
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmtP(c.raw)}`}}},
+        scales:{
+          x:{ticks:{font:{size:11}}, grid:{display:false}},
+          y:{ticks:{font:{size:10}, color:'#888', callback:v=>v+'%'}, grid:{color:'rgba(128,128,128,0.08)'}}
+        }
+      }
+    });
   }
 }
 
@@ -743,185 +614,254 @@ function buildRentCharts() {
 function renderOpsHTML() {
   const ops = D.ops || [];
   if (!ops.length) return '<div style="color:var(--text3);font-size:12px;padding:.5rem 0">Sin operaciones registradas</div>';
-  const esAlcista = t => ['APERTURA','AUMENTO'].includes(t);
-  return ops.slice(0,20).map(o => {
-    const alcista = esAlcista(o.tipo);
-    const triangulo = alcista ? '▲' : '▼';
-    const color = alcista ? 'var(--green)' : 'var(--red)';
-    return `<div style="display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
-      <span style="font-size:14px;color:${color};text-align:center;font-weight:700">${triangulo}</span>
-      <div style="min-width:0"><div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div><div style="font-size:10px;color:var(--text3)">${o.ticker} · ${o.fecha}</div></div>
-      <div style="text-align:right;flex-shrink:0;min-width:90px"><div style="font-size:12px;font-weight:600">${o.precio}</div><div style="font-size:10px;color:var(--text2)">Δ ${o.cambio}</div></div>
+
+  const tipoCls = {
+    'APERTURA': 'op-ap',
+    'CIERRE':   'op-ci',
+    'AUMENTO':  'op-au',
+    'RECORTE':  'op-re',
+  };
+
+  return ops.slice(0, 20).map(o => {
+    const cls = tipoCls[o.tipo] || 'op-re';
+    return `<div style="display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <span class="${cls}" style="text-align:center;width:72px">${o.tipo}</span>
+      <div style="min-width:0">
+        <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div>
+        <div style="font-size:10px;color:var(--text3)">${o.ticker} · ${o.fecha}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;min-width:90px">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:1px">Precio</div>
+        <div style="font-size:12px;font-weight:600">${o.precio}</div>
+        <div style="font-size:10px;color:var(--text2)">Δ ${o.cambio}</div>
+      </div>
     </div>`;
   }).join('');
 }
 
-// ── PARSER EN DESARROLLO ────────────────────────────────────
+// ── PARSER RESULTADOS ────────────────────────────────────────
 function parseDev(rows) {
-  return rows.filter(r => r[0] && String(r[0]).trim() && !String(r[0]).startsWith('Concepto'))
-    .map(r => ({ concepto:String(r[0]||'').trim(), tipo:String(r[1]||'').trim(), pista:String(r[2]||'').trim(), fecha:String(r[3]||'').trim(), notas:String(r[4]||'').trim() }))
-    .filter(r => r.tipo);
+  return rows.filter(r => r[0] && String(r[0]).trim() && !String(r[0]).startsWith('Ticker'))
+    .map(r => ({
+      ticker:   String(r[0]||'').replace('$','').trim().toUpperCase(),
+      empresa:  String(r[1]||'').trim(),
+      estado:   String(r[2]||'').trim(),
+      fecha:    String(r[3]||'').trim(),
+      notas:    String(r[4]||'').trim(),
+    })).filter(r => r.empresa);
 }
 
-// ── EN DESARROLLO HTML ────────────────────────────────────────
+// ── PRÓXIMOS RESULTADOS HTML ──────────────────────────────────
 function buildDevHTML(items) {
-  if (!items.length) return '<div class="ebox">Sin datos en la pestaña EN_DESARROLLO del sheet.</div>';
-  const tipoConfig = { 'Tesis':{icon:'🔍',color:'#185fa5',bg:'#e6f1fb'}, 'Investigación':{icon:'🧪',color:'#0f6e56',bg:'#e1f5ee'}, 'Artículo':{icon:'✍️',color:'#854f0b',bg:'#faeeda'}, 'Modelo financiero':{icon:'📊',color:'#533AB7',bg:'#ede8fb'}, 'Herramienta':{icon:'🛠️',color:'#D85A30',bg:'#fce8e0'} };
-  const grupos = {};
-  items.forEach(i => { const t=i.tipo.trim(); if(!grupos[t]) grupos[t]=[]; grupos[t].push(i); });
-  const sorted = [...items].sort((a,b) => {
-    const parseF = f => { if(!f||f==='Sin decidir'||f==='—') return null; const s=f.match(/Semana del (\d+)/i); if(s) return parseInt(s[1]); if(f.toLowerCase().includes('abril')||f.toLowerCase().includes('mayo')) return 200; const d=new Date(f); if(!isNaN(d)) return d.getTime()/1000000; return null; };
-    const fa=parseF(a.fecha), fb=parseF(b.fecha);
-    if(fa===null&&fb===null) return 0; if(fa===null) return 1; if(fb===null) return -1; return fa-fb;
+  if (!items.length) return '<div class="ebox">Sin datos en la pestaña RESULTADOS del sheet.</div>';
+
+  // Ordenar: fechas exactas primero (más próxima), luego aproximadas, luego sin fecha
+  const sorted = [...items].sort((a, b) => {
+    const parseF = f => {
+      if (!f || f === '—') return null;
+      // Fecha DD/MM/YYYY
+      if (f.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        const [d,m,y] = f.split('/');
+        return new Date(y,m-1,d).getTime();
+      }
+      // Fecha YYYY-MM-DD
+      const d = new Date(f);
+      if (!isNaN(d.getTime())) return d.getTime();
+      // Aproximadas — asignar peso por mes mencionado
+      const meses = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12};
+      for (const [mes, num] of Object.entries(meses)) {
+        if (f.toLowerCase().includes(mes)) return new Date(2026, num-1, 15).getTime() + 1;
+      }
+      return 99999999999999;
+    };
+    const fa = parseF(a.fecha), fb = parseF(b.fecha);
+    if (fa === null && fb === null) return 0;
+    if (fa === null) return 1;
+    if (fb === null) return -1;
+    return fa - fb;
   });
-  const cards = sorted.map(item => {
-    const tipo=item.tipo.trim(); const cfg=tipoConfig[tipo]||{icon:'📌',color:'#6b6b66',bg:'#f0f0ed'};
-    const notasBadge = item.notas ? `<div style="font-size:11px;color:var(--text2);margin-top:6px;font-style:italic">${item.notas}</div>` : '';
-    return `<div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <span style="background:${cfg.bg};color:${cfg.color};font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px">${cfg.icon} ${tipo}</span>
-        <span style="font-size:11px;color:var(--text3)">📅 ${item.fecha||'—'}</span>
-      </div>
-      <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:2px">${item.pista||'—'}</div>${notasBadge}</div>`;
-  }).join('');
-  const resumen = Object.entries(grupos).map(([tipo,arr]) => { const cfg=tipoConfig[tipo.trim()]||{icon:'📌',color:'#6b6b66',bg:'#f0f0ed'}; return `<div style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="background:${cfg.bg};color:${cfg.color};padding:2px 8px;border-radius:12px;font-weight:600">${cfg.icon} ${tipo}: ${arr.length}</span></div>`; }).join('');
-  return `<div style="margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:13px;font-weight:600">${items.length} publicaciones en preparación</div><div style="display:flex;gap:6px;flex-wrap:wrap">${resumen}</div></div><div class="dev-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">${cards}</div></div>`;
-}
 
-// ── ESTUDIADOS HTML ──────────────────────────────────────────
-function buildEstudiadosHTML(pos) {
-  const activos = (pos||[]).filter(p => p.ticker && p.ticker !== 'LIQUIDEZ' && p.empresa !== '—' && !p.ocultar);
-  if (!activos.length) return '<div class="ebox">Sin datos en la pestaña ESTUDIADOS del sheet.</div>';
-  const conCagr = activos.filter(p => p.cagr3y !== null && p.cagr3y !== undefined);
-  const rows = activos.map(p => {
-    const gf=`https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
-    const rv=parseInt(p.riesgo)||0; const rc=rv<=3?'rlo':rv<=6?'rmd':'rhi';
-    const tL=p.urlTesis?`<a href="${p.urlTesis}" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>`:'';
-    const mL=p.urlModelo?`<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>`:'';
-    const cagrFmt=p.cagr3y!==null?(p.cagr3y>=0?'+':'')+p.cagr3y.toFixed(1)+'%':'—';
-    const cagrCls=p.cagr3y!==null?(p.cagr3y>=0?'pos':'neg'):'';
-    const tooltip=p.resumen?`title="${p.resumen.replace(/"/g,'&quot;')}"` :'';
-    const pmKeyEst = p.ticker.split(':').pop().toLowerCase();
-    const hasPMEst = !!(D.pm[pmKeyEst] || D.pm[p.empresa.trim().toLowerCase()]);
-    const precioDetalleEst = p.precioEur || p.precioNum || null;
-    const detBtnEst = hasPMEst ? `<button class="det-btn has-data" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\'")}',${precioDetalleEst||'null'},false)">📊 Detalle</button>` : '';
-    return `<tr><td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td><td class="col-hide-mobile">${p.moneda}</td><td class="col-hide-mobile">${p.precio}</td><td class="col-hide-mobile" style="font-weight:500">${p.po}</td><td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td><td style="text-align:right">${detBtnEst}</td><td class="col-hide-mobile">${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td><td style="text-align:right">${tL}${mL}</td></tr>`;
-  }).join('');
-  return `<div class="card"><div class="ch"><span class="ct">Valores estudiados — fuera de cartera</span><span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span></div><div class="ox"><table><thead><tr><th style="width:28%;text-align:left">Empresa</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio actual</th><th class="col-hide-mobile">P.O. 3a</th><th>CAGR 3a</th><th style="text-align:right">Detalle</th><th class="col-hide-mobile">Riesgo</th><th style="text-align:right">Links</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
-}
+  const enCartera = sorted.filter(r => r.estado === 'En cartera');
+  const seguimiento = sorted.filter(r => r.estado !== 'En cartera');
 
-// ── CONTRIBUCIÓN HTML ────────────────────────────────────────
-function buildContribHTML() {
-  // Deduplicar por empresa (el mapa guarda la misma entrada con varias claves)
-  const seen = new Set();
-  const items = Object.values(D.pm).filter(v => {
-    if (seen.has(v.empresa)) return false;
-    seen.add(v.empresa);
-    return true;
-  });
-  // Incluir también valores de Estudiados que tengan precio en el mapa
-  [...(D.est||[])].forEach(p => {
-    if (!seen.has(p.empresa)) {
-      const key = p.ticker.split(':').pop().toLowerCase();
-      const pm = D.pm[key] || D.pm[p.empresa.trim().toLowerCase()];
-      if (pm) { seen.add(p.empresa); items.push(pm); }
-    }
-  });
-  const conDatos = items.filter(i => i.totalCombinado !== null && i.totalCombinado !== undefined);
-  if (!conDatos.length) return '<div style="font-size:11px;color:var(--text3);font-style:italic;padding:8px 0">Sin datos en PRECIO_MEDIO</div>';
+  function renderGrupo(lista, titulo) {
+    if (!lista.length) return '';
+    const rows = lista.map(r => {
+      const esExacta = r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/) || (!isNaN(new Date(r.fecha).getTime()) && r.fecha.includes('-'));
+      const fechaStyle = esExacta
+        ? 'font-weight:600;color:var(--text)'
+        : 'color:var(--text2);font-style:italic';
+      const notaBadge = r.notas
+        ? `<span style="font-size:10px;background:var(--abg);color:var(--amber);padding:1px 6px;border-radius:8px;margin-left:6px">${r.notas}</span>`
+        : '';
+      return `<tr>
+        <td style="font-weight:600">${r.empresa}<span class="tsub">${r.ticker}</span></td>
+        <td style="${fechaStyle};text-align:right">
+          ${esExacta ? '📅' : '~'} ${r.fecha}${notaBadge}
+        </td>
+      </tr>`;
+    }).join('');
 
-  const sorted = [...conDatos].sort((a,b) => b.totalCombinado - a.totalCombinado);
-  const top8   = sorted.slice(0, 8);
-  const bot8   = [...conDatos].sort((a,b) => a.totalCombinado - b.totalCombinado).slice(0, 8);
-
-  function row(item) {
-    const cls = item.totalCombinado >= 0 ? 'pos' : 'neg';
-    const val = item.totalCombinado >= 0 ? '+' : '';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border)">
-      <span style="font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%">${item.empresa.length > 14 ? item.empresa.substring(0,14).trim() + '…' : item.empresa}</span>
-      <span style="font-size:12px;font-weight:700" class="${cls}">${val}${Math.round(item.totalCombinado).toLocaleString('es-ES')} €</span>
+    return `
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:8px">${titulo}</div>
+      <div class="card"><div class="ox"><table>
+        <tbody>${rows}</tbody>
+      </table></div></div>
     </div>`;
   }
 
   return `
-    <div style="margin-bottom:10px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--green);margin-bottom:4px">▲ Top 8 que más aportan</div>
-      <div style="overflow-y:auto;max-height:155px;scrollbar-width:thin;">
-        ${top8.map(row).join('')}
-      </div>
+<div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:13px;font-weight:600">Próximos resultados — ${sorted.length} empresas</div>
+    <div style="display:flex;gap:6px">
+      <span style="font-size:11px;background:var(--gbg);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:600">📂 En cartera: ${enCartera.length}</span>
+      ${seguimiento.length ? `<span style="font-size:11px;background:var(--bbg);color:var(--blue);padding:2px 8px;border-radius:10px;font-weight:600">👁 Seguimiento: ${seguimiento.length}</span>` : ''}
     </div>
-    <div>
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--red);margin-bottom:4px">▼ Top 8 que menos aportan</div>
-      <div style="overflow-y:auto;max-height:155px;scrollbar-width:thin;">
-        ${bot8.map(row).join('')}
-      </div>
-    </div>`;
+  </div>
+  ${renderGrupo(enCartera, 'En cartera')}
+  ${renderGrupo(seguimiento, 'En seguimiento')}
+</div>`;
+}
+
+// ── ESTUDIADOS HTML ──────────────────────────────────────────
+function buildEstudiadosHTML(pos) {
+  const activos = (pos||[]).filter(p => p.ticker && p.ticker !== 'LIQUIDEZ' && p.empresa !== '—');
+  if (!activos.length) return '<div class="ebox">Sin datos en la pestaña ESTUDIADOS del sheet.</div>';
+
+  const conCagr = activos.filter(p => p.cagr3y !== null && p.cagr3y !== undefined);
+
+  const rows = activos.map(p => {
+    const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
+    const rv = parseInt(p.riesgo)||0;
+    const rc = rv<=3?'rlo':rv<=6?'rmd':'rhi';
+    const tL = p.urlTesis ? `<a href="${p.urlTesis}" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>` : '';
+    const mL = p.urlModelo ? `<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>` : '';
+    const cagrFmt = p.cagr3y !== null ? (p.cagr3y >= 0 ? '+' : '') + p.cagr3y.toFixed(1) + '%' : '—';
+    const cagrCls = p.cagr3y !== null ? (p.cagr3y >= 0 ? 'pos' : 'neg') : '';
+    const tooltip = p.resumen ? `title="${p.resumen.replace(/"/g, '&quot;')}"` : '';
+    return `<tr>
+      <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+      <td>${p.moneda}</td>
+      <td>${p.precio}</td>
+      <td style="font-weight:500">${p.po}</td>
+      <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
+      <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
+      <td style="text-align:right">${tL}${mL}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+<div class="card">
+  <div class="ch">
+    <span class="ct">Valores estudiados — fuera de cartera</span>
+    <span class="cm">${activos.length} empresas · ${conCagr.length} con P.O.</span>
+  </div>
+  <div class="ox"><table>
+    <thead><tr>
+      <th style="width:28%;text-align:left">Empresa</th>
+      <th>Moneda</th><th>Precio actual</th><th>P.O. 3a</th>
+      <th>CAGR 3a</th><th>Riesgo</th>
+      <th style="text-align:right">Links</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>
+</div>`;
 }
 
 // ── CARTERA HTML ──────────────────────────────────────────────
 function buildCarteraHTML(pos, nombre, id) {
   const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ');
   const liq = (pos||[]).find(p => p.ticker === 'LIQUIDEZ');
-  const conCagr = activos.filter(p => p.cagr3y !== null && p.peso > 0);
-  const pesoTotal = conCagr.reduce((s,p) => s+p.peso, 0);
-  const cagrPonderado = pesoTotal > 0 ? conCagr.reduce((s,p) => s+p.cagr3y*(p.peso/pesoTotal), 0) : null;
-  const cagrPondFmt = cagrPonderado !== null ? (cagrPonderado>=0?'+':'')+cagrPonderado.toFixed(1)+'%' : '—';
-  const pctConPO = pesoTotal > 0 ? pesoTotal.toFixed(1)+'% de la cartera' : '';
 
-  const posSorted = [...(pos||[])].sort((a,b) => (b.peso||0) - (a.peso||0));
-  const rows = posSorted.map(p => {
-    const gf=`https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
-    const rv=parseInt(p.riesgo)||0; const rc=rv<=3?'rlo':rv<=6?'rmd':'rhi';
-    const tL=p.urlTesis?`<a href="${p.urlTesis}" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>`:p.tieneTesis?`<span class="ilink" style="opacity:.3;cursor:default">✍ Tesis</span>`:'';
-    const mL=p.urlModelo?`<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>`:p.tieneModelo?`<span class="ilink" style="opacity:.3;cursor:default">📊 Modelo</span>`:'';
-    const cagrFmt=p.cagr3y!==null?(p.cagr3y>=0?'+':'')+p.cagr3y.toFixed(1)+'%':'—';
-    const cagrCls=p.cagr3y!==null?(p.cagr3y>=0?'pos':'neg'):'';
-    const tooltip=p.resumen?`title="${p.resumen.replace(/"/g,'&quot;')}"` :'';
-    const antFmt=p.antiguedad!==null&&p.antiguedad!==undefined?p.antiguedad.toFixed(1)+'a':'—';
-    // Botón detalle — azul si tiene datos PM, gris si no
-    const pmKey = p.ticker.split(':').pop().toLowerCase();
-    const hasPM = !!(D.pm[pmKey] || D.pm[p.empresa.trim().toLowerCase()]);
-    const precioDetalle = p.precioEur || p.precioNum || null;
-    const detBtn = hasPM ? `<button class="det-btn has-data" onclick="showDetalle('${p.ticker}','${p.empresa.replace(/'/g,"\\'")}',${precioDetalle||'null'},true)">📊 Detalle</button>` : '';
+  // CAGR medio ponderado por peso (solo posiciones con PO)
+  const conCagr = activos.filter(p => p.cagr3y !== null && p.peso > 0);
+  const pesoTotal = conCagr.reduce((s, p) => s + p.peso, 0);
+  const cagrPonderado = pesoTotal > 0
+    ? conCagr.reduce((s, p) => s + p.cagr3y * (p.peso / pesoTotal), 0)
+    : null;
+  const cagrPondFmt = cagrPonderado !== null
+    ? (cagrPonderado >= 0 ? '+' : '') + cagrPonderado.toFixed(1) + '%'
+    : '—';
+  const pctConPO = pesoTotal > 0 ? pesoTotal.toFixed(1) + '% de la cartera' : '';
+
+  const rows = (pos||[]).map(p => {
+    const gf = `https://www.google.com/finance/quote/${encodeURIComponent(p.ticker.replace(':','.'))}`;
+    const rv = parseInt(p.riesgo)||0;
+    const rc = rv<=3?'rlo':rv<=6?'rmd':'rhi';
+    const tL = p.urlTesis ? `<a href="${p.urlTesis}" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>`
+              : p.tieneTesis ? `<span class="ilink" style="opacity:.3;cursor:default">✍ Tesis</span>` : '';
+    const mL = p.urlModelo ? `<a href="${p.urlModelo}" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>`
+              : p.tieneModelo ? `<span class="ilink" style="opacity:.3;cursor:default">📊 Modelo</span>` : '';
+    const cagrFmt = p.cagr3y !== null ? (p.cagr3y >= 0 ? '+' : '') + p.cagr3y.toFixed(1) + '%' : '—';
+    const cagrCls = p.cagr3y !== null ? (p.cagr3y >= 0 ? 'pos' : 'neg') : '';
+    const tooltip = p.resumen ? `title="${p.resumen.replace(/"/g, '&quot;')}"` : '';
+    const antFmt = p.antiguedad !== null && p.antiguedad !== undefined
+      ? p.antiguedad < 1 ? p.antiguedad.toFixed(1) + 'a' : p.antiguedad.toFixed(1) + 'a'
+      : '—';
     return `<tr>
-      <td ${tooltip} style="${p.resumen?'cursor:help':''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
-      <td class="col-hide-mobile" style="color:var(--text2)">${p.geo||'—'}</td>
-      <td class="col-hide-mobile">${p.moneda}</td>
-      <td class="col-hide-mobile">${p.precio}</td>
+      <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+      <td class="col-hide-mobile" style="color:var(--text2)">${p.geo || '—'}</td>
+      <td class="col-hide-mobile">${p.moneda}</td><td class="col-hide-mobile">${p.precio}</td>
       <td class="col-hide-mobile" style="font-weight:500">${p.po}</td>
       <td class="${cagrCls}" style="font-weight:600">${cagrFmt}</td>
-      <td style="text-align:right">${detBtn}</td>
-      <td class="col-hide-mobile" style="font-weight:600">${p.pesoFmt}</td>
+      <td style="font-weight:600">${p.pesoFmt}</td>
       <td class="col-hide-mobile" style="color:var(--text2);font-size:11px">${antFmt}</td>
-      <td class="col-hide-mobile">${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
+      <td>${p.riesgo!=='—'?`<span class="risk ${rc}">${p.riesgo}</span>`:'—'}</td>
       <td style="text-align:right">${tL}${mL}</td>
     </tr>`;
   }).join('');
 
+  // Donut geografía
+  const geoMap = {};
+  activos.forEach(p => {
+    if (!p.geo || !p.peso) return;
+    geoMap[p.geo] = (geoMap[p.geo]||0) + p.peso;
+  });
+  const geoLabels = Object.keys(geoMap);
+  const geoVals   = geoLabels.map(g => +geoMap[g].toFixed(1));
+
   return `
 <div class="mgrid" style="margin-bottom:16px">
-  ${cagrPonderado!==null?`<div class="metric"><div class="mlbl">CAGR esperado ponderado</div><div class="mval ${cagrPonderado>=0?'pos':'neg'}">${cagrPondFmt}</div><div class="msub">${pctConPO} con P.O.</div></div>`:''}
-  ${liq?`<div class="metric"><div class="mlbl">Liquidez</div><div class="mval">${liq.pesoFmt}</div><div class="msub">${activos.length} posiciones activas</div></div>`:''}
-  <div class="metric"><div class="mlbl">Riesgo medio ponderado</div><div class="mval">${(()=>{const conR=activos.filter(p=>p.riesgo!=='—'&&p.peso>0);const pt=conR.reduce((s,p)=>s+p.peso,0);return pt>0?(conR.reduce((s,p)=>s+(parseInt(p.riesgo)||0)*(p.peso/pt),0)).toFixed(1):'—';})()}<span style="font-size:13px;font-weight:400">/10</span></div><div class="msub">ponderado por peso</div></div>
+  ${cagrPonderado !== null ? `
+  <div class="metric">
+    <div class="mlbl">CAGR esperado ponderado</div>
+    <div class="mval ${cagrPonderado >= 0 ? 'pos' : 'neg'}">${cagrPondFmt}</div>
+    <div class="msub">${pctConPO} con P.O.</div>
+  </div>` : ''}
+  ${liq ? `
+  <div class="metric">
+    <div class="mlbl">Liquidez</div>
+    <div class="mval">${liq.pesoFmt}</div>
+    <div class="msub">${activos.length} posiciones activas</div>
+  </div>` : ''}
+  <div class="metric">
+    <div class="mlbl">Riesgo medio ponderado</div>
+    <div class="mval">${(() => {
+      const conR = activos.filter(p => p.riesgo !== '—' && p.peso > 0);
+      const pt = conR.reduce((s,p) => s + p.peso, 0);
+      return pt > 0 ? (conR.reduce((s,p) => s + (parseInt(p.riesgo)||0) * (p.peso/pt), 0)).toFixed(1) : '—';
+    })()}<span style="font-size:13px;font-weight:400">/10</span></div>
+    <div class="msub">ponderado por peso</div>
+  </div>
 </div>
-<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:16px">
+<div class="cgrid">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
     <div class="donut-wrapper" style="display:flex;gap:0;align-items:stretch">
-      <div style="flex:1;position:relative;height:320px"><canvas id="c-donut-${id}"></canvas></div>
-      <div id="tesis-panel-${id}" class="tesis-panel-mobile" style="display:none;width:220px;padding:14px 14px 14px 12px;border-left:0.5px solid var(--border);overflow-y:auto;max-height:320px"></div>
+      <div style="flex:1;position:relative;height:340px"><canvas id="c-donut-${id}"></canvas></div>
+      <div id="tesis-panel-${id}" class="tesis-panel-mobile" style="display:none;width:220px;padding:14px 14px 14px 12px;border-left:0.5px solid var(--border);overflow-y:auto;max-height:340px"></div>
     </div>
     <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Haz clic en un segmento para ver la tesis</div>
   </div>
   <div class="cwrap" style="margin-bottom:0">
-    <div class="ctit">Últimos movimientos</div>
-    <div style="overflow-y:auto;max-height:300px">
+    <div class="ctit">Distribución geográfica</div>
+    <div style="position:relative;height:200px"><canvas id="c-geo-${id}"></canvas></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border);overflow-y:auto;max-height:160px">
+      <div class="ctit" style="margin-bottom:8px">Últimos movimientos</div>
       ${renderOpsHTML()}
     </div>
-  </div>
-  <div class="cwrap" style="margin-bottom:0">
-    <div class="ctit">Contribución total combinado</div>
-    ${buildContribHTML()}
   </div>
 </div>
 <div class="card">
@@ -932,8 +872,7 @@ function buildCarteraHTML(pos, nombre, id) {
   <div class="ox"><table>
     <thead><tr>
       <th style="width:22%;text-align:left">Empresa</th>
-      <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th>
-      <th>CAGR 3a</th><th>Detalle</th><th class="col-hide-mobile">Peso</th><th class="col-hide-mobile">Antigüedad</th><th class="col-hide-mobile">Riesgo</th>
+      <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th class="col-hide-mobile">Antigüedad</th><th>Riesgo</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
@@ -943,27 +882,113 @@ function buildCarteraHTML(pos, nombre, id) {
 
 function buildCarteraCharts(id, pos) {
   const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ' && p.peso > 0);
+
+  // Donut con labels dentro
   const elD = document.getElementById(`c-donut-${id}`);
   if (elD && activos.length) {
-    const activosSorted = [...activos].sort((a,b) => b.peso-a.peso);
+    const activosSorted = [...activos].sort((a,b) => b.peso - a.peso);
+
     const donutClick = (evt) => {
-      const chart = CH[`d-${id}`]; if (!chart) return;
-      const pts = chart.getElementsAtEventForMode(evt,'nearest',{intersect:true},false);
+      const chart = CH[`d-${id}`];
+      if (!chart) return;
+      const pts = chart.getElementsAtEventForMode(evt, 'nearest', {intersect:true}, false);
       if (!pts.length) return;
-      const pos = activosSorted[pts[0].index];
-      const panel = document.getElementById('tesis-panel-'+id);
+      const idx = pts[0].index;
+      const pos = activosSorted[idx];
+      const panel = document.getElementById('tesis-panel-' + id);
       if (!panel || !pos.resumen) return;
-      const tL = pos.urlTesis?`<a href="${pos.urlTesis}" target="_blank" class="ilink ilink-tesis" style="margin-top:8px;display:inline-flex">✍ Tesis completa</a>`:'';
-      panel.style.display='block';
-      panel.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div><div style="font-size:13px;font-weight:700">${pos.empresa.split(' ').slice(0,2).join(' ')}</div><div style="font-size:10px;color:var(--text3);margin-top:1px">${pos.ticker} · ${pos.pesoFmt}</div></div><button onclick="document.getElementById('tesis-panel-${id}').style.display='none'" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0">×</button></div><div style="font-size:11px;line-height:1.7;color:var(--text2)">${pos.resumen}</div><div style="margin-top:12px">${tL}</div>`;
+      const tL = pos.urlTesis ? `<a href="${pos.urlTesis}" target="_blank" class="ilink ilink-tesis" style="margin-top:8px;display:inline-flex">✍ Tesis completa</a>` : '';
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:13px;font-weight:700">${pos.empresa.split(' ').slice(0,2).join(' ')}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">${pos.ticker} · ${pos.pesoFmt}</div>
+          </div>
+          <button onclick="document.getElementById('tesis-panel-${id}').style.display='none'"
+            style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0">×</button>
+        </div>
+        <div style="font-size:11px;line-height:1.7;color:var(--text2)">${pos.resumen}</div>
+        <div style="margin-top:12px">${tL}</div>`;
     };
-    CH[`d-${id}`] = new Chart(elD, { type:'doughnut', data:{ labels:activosSorted.map(p=>p.ticker.split(':').pop()), datasets:[{data:activosSorted.map(p=>p.peso),backgroundColor:COLS,borderWidth:2,borderColor:'rgba(255,255,255,0.15)'}] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'52%', onClick:donutClick, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>{ const p=activosSorted[c.dataIndex]; return ` ${c.label}: ${c.raw.toFixed(1)}%${p&&p.resumen?' · clic para tesis':''}`; }}} } }, plugins:[{ id:'labels', afterDraw(chart) { const {ctx,chartArea:{left,right,top,bottom}}=chart; const cx=(left+right)/2,cy=(top+bottom)/2; chart.getDatasetMeta(0).data.forEach((arc,i)=>{ if(activosSorted[i].peso<3.5) return; const angle=(arc.startAngle+arc.endAngle)/2; const r=(arc.outerRadius+arc.innerRadius)/2; const x=cx+Math.cos(angle)*r,y=cy+Math.sin(angle)*r; ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff'; ctx.fillText(activosSorted[i].ticker.split(':').pop(),x,y-6); ctx.font='10px -apple-system,sans-serif'; ctx.fillText(activosSorted[i].peso.toFixed(1)+'%',x,y+6); ctx.restore(); }); } }] });
+
+    CH[`d-${id}`] = new Chart(elD, {
+      type:'doughnut',
+      data:{
+        labels: activosSorted.map(p=>p.ticker.split(':').pop()),
+        datasets:[{data:activosSorted.map(p=>p.peso), backgroundColor:COLS, borderWidth:2, borderColor:'rgba(255,255,255,0.15)'}]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false, cutout:'52%',
+        onClick: donutClick,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:c=>{
+            const p = activosSorted[c.dataIndex];
+            return ` ${c.label}: ${c.raw.toFixed(1)}%${p && p.resumen ? ' · clic para tesis' : ''}`;
+          }}}
+        }
+      },
+      plugins:[{
+        id:'labels',
+        afterDraw(chart) {
+          const {ctx, chartArea:{left,right,top,bottom}} = chart;
+          const cx=(left+right)/2, cy=(top+bottom)/2;
+          const meta = chart.getDatasetMeta(0);
+          meta.data.forEach((arc,i) => {
+            if (activosSorted[i].peso < 3.5) return;
+            const angle = (arc.startAngle+arc.endAngle)/2;
+            const r = (arc.outerRadius+arc.innerRadius)/2;
+            const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
+            ctx.save();
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
+            ctx.fillText(activosSorted[i].ticker.split(':').pop(), x, y-6);
+            ctx.font='10px -apple-system,sans-serif';
+            ctx.fillText(activosSorted[i].peso.toFixed(1)+'%', x, y+6);
+            ctx.restore();
+          });
+        }
+      }]
+    });
   }
-  const elG = document.getElementById('c-geo-'+id);
+
+  // Donut geografía
+  const elG = document.getElementById('c-geo-' + id);
   if (elG) {
-    const geoMap={}; activos.forEach(p=>{if(p.geo&&p.peso) geoMap[p.geo]=(geoMap[p.geo]||0)+p.peso;});
-    const geoL=Object.keys(geoMap); const geoV=geoL.map(g=>+geoMap[g].toFixed(1));
-    CH['g-'+id] = new Chart(elG, { type:'doughnut', data:{labels:geoL,datasets:[{data:geoV,backgroundColor:['#378ADD','#1D9E75','#EF9F27','#D4537E','#533AB7','#D85A30'],borderWidth:2,borderColor:'rgba(255,255,255,0.15)'}]}, options:{ responsive:true, maintainAspectRatio:false, cutout:'52%', plugins:{ legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:10,font:{size:11},padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toFixed(1)}%`}} } }, plugins:[{ id:'geoLabels', afterDraw(chart) { const {ctx,chartArea:{left,right,top,bottom}}=chart; const cx=(left+right)/2,cy=(top+bottom)/2; chart.getDatasetMeta(0).data.forEach((arc,i)=>{ if(geoV[i]<8) return; const angle=(arc.startAngle+arc.endAngle)/2; const r=(arc.outerRadius+arc.innerRadius)/2; ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff'; ctx.fillText(geoV[i].toFixed(1)+'%',cx+Math.cos(angle)*r,cy+Math.sin(angle)*r); ctx.restore(); }); } }] });
+    const geoMap = {};
+    activos.forEach(p => { if (p.geo && p.peso) geoMap[p.geo] = (geoMap[p.geo]||0) + p.peso; });
+    const geoL = Object.keys(geoMap);
+    const geoV = geoL.map(g => +geoMap[g].toFixed(1));
+    const geoCols = ['#378ADD','#1D9E75','#EF9F27','#D4537E','#533AB7','#D85A30'];
+    CH['g-'+id] = new Chart(elG, {
+      type:'doughnut',
+      data:{ labels:geoL, datasets:[{ data:geoV, backgroundColor:geoCols, borderWidth:2, borderColor:'rgba(255,255,255,0.15)' }] },
+      options:{
+        responsive:true, maintainAspectRatio:false, cutout:'52%',
+        plugins:{
+          legend:{ display:true, position:'bottom', labels:{ boxWidth:10, boxHeight:10, font:{size:11}, padding:10 } },
+          tooltip:{ callbacks:{ label:c=>` ${c.label}: ${c.raw.toFixed(1)}%` } }
+        }
+      },
+      plugins:[{
+        id:'geoLabels',
+        afterDraw(chart) {
+          const {ctx, chartArea:{left,right,top,bottom}} = chart;
+          const cx=(left+right)/2, cy=(top+bottom)/2;
+          chart.getDatasetMeta(0).data.forEach((arc,i) => {
+            if (geoV[i] < 8) return;
+            const angle=(arc.startAngle+arc.endAngle)/2;
+            const r=(arc.outerRadius+arc.innerRadius)/2;
+            ctx.save();
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
+            ctx.fillText(geoV[i].toFixed(1)+'%', cx+Math.cos(angle)*r, cy+Math.sin(angle)*r);
+            ctx.restore();
+          });
+        }
+      }]
+    });
   }
 }
 </script>
