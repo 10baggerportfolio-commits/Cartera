@@ -1184,13 +1184,16 @@ function filtrarArticulos() {
       `<span style="font-size:10px;background:var(--bg3);color:var(--text2);padding:1px 5px;border-radius:3px;margin-right:3px">${t}</span>`
     ).join('');
     const mainTicker = p.tickers[0] || '';
-    const logoUrl = mainTicker ? `https://assets.parqet.com/logos/symbol/${mainTicker}?format=jpg` : '';
     return `
     <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
       <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:10px;display:flex;flex-direction:column"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:100%;height:100px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden">
-          ${logoUrl ? `<img src="${logoUrl}" alt="${mainTicker}" style="max-height:68px;max-width:160px;object-fit:contain" onerror="this.outerHTML='<span style=\'font-size:26px;font-weight:800;color:var(--text2)\'>${mainTicker}</span>'">` : `<span style="font-size:26px;font-weight:800;color:var(--text2)">${mainTicker}</span>`}
+        <div style="width:100%;height:140px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden">
+          ${p.img
+            ? `<img src="${p.img}" alt="${mainTicker}" style="width:100%;height:140px;object-fit:cover;display:block">`
+            : rss.img
+              ? `<img src="${rss.img}" alt="${mainTicker}" style="width:100%;height:140px;object-fit:cover;display:block">`
+              : `<span style="font-size:26px;font-weight:800;color:var(--text2)">${mainTicker}</span>`}
         </div>
         <div style="padding:12px 14px;flex:1;display:flex;flex-direction:column">
           ${fechaFmt ? `<div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">${fechaFmt}</div>` : ''}
