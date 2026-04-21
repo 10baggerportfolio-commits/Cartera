@@ -1062,17 +1062,6 @@ function buildCarteraHTML(pos, nombre, id) {
     <div class="msub">ponderado por peso</div>
   </div>
 </div>
-${ganancias.length > 0 ? `
-<div class="cgrid" style="margin-bottom:16px">
-  <div class="cwrap" style="margin-bottom:0">
-    <div class="ctit">✅ Mejor rentabilidad latente</div>
-    ${renderContrib(top3, 'top', 'pos')}
-  </div>
-  <div class="cwrap" style="margin-bottom:0">
-    <div class="ctit">⚠️ Menor rentabilidad latente</div>
-    ${renderContrib(bot3, 'bot', 'neg')}
-  </div>
-</div>` : ''}
 <div class="cgrid">
   <div class="cwrap" style="margin-bottom:0">
     <div class="ctit">Composición ${nombre}</div>
@@ -1082,29 +1071,33 @@ ${ganancias.length > 0 ? `
     </div>
     <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">Haz clic en un segmento para ver la tesis</div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:0">
-    <div class="cwrap" style="margin-bottom:0">
-      <div class="ctit">Distribución geográfica</div>
-      <div style="position:relative;height:160px"><canvas id="c-geo-${id}"></canvas></div>
-    </div>
-    <div class="cwrap" style="margin-bottom:0;overflow-y:auto;max-height:220px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0">
+    <div class="cwrap" style="margin-bottom:0;overflow-y:auto;max-height:240px">
       <div class="ctit" style="margin-bottom:8px">Últimos movimientos</div>
       ${renderOpsHTML()}
     </div>
     <div class="cwrap" style="margin-bottom:0">
-      <div class="ctit">✅ Mayor ganancia latente</div>
-      <div style="overflow-y:auto;max-height:80px;margin-bottom:10px">
-        ${ganancias.slice(0,8).map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px">
-          <span style="font-weight:500">${p.ticker.split(':').pop()}</span>
-          <span class="pos" style="font-weight:700">${p.gananciaPct>=0?'+':''}${p.gananciaPct.toFixed(1)}%</span>
-        </div>`).join('')}
+      <div class="ctit" style="margin-bottom:6px">✅ Más aportan (capital)</div>
+      <div style="overflow-y:auto;max-height:88px;margin-bottom:10px">
+        ${ganancias.slice(0,8).map(p => {
+          const ganEur = p.precioMedio && p.precioNum && p.ntit && p.ntit !== '—'
+            ? ((p.precioNum - p.precioMedio) * parseFloat(String(p.ntit).replace(',','.'))).toFixed(0)
+            : null;
+          const ganFmt = ganEur !== null ? (parseFloat(ganEur)>=0?'+':'')+parseFloat(ganEur).toLocaleString('es-ES')+'€' : p.gananciaPct.toFixed(1)+'%';
+          const cls = (ganEur!==null?parseFloat(ganEur):p.gananciaPct) >= 0 ? 'pos' : 'neg';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
+        }).join('')}
       </div>
-      <div class="ctit" style="margin-bottom:4px">⚠️ Menor ganancia latente</div>
-      <div style="overflow-y:auto;max-height:80px">
-        ${[...ganancias].reverse().slice(0,8).map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px">
-          <span style="font-weight:500">${p.ticker.split(':').pop()}</span>
-          <span class="${p.gananciaPct>=0?'pos':'neg'}" style="font-weight:700">${p.gananciaPct>=0?'+':''}${p.gananciaPct.toFixed(1)}%</span>
-        </div>`).join('')}
+      <div class="ctit" style="margin-bottom:6px">⚠️ Menos aportan (capital)</div>
+      <div style="overflow-y:auto;max-height:88px">
+        ${[...ganancias].reverse().slice(0,8).map(p => {
+          const ganEur = p.precioMedio && p.precioNum && p.ntit && p.ntit !== '—'
+            ? ((p.precioNum - p.precioMedio) * parseFloat(String(p.ntit).replace(',','.'))).toFixed(0)
+            : null;
+          const ganFmt = ganEur !== null ? (parseFloat(ganEur)>=0?'+':'')+parseFloat(ganEur).toLocaleString('es-ES')+'€' : p.gananciaPct.toFixed(1)+'%';
+          const cls = (ganEur!==null?parseFloat(ganEur):p.gananciaPct) >= 0 ? 'pos' : 'neg';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
+        }).join('')}
       </div>
     </div>
   </div>
