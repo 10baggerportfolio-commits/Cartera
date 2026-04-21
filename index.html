@@ -850,14 +850,56 @@ let sortField = 'peso', sortDir = -1; // -1=desc, 1=asc
 function sortCartera(field) {
   if (sortField === field) sortDir *= -1;
   else { sortField = field; sortDir = -1; }
-  // Update indicators
+
+  // Sort the data array in place
+  const pos = CUR === '10b' ? D.pos10b : D.est;
+  if (!pos) return;
+  pos.sort((a, b) => {
+    let va, vb;
+    if (field === 'peso')   { va = a.peso||0;    vb = b.peso||0; }
+    if (field === 'cagr')   { va = a.cagr3y!==null&&a.cagr3y!==undefined?a.cagr3y:-999; vb = b.cagr3y!==null&&b.cagr3y!==undefined?b.cagr3y:-999; }
+    if (field === 'riesgo') { va = parseInt(a.riesgo)||0; vb = parseInt(b.riesgo)||0; }
+    if (field === 'ant')    { va = a.antiguedad||0; vb = b.antiguedad||0; }
+    return (va - vb) * sortDir;
+  });
+
+  // Re-render only the table body
+  const tbody = document.querySelector('#mc tbody');
+  if (!tbody) return;
+  const nombre = CUR === '10b' ? '10Bagger' : 'Estudiados';
+  const id = CUR;
+  tbody.innerHTML = pos.map(p => {
+    const gf = 'https://www.google.com/finance/quote/' + encodeURIComponent(p.ticker.replace(':','.'));
+    const rv = parseInt(p.riesgo)||0;
+    const rc = rv<=3?'rlo':rv<=6?'rmd':'rhi';
+    const tL = p.urlTesis ? '<a href="'+p.urlTesis+'" target="_blank" class="ilink ilink-tesis">✍ Tesis</a>'
+              : p.tieneTesis ? '<span class="ilink" style="opacity:.35">✍ Tesis</span>' : '';
+    const mL = p.urlModelo ? '<a href="'+p.urlModelo+'" target="_blank" class="ilink ilink-modelo">📊 Modelo</a>'
+              : p.tieneModelo ? '<span class="ilink" style="opacity:.35">📊 Modelo</span>' : '';
+    const cagrFmt = p.cagr3y !== null && p.cagr3y !== undefined ? (p.cagr3y>=0?'+':'')+p.cagr3y.toFixed(1)+'%' : '—';
+    const cagrCls = p.cagr3y !== null && p.cagr3y !== undefined ? (p.cagr3y>=0?'pos':'neg') : '';
+    const antFmt = p.antiguedad !== null && p.antiguedad !== undefined ? p.antiguedad.toFixed(1)+'a' : '—';
+    const tooltip = p.resumen ? 'title="'+p.resumen.replace(/"/g,'&quot;')+'"' : '';
+    return '<tr>' +
+      '<td '+tooltip+' style="'+(p.resumen?'cursor:help':'')+'">' + p.empresa +
+        '<span class="tsub"><a href="'+gf+'" target="_blank" style="color:var(--blue);text-decoration:none">'+p.ticker+'</a></span></td>' +
+      '<td class="col-hide-mobile" style="color:var(--text2)">'+(p.geo||'—')+'</td>' +
+      '<td class="col-hide-mobile">'+p.moneda+'</td>' +
+      '<td class="col-hide-mobile">'+p.precio+'</td>' +
+      '<td class="col-hide-mobile" style="font-weight:500">'+p.po+'</td>' +
+      '<td class="'+cagrCls+'" style="font-weight:600">'+cagrFmt+'</td>' +
+      '<td style="font-weight:600">'+p.pesoFmt+'</td>' +
+      '<td class="col-hide-mobile" style="color:var(--text2);font-size:11px">'+antFmt+'</td>' +
+      '<td>'+(p.riesgo!=='—'?'<span class="risk '+rc+'">'+p.riesgo+'</span>':'—')+'</td>' +
+      '<td style="text-align:right">'+tL+mL+'</td>' +
+    '</tr>';
+  }).join('');
+
+  // Update sort indicators
   ['cagr','peso','ant','riesgo'].forEach(f => {
     const el = document.getElementById('sort-' + f);
-    if (el) el.textContent = f === sortField ? (sortDir === -1 ? '↓' : '↑') : '↕';
+    if (el) el.textContent = f === field ? (sortDir === -1 ? '↓' : '↑') : '↕';
   });
-  // Re-render cartera
-  const mc = document.getElementById('mc');
-  if (CUR === '10b') { mc.innerHTML = buildCarteraHTML(D.pos10b, '10Bagger', '10b'); buildCarteraCharts('10b', D.pos10b); }
 }
 
 // ── CARTERA HTML ──────────────────────────────────────────────
