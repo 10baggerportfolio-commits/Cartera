@@ -118,6 +118,7 @@ tbody tr:hover td{background:var(--bg3)}
 <body>
 <div id="login">
   <div class="lcard">
+    <img src="https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/logo.png" style="width:56px;height:56px;border-radius:50%;margin-bottom:12px;display:block">
     <div class="llogo">10Bagger Portfolio</div>
     <div class="lsub">Panel privado de inversiones</div>
     <label class="lbl">Contraseña</label>
@@ -134,7 +135,7 @@ tbody tr:hover td{background:var(--bg3)}
 
 <div id="dash">
   <div class="topbar">
-    <div class="brand">10Bagger Portfolio <span class="badge bc" id="badge">⟳ Cargando</span></div>
+    <div class="brand"><img src="https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/logo.png" style="width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle"> 10Bagger Portfolio <span class="badge bc" id="badge">⟳ Cargando</span></div>
     <div class="tright">
       <span class="utime" id="lupd"></span>
       <button class="bsm" onclick="loadAll()">↻ Actualizar</button>
@@ -843,9 +844,34 @@ function buildEstudiadosHTML(pos) {
 </div>`;
 }
 
+// ── SORT STATE ───────────────────────────────────────────────
+let sortField = 'peso', sortDir = -1; // -1=desc, 1=asc
+
+function sortCartera(field) {
+  if (sortField === field) sortDir *= -1;
+  else { sortField = field; sortDir = -1; }
+  // Update indicators
+  ['cagr','peso','ant','riesgo'].forEach(f => {
+    const el = document.getElementById('sort-' + f);
+    if (el) el.textContent = f === sortField ? (sortDir === -1 ? '↓' : '↑') : '↕';
+  });
+  // Re-render cartera
+  const mc = document.getElementById('mc');
+  if (CUR === '10b') { mc.innerHTML = buildCarteraHTML(D.pos10b, '10Bagger', '10b'); buildCarteraCharts('10b', D.pos10b); }
+}
+
 // ── CARTERA HTML ──────────────────────────────────────────────
 function buildCarteraHTML(pos, nombre, id) {
-  const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ');
+  // Apply sort
+  const sortFn = (a, b) => {
+    let va, vb;
+    if (sortField === 'peso')   { va = a.peso||0;    vb = b.peso||0; }
+    if (sortField === 'cagr')   { va = a.cagr3y!==null?a.cagr3y:-999; vb = b.cagr3y!==null?b.cagr3y:-999; }
+    if (sortField === 'riesgo') { va = parseInt(a.riesgo)||0; vb = parseInt(b.riesgo)||0; }
+    if (sortField === 'ant')    { va = a.antiguedad||0; vb = b.antiguedad||0; }
+    return (va - vb) * sortDir;
+  };
+  const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ').sort(sortFn);
   const liq = (pos||[]).find(p => p.ticker === 'LIQUIDEZ');
 
   // CAGR medio ponderado por peso (solo posiciones con PO)
@@ -945,7 +971,11 @@ function buildCarteraHTML(pos, nombre, id) {
   <div class="ox"><table>
     <thead><tr>
       <th style="width:22%;text-align:left">Empresa</th>
-      <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th><th>CAGR 3a</th><th>Peso</th><th class="col-hide-mobile">Antigüedad</th><th>Riesgo</th>
+      <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th>
+      <th style="cursor:pointer;user-select:none" onclick="sortCartera('cagr')" title="Ordenar por CAGR">CAGR 3a <span id="sort-cagr">↕</span></th>
+      <th style="cursor:pointer;user-select:none" onclick="sortCartera('peso')" title="Ordenar por peso">Peso <span id="sort-peso">↕</span></th>
+      <th class="col-hide-mobile" style="cursor:pointer;user-select:none" onclick="sortCartera('ant')" title="Ordenar por antigüedad">Antigüedad <span id="sort-ant">↕</span></th>
+      <th style="cursor:pointer;user-select:none" onclick="sortCartera('riesgo')" title="Ordenar por riesgo">Riesgo <span id="sort-riesgo">↕</span></th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
