@@ -859,15 +859,20 @@ function showDetalle(ticker) {
   const gPctCls = gPct !== null ? (gPct>=0?'color:var(--green)':'color:var(--red)') : '';
 
   // Ganancia total en EUR
-  const pmLocal = PRECIO_MEDIO[ticker] || null;
+  const pmLocal = PRECIO_MEDIO[ticker] || null;       // precio medio en moneda local
+  const pmEur = PRECIO_MEDIO_EUR[ticker] || null;     // precio medio en EUR
   const ntitNum = pos.ntit ? parseFloat(String(pos.ntit).replace(',','.')) : 0;
   const realizado = REALIZED_GAINS[ticker] || 0;
   let latente = null;
-  if (pm && pmLocal && precioActual && ntitNum) {
-    latente = ((precioActual / pmLocal) - 1) * pm * ntitNum;
+  if (pmLocal && pmEur && precioActual && ntitNum) {
+    // latente EUR = (precio_actual / precio_medio_local - 1) * coste_eur_total
+    latente = ((precioActual / pmLocal) - 1) * pmEur * ntitNum;
   }
   const gananciaTotal = (latente || 0) + realizado;
-  const superaInversion = realizado > 0 && pm && ntitNum && realizado >= pm * ntitNum;
+  // Inversión total en EUR = ntitNum * pmEur
+  const inversionEur = pmEur ? pmEur * ntitNum : null;
+  const superaInversion = realizado > 0 && inversionEur && realizado >= inversionEur;
+  // % ganancia total sobre inversión total histórica (compras en EUR)
   
   // % ganancia total sobre inversión total realizada
   const opsDelTicker = OPS_DATA[ticker] || [];
