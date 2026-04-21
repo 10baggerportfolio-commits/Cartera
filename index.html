@@ -1027,30 +1027,24 @@ function buildCarteraHTML(pos, nombre, id) {
   // valor_actual_EUR = precio_actual_local * fx * ntit ≈ usar peso * totalCartera
   // Pero tenemos precio_medio en EUR directamente
   const totalCarteraEUR = activos.reduce((s,p) => s + (p.peso > 0 ? p.peso/100 : 0), 0);
-  const conPM = activos.filter(p => p.precioMedio && p.precioNum && p.precioNum !== 0 && p.ntit && p.ntit !== '—');
-  const ganancias = conPM.map(p => {
+  // Ganancia total por ticker = latente + realizada
+  const conPM = activos.filter(p => p.precioNum && p.precioNum !== 0 && p.ntit && p.ntit !== '—');
+  const todosConGanancia = activos.map(p => {
     const ntitNum = parseFloat(String(p.ntit).replace(',','.')) || 0;
-    const fx = p.precioMedio && p.precioNum ? p.precioMedio / p.precioNum : 1; // precio_medio_eur/precio_actual_local = fx aprox
-    // Valor actual en EUR = ntit * precio_actual * fx_aprox... mejor: usar diferencia de precios en EUR
-    // coste_eur = ntit * precio_medio_eur
-    // valor_actual_eur ≈ ntit * precio_actual * (precio_medio_eur/precio_medio_local)
-    // Simplificado: ganancia_eur = (precio_medio_eur / PRECIO_MEDIO[ticker] * precio_actual - precio_medio_eur) * ntit
-    // Más directo: tenemos pm_eur y precio_actual en moneda local
-    // La FX actual está implícita en el sheet (tipo cambio col F)
-    // Usamos: ganancia_latente_eur = valor_actual_eur - coste_eur
-    // valor_actual_eur se puede aproximar como: (precio_actual/precio_medio_local) * coste_eur
-    const pmLocal = PRECIO_MEDIO[p.ticker] || null; // precio medio en moneda local (si existe)
-    let ganEur;
-    if (pmLocal && p.precioNum) {
-      // ganancia latente = (precio_actual/precio_medio_local - 1) * coste_eur
-      ganEur = ((p.precioNum / pmLocal) - 1) * p.precioMedio * ntitNum;
-    } else {
-      // fallback: usar solo %
-      ganEur = null;
+    const pmLocal = PRECIO_MEDIO[p.ticker] || null;
+    const pmEur = p.precioMedio || null;
+    const realizado = REALIZED_GAINS[p.ticker] || 0;
+    let latente = null;
+    let pct = 0;
+    if (pmLocal && pmEur && p.precioNum) {
+      // latente EUR = (precio_actual/precio_medio_local - 1) * coste_eur_total
+      latente = ((p.precioNum / pmLocal) - 1) * pmEur * ntitNum;
+      pct = ((p.precioNum / pmLocal) - 1) * 100;
     }
-    const pct = ((p.precioNum / (pmLocal || p.precioNum)) - 1) * 100;
-    return { ...p, gananciaPct: pct, gananciaEur: ganEur, ntitNum };
-  }).sort((a,b) => (b.gananciaEur||b.gananciaPct) - (a.gananciaEur||a.gananciaPct));
+    const totalEur = (latente || 0) + realizado;
+    return { ...p, gananciaPct: pct, gananciaEur: latente, gananciaRealizada: realizado, gananciaTotal: totalEur, ntitNum };
+  }).filter(p => p.gananciaTotal !== 0 || p.gananciaEur !== null);
+  const ganancias = [...todosConGanancia].sort((a,b) => b.gananciaTotal - a.gananciaTotal);
   const top3 = ganancias.slice(0, 3);
   const bot3 = ganancias.slice(-3).reverse();
 
@@ -1106,16 +1100,16 @@ function buildCarteraHTML(pos, nombre, id) {
       <div class="ctit" style="margin-bottom:4px">✅ Más aportan</div>
       <div style="overflow-y:auto;flex:1;min-height:80px;margin-bottom:8px">
         ${ganancias.slice(0,8).map(p => {
-          const ganFmt = p.gananciaEur !== null ? (p.gananciaEur>=0?'+':'')+Math.round(p.gananciaEur).toLocaleString('es-ES')+'€' : (p.gananciaPct>=0?'+':'')+p.gananciaPct.toFixed(1)+'%';
-          const cls = (p.gananciaEur !== null ? p.gananciaEur : p.gananciaPct) >= 0 ? 'pos' : 'neg';
+          const ganFmt = (p.gananciaEur>=0?'+':'')+Math.round(p.gananciaTotal).toLocaleString('es-ES')+'€';
+          const cls = p.gananciaTotal >= 0 ? 'pos' : 'neg';
           return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
         }).join('')}
       </div>
       <div class="ctit" style="margin-bottom:4px">⚠️ Menos aportan</div>
       <div style="overflow-y:auto;flex:1;min-height:80px">
         ${[...ganancias].reverse().slice(0,8).map(p => {
-          const ganFmt = p.gananciaEur !== null ? (p.gananciaEur>=0?'+':'')+Math.round(p.gananciaEur).toLocaleString('es-ES')+'€' : (p.gananciaPct>=0?'+':'')+p.gananciaPct.toFixed(1)+'%';
-          const cls = (p.gananciaEur !== null ? p.gananciaEur : p.gananciaPct) >= 0 ? 'pos' : 'neg';
+          const ganFmt = (p.gananciaEur>=0?'+':'')+Math.round(p.gananciaTotal).toLocaleString('es-ES')+'€';
+          const cls = p.gananciaTotal >= 0 ? 'pos' : 'neg';
           return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
         }).join('')}
       </div>
