@@ -858,11 +858,16 @@ function showDetalle(ticker) {
   const gPctFmt = gPct !== null ? (gPct>=0?'+':'')+gPct.toFixed(1)+'%' : '—';
   const gPctCls = gPct !== null ? (gPct>=0?'color:var(--green)':'color:var(--red)') : '';
 
-  // Estimate EUR gain
-  const totalCartera = D.pos10b ? D.pos10b.reduce((s,p) => s + (p.peso||0), 0) : 0;
-  // pos.peso is already a % — we need actual EUR value
-  // Use: valor_eur ≈ ntit_num * precioActual * fx (we don't have fx directly)
-  // Instead show % gain and note
+  // Ganancia total en EUR
+  const pmLocal = PRECIO_MEDIO[ticker] || null;
+  const ntitNum = pos.ntit ? parseFloat(String(pos.ntit).replace(',','.')) : 0;
+  const realizado = REALIZED_GAINS[ticker] || 0;
+  let latente = null;
+  if (pm && pmLocal && precioActual && ntitNum) {
+    latente = ((precioActual / pmLocal) - 1) * pm * ntitNum;
+  }
+  const gananciaTotal = (latente || 0) + realizado;
+  const superaInversion = realizado > 0 && pm && ntitNum && realizado >= pm * ntitNum;
   
   const panel = document.createElement('div');
   panel.id = 'detalle-modal';
@@ -889,6 +894,16 @@ function showDetalle(ticker) {
         <div style="background:var(--bg3);border-radius:var(--rs);padding:12px">
           <div style="font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px">Nº títulos actuales</div>
           <div style="font-size:18px;font-weight:700">${ntit}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:var(--rs);padding:12px">
+          <div style="font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px">Ganancia realizada</div>
+          <div style="font-size:16px;font-weight:700;${realizado>=0?'color:var(--green)':'color:var(--red)'}">${realizado>=0?'+':''}${Math.round(realizado).toLocaleString('es-ES')}€</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:var(--rs);padding:12px">
+          <div style="font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px">Ganancia total</div>
+          <div style="font-size:16px;font-weight:700;${gananciaTotal>=0?'color:var(--green)':'color:var(--red)'}">${gananciaTotal>=0?'+':''}${Math.round(gananciaTotal).toLocaleString('es-ES')}€
+            ${superaInversion ? '<span style="font-size:11px;background:#fff3cd;color:#856404;padding:1px 6px;border-radius:8px;margin-left:4px">🏆 Inversión recuperada</span>' : ''}
+          </div>
         </div>
         <div style="background:var(--bg3);border-radius:var(--rs);padding:12px;grid-column:span 2">
           <div style="font-size:10px;color:var(--text2);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px">Primera entrada</div>
@@ -949,7 +964,7 @@ function sortCartera(field) {
       '<td>'+(p.riesgo!=='—'?'<span class="risk '+rc+'">'+p.riesgo+'</span>':'—')+'</td>' +
       '<td style="text-align:right">' +
         tL+mL+
-        (p.precioMedio ? '<button onclick="showDetalle(\'' + p.ticker + '\')" class="ilink" style="cursor:pointer;background:var(--bg3);border:0.5px solid var(--border2);margin-left:3px">📋</button>' : '') +
+        '<button onclick="showDetalle(\'' + p.ticker + '\')" class="ilink" style="cursor:pointer;background:var(--bg3);border:0.5px solid var(--border2);margin-left:3px">📋</button>' +
       '</td>' +
     '</tr>';
   }).join('');
@@ -1027,24 +1042,31 @@ function buildCarteraHTML(pos, nombre, id) {
   // valor_actual_EUR = precio_actual_local * fx * ntit ≈ usar peso * totalCartera
   // Pero tenemos precio_medio en EUR directamente
   const totalCarteraEUR = activos.reduce((s,p) => s + (p.peso > 0 ? p.peso/100 : 0), 0);
-  // Ganancia total por ticker = latente + realizada
-  const conPM = activos.filter(p => p.precioNum && p.precioNum !== 0 && p.ntit && p.ntit !== '—');
+  // Ganancia total = latente (posiciones actuales) + realizada (todas)
   const todosConGanancia = activos.map(p => {
     const ntitNum = parseFloat(String(p.ntit).replace(',','.')) || 0;
     const pmLocal = PRECIO_MEDIO[p.ticker] || null;
     const pmEur = p.precioMedio || null;
     const realizado = REALIZED_GAINS[p.ticker] || 0;
-    let latente = null;
-    let pct = 0;
+    let latente = null, pct = 0;
     if (pmLocal && pmEur && p.precioNum) {
-      // latente EUR = (precio_actual/precio_medio_local - 1) * coste_eur_total
       latente = ((p.precioNum / pmLocal) - 1) * pmEur * ntitNum;
       pct = ((p.precioNum / pmLocal) - 1) * 100;
     }
     const totalEur = (latente || 0) + realizado;
     return { ...p, gananciaPct: pct, gananciaEur: latente, gananciaRealizada: realizado, gananciaTotal: totalEur, ntitNum };
-  }).filter(p => p.gananciaTotal !== 0 || p.gananciaEur !== null);
-  const ganancias = [...todosConGanancia].sort((a,b) => b.gananciaTotal - a.gananciaTotal);
+  });
+
+  // Add closed positions (in REALIZED_GAINS but not in activos)
+  const activosTickers = new Set(activos.map(p => p.ticker));
+  const cerradas = Object.entries(REALIZED_GAINS)
+    .filter(([t]) => !activosTickers.has(t))
+    .map(([t, gan]) => ({
+      ticker: t, empresa: t.split(':').pop(), gananciaEur: null, gananciaRealizada: gan,
+      gananciaTotal: gan, gananciaPct: 0, ntitNum: 0, precioMedio: null
+    }));
+
+  const ganancias = [...todosConGanancia, ...cerradas].sort((a,b) => b.gananciaTotal - a.gananciaTotal);
   const top3 = ganancias.slice(0, 3);
   const bot3 = ganancias.slice(-3).reverse();
 
