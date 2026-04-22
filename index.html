@@ -546,12 +546,13 @@ function buildRentHTML() {
     `<button class="pbtn${k===curPeriod?' active':''}" onclick="setPeriod('${k}')">${v}</button>`
   ).join('');
 
-  function card(label, val, valEur) {
+  function card(label, val, valEur, sub) {
     const cls = val===null ? '' : val>=0 ? 'pos' : 'neg';
     const eurLine = valEur !== undefined && valEur !== null
       ? `<div class="msub" style="color:${valEur>=0?'var(--green)':'var(--red)'}">EUR: ${fmtP(valEur)}</div>`
       : '';
-    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div>${eurLine}</div>`;
+    const subLine = sub ? `<div style="font-size:9px;color:var(--text3);margin-top:2px;line-height:1.3">${sub}</div>` : '';
+    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div>${eurLine}${subLine}</div>`;
   }
 
   // Años para el gráfico de barras
@@ -560,8 +561,8 @@ function buildRentHTML() {
   return `
 <div class="pbtns">${btns}</div>
 <div class="mgrid">
-  ${card('10Bagger', p.b10)}
-  ${p.qh !== null && p.qh !== undefined ? card('Quality Hold', p.qh) : ''}
+  ${card('10Bagger', p.b10, null, 'desde ago 2022 · en euros')}
+  ${p.qh !== null && p.qh !== undefined ? card('Quality Hold', p.qh, null, 'desde ene 2025 · en euros') : ''}
   ${card('S&P 500', p.spx, p.spx_eur)}
   ${card('Nasdaq-100', p.ndx, p.ndx_eur)}
 </div>
