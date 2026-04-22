@@ -473,9 +473,10 @@ function calcPeriods() {
   function rentPeriodo(r) {
     const spx = r.spx_ini && r.spx_fin ? ((r.spx_fin/r.spx_ini)-1)*100 : null;
     const ndx = r.ndx_ini && r.ndx_fin ? ((r.ndx_fin/r.ndx_ini)-1)*100 : null;
+    const qh  = r.qh_ini  && r.qh_fin  ? ((r.qh_fin/r.qh_ini)-1)*100   : null;
     return {
       b10: r.b10_ini && r.b10_fin ? ((r.b10_fin/r.b10_ini)-1)*100 : null,
-      spx, ndx,
+      qh, spx, ndx,
       spx_eur: eurAdj(spx, r),
       ndx_eur: eurAdj(ndx, r),
     };
@@ -483,14 +484,15 @@ function calcPeriods() {
 
   function acumN(n) {
     const slice = rend.slice(-n);
-    let b10=1, spx=1, ndx=1, spxE=1, ndxE=1;
+    let b10=1, qh=1, qhN=0, spx=1, ndx=1, spxE=1, ndxE=1;
     for (const r of slice) {
       if (r.b10_ini && r.b10_fin) b10 *= r.b10_fin/r.b10_ini;
+      if (r.qh_ini  && r.qh_fin)  { qh  *= r.qh_fin/r.qh_ini; qhN++; }
       if (r.spx_ini && r.spx_fin) { const f=r.spx_fin/r.spx_ini; spx*=f; if(r.fx_ini&&r.fx_fin) spxE*=f/(r.fx_fin/r.fx_ini); }
       if (r.ndx_ini && r.ndx_fin) { const f=r.ndx_fin/r.ndx_ini; ndx*=f; if(r.fx_ini&&r.fx_fin) ndxE*=f/(r.fx_fin/r.fx_ini); }
     }
     return {
-      b10:(b10-1)*100, spx:(spx-1)*100, ndx:(ndx-1)*100,
+      b10:(b10-1)*100, qh:qhN>0?(qh-1)*100:null, spx:(spx-1)*100, ndx:(ndx-1)*100,
       spx_eur:(spxE-1)*100, ndx_eur:(ndxE-1)*100,
     };
   }
@@ -504,8 +506,15 @@ function calcPeriods() {
       if (r.spx_ini&&r.spx_fin) { const v=r.spx_fin/r.spx_ini; spxAcum*=v; if(r.fx_ini&&r.fx_fin) spxEAcum*=v/(r.fx_fin/r.fx_ini); }
       if (r.ndx_ini&&r.ndx_fin) { const v=r.ndx_fin/r.ndx_ini; ndxAcum*=v; if(r.fx_ini&&r.fx_fin) ndxEAcum*=v/(r.fx_fin/r.fx_ini); }
     }
+    // QH CAGR — only from when it started
+    let qhAcum=1, qhDias=0;
+    for (const r of rend) {
+      if (r.qh_ini && r.qh_fin) { qhAcum *= r.qh_fin/r.qh_ini; qhDias += r.dias||0; }
+    }
+    const qhYears = qhDias / 365.25;
     return {
       b10: f.b10_ini&&l.b10_fin ? (Math.pow(l.b10_fin/f.b10_ini,1/years)-1)*100 : null,
+      qh: qhDias > 0 ? (Math.pow(qhAcum,1/qhYears)-1)*100 : null,
       spx: (Math.pow(spxAcum,1/years)-1)*100,
       ndx: (Math.pow(ndxAcum,1/years)-1)*100,
       spx_eur: (Math.pow(spxEAcum,1/years)-1)*100,
@@ -552,6 +561,7 @@ function buildRentHTML() {
 <div class="pbtns">${btns}</div>
 <div class="mgrid">
   ${card('10Bagger', p.b10)}
+  ${p.qh !== null && p.qh !== undefined ? card('Quality Hold', p.qh) : ''}
   ${card('S&P 500', p.spx, p.spx_eur)}
   ${card('Nasdaq-100', p.ndx, p.ndx_eur)}
 </div>
