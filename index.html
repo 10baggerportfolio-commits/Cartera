@@ -306,15 +306,11 @@ function parseRend(rows) {
     return años.some(a => p.startsWith(a));
   }).map(r => {
     const v = i => typeof r[i]==='number' ? r[i] : toNum(r[i]);
-    // Cols: 0=Periodo,1=Dias,2=10B_ini,3=10B_fin,4=QH_ini,5=QH_fin,6=SPX_ini,7=SPX_fin,8=NDX_ini,9=NDX_fin
-    const qh_ini = v(4), qh_fin = v(5);
-    const spx_ini = v(6), spx_fin = v(7);
-    const ndx_ini = v(8), ndx_fin = v(9);
-    const fx_ini = null, fx_fin = null;
-    // Rentabilidad ajustada a EUR por período:
-    // rent_eur = (1 + rent_usd) / (1 + var_fx_eurusd) - 1
-    // var_fx = fx_fin/fx_ini - 1  (fx en EUR/USD)
-    // Si el euro se aprecia (fx sube), la rentabilidad en EUR baja
+    // Cols: 0=Periodo,1=Dias,2=b10_ini,3=b10_fin,4=spx_ini,5=spx_fin,6=ndx_ini,7=ndx_fin,8=fx_ini,9=fx_fin,10=qh_ini,11=qh_fin
+    const spx_ini = v(4), spx_fin = v(5);
+    const ndx_ini = v(6), ndx_fin = v(7);
+    const fx_ini = v(8), fx_fin = v(9);
+    const qh_ini = v(10), qh_fin = v(11);
     const var_fx = fx_ini && fx_fin ? fx_fin / fx_ini : 1;
     const spx_rent_eur = spx_ini && spx_fin ? ((spx_fin/spx_ini) / var_fx) : null;
     const ndx_rent_eur = ndx_ini && ndx_fin ? ((ndx_fin/ndx_ini) / var_fx) : null;
