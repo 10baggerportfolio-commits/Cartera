@@ -690,119 +690,101 @@ function parseDev(rows) {
 function buildDevHTML(items) {
   if (!items.length) return '<div class="ebox">Sin datos en la pestaña RESULTADOS del sheet.</div>';
 
-  // Ordenar: fechas exactas primero (más próxima), luego aproximadas, luego sin fecha
-  const sorted = [...items].sort((a, b) => {
-    const parseF = f => {
-      if (!f || f === '—') return null;
-      // Fecha DD/MM/YYYY
-      if (f.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-        const [d,m,y] = f.split('/');
-        return new Date(y,m-1,d).getTime();
-      }
-      // Fecha YYYY-MM-DD
-      const d = new Date(f);
-      if (!isNaN(d.getTime())) return d.getTime();
-      // Aproximadas — asignar peso por mes mencionado
-      const meses = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12};
-      for (const [mes, num] of Object.entries(meses)) {
-        if (f.toLowerCase().includes(mes)) return new Date(2026, num-1, 15).getTime() + 1;
-      }
-      return 99999999999999;
-    };
+  const parseF = f => {
+    if (!f || f === '—') return null;
+    if (f.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      const [d,m,y] = f.split('/');
+      return new Date(y,m-1,d).getTime();
+    }
+    const d = new Date(f);
+    if (!isNaN(d.getTime())) return d.getTime();
+    const meses = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12};
+    for (const [mes, num] of Object.entries(meses)) {
+      if (f.toLowerCase().includes(mes)) return new Date(2026, num-1, 15).getTime() + 1;
+    }
+    return 99999999999999;
+  };
+
+  const sorted = [...items].sort((a,b) => {
     const fa = parseF(a.fecha), fb = parseF(b.fecha);
-    if (fa === null && fb === null) return 0;
-    if (fa === null) return 1;
-    if (fb === null) return -1;
+    if (fa===null && fb===null) return 0;
+    if (fa===null) return 1;
+    if (fb===null) return -1;
     return fa - fb;
   });
 
-  const enCartera = sorted.filter(r => r.estado === '10Bagger' || r.estado === 'Quality Hold' || r.estado === 'Ambas');
-  const seguimiento = sorted.filter(r => r.estado === 'Seguimiento');
+  const sitMap = {
+    '10Bagger':     {txt:'10Bagger',     bg:'#e6f1fb', color:'#185fa5'},
+    'Quality Hold': {txt:'Quality Hold', bg:'#faeeda', color:'#854f0b'},
+    'Ambas':        {txt:'Ambas',        bg:'#e8f5e9', color:'#0f6e56'},
+    'Seguimiento':  {txt:'Seguimiento',  bg:'var(--bg3)', color:'var(--text3)'},
+  };
 
-  function renderGrupo(lista, titulo) {
-    if (!lista.length) return '';
-    const rows = lista.map(r => {
-      const esExacta = r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/) || (!isNaN(new Date(r.fecha).getTime()) && r.fecha.includes('-'));
-      const fechaStyle = esExacta
-        ? 'font-weight:600;color:var(--text)'
-        : 'color:var(--text2);font-style:italic';
-      const notaBadge = r.notas
-        ? `<span style="font-size:10px;background:var(--abg);color:var(--amber);padding:1px 6px;border-radius:8px;margin-left:6px">${r.notas}</span>`
-        : '';
+  const cards = sorted.map(r => {
+    const esExacta = r.fecha && (r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/) || (!isNaN(new Date(r.fecha).getTime()) && r.fecha.includes('-')));
+    
+    // Cuenta atrás
+    let countdownBadge = '', diasNum = null;
+    if (esExacta) {
+      let fd;
+      if (r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        const [d,m,y] = r.fecha.split('/');
+        fd = new Date(y,m-1,d);
+      } else { fd = new Date(r.fecha); }
+      const hoy = new Date(); hoy.setHours(0,0,0,0); fd.setHours(0,0,0,0);
+      diasNum = Math.round((fd - hoy) / (1000*60*60*24));
+      if (diasNum === 0)      countdownBadge = `<span style="font-size:11px;font-weight:700;color:var(--green)">¡Hoy!</span>`;
+      else if (diasNum > 0) {
+        const col = diasNum<=7?'var(--amber)':diasNum<=30?'var(--blue)':'var(--text3)';
+        countdownBadge = `<span style="font-size:22px;font-weight:800;color:${col};line-height:1">${diasNum}</span><span style="font-size:11px;color:${col};margin-left:2px">días</span>`;
+      } else countdownBadge = `<span style="font-size:11px;color:var(--text3)">Publicado</span>`;
+    }
 
-      // Cuenta atrás solo para fechas exactas
-      let countdownBadge = '';
-      if (esExacta) {
-        let fechaDate;
-        if (r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-          const [d,m,y] = r.fecha.split('/');
-          fechaDate = new Date(y, m-1, d);
-        } else {
-          fechaDate = new Date(r.fecha);
-        }
-        const hoy = new Date();
-        hoy.setHours(0,0,0,0);
-        fechaDate.setHours(0,0,0,0);
-        const dias = Math.round((fechaDate - hoy) / (1000*60*60*24));
-        if (dias === 0) {
-          countdownBadge = `<span style="font-size:10px;background:var(--gbg);color:var(--green);padding:1px 8px;border-radius:8px;font-weight:700;margin-left:6px">¡Hoy!</span>`;
-        } else if (dias > 0) {
-          const col = dias <= 7 ? 'var(--amber)' : dias <= 30 ? 'var(--blue)' : 'var(--text3)';
-          const bg  = dias <= 7 ? 'var(--abg)'   : dias <= 30 ? 'var(--bbg)'  : 'var(--bg3)';
-          countdownBadge = `<span style="font-size:10px;background:${bg};color:${col};padding:1px 8px;border-radius:8px;font-weight:600;margin-left:6px">${dias}d</span>`;
-        } else {
-          countdownBadge = `<span style="font-size:10px;background:var(--bg3);color:var(--text3);padding:1px 8px;border-radius:8px;margin-left:6px">Publicado</span>`;
-        }
+    const sit = sitMap[r.estado];
+    const sitBadge = sit ? `<span style="font-size:10px;background:${sit.bg};color:${sit.color};padding:2px 6px;border-radius:6px;font-weight:600">${sit.txt}</span>` : '';
+    const notaBadge = r.notas ? `<span style="font-size:10px;background:var(--abg);color:var(--amber);padding:1px 5px;border-radius:6px">${r.notas}</span>` : '';
+    
+    const fechaFmt = esExacta ? (() => {
+      if (r.fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        const [d,m,y] = r.fecha.split('/');
+        return new Date(y,m-1,d).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
       }
+      return r.fecha;
+    })() : r.fecha;
 
-      // Situación badge — texto completo después del nombre
-      const sitMap = {
-        '10Bagger':     {txt:'10Bagger',     bg:'#e6f1fb', color:'#185fa5'},
-        'Quality Hold': {txt:'Quality Hold', bg:'#faeeda', color:'#854f0b'},
-        'Ambas':        {txt:'Ambas',        bg:'#e8f5e9', color:'#0f6e56'},
-        'Seguimiento':  {txt:'Seguimiento',  bg:'var(--bg3)', color:'var(--text3)'},
-      };
-      const sit = sitMap[r.estado];
-      const sitBadge = sit
-        ? `<span style="font-size:10px;background:${sit.bg};color:${sit.color};padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap">${sit.txt}</span>`
-        : '';
-
-      return `<tr>
-        <td style="font-weight:600;width:100%">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">
-            <div>
-              ${r.empresa}
-              <span class="tsub">${r.ticker}</span>
-              <span style="display:block;margin-top:2px">${sitBadge}</span>
-            </div>
-            <div style="${fechaStyle};text-align:right;white-space:normal;flex-shrink:0;max-width:140px;font-size:11px">
-              ${esExacta ? '📅' : '~'} ${r.fecha}${countdownBadge}${notaBadge}
-            </div>
-          </div>
-        </td>
-      </tr>`;
-    }).join('');
+    const borderCol = diasNum!==null && diasNum>=0 && diasNum<=7 ? 'var(--amber)' : diasNum!==null && diasNum<=30 ? 'var(--blue)' : 'var(--border)';
 
     return `
-    <div style="margin-bottom:16px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:8px">${titulo}</div>
-      <div class="card"><div class="ox"><table>
-        <tbody>${rows}</tbody>
-      </table></div></div>
+    <div style="background:var(--bg2);border:0.5px solid ${borderCol};border-radius:var(--rs);padding:14px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700;line-height:1.3">${r.empresa}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px">${r.ticker}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          ${countdownBadge}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);font-style:${esExacta?'normal':'italic'}">📅 ${fechaFmt}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">${sitBadge}${notaBadge}</div>
     </div>`;
-  }
+  }).join('');
+
+  const enCartera = sorted.filter(r => r.estado !== 'Seguimiento').length;
+  const seguimiento = sorted.filter(r => r.estado === 'Seguimiento').length;
 
   return `
 <div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <div style="font-size:13px;font-weight:600">Próximos resultados — ${sorted.length} empresas</div>
     <div style="display:flex;gap:6px">
-      <span style="font-size:11px;background:var(--gbg);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:600">📂 En cartera: ${enCartera.length}</span>
-      ${seguimiento.length ? `<span style="font-size:11px;background:var(--bbg);color:var(--blue);padding:2px 8px;border-radius:10px;font-weight:600">👁 Seguimiento: ${seguimiento.length}</span>` : ''}
+      <span style="font-size:11px;background:var(--gbg);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:600">📂 En cartera: ${enCartera}</span>
+      ${seguimiento ? `<span style="font-size:11px;background:var(--bbg);color:var(--blue);padding:2px 8px;border-radius:10px;font-weight:600">👁 Seguimiento: ${seguimiento}</span>` : ''}
     </div>
   </div>
-  ${renderGrupo(enCartera, 'En cartera — 10Bagger y Quality Hold')}
-  ${renderGrupo(seguimiento, 'En seguimiento')}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+    ${cards}
+  </div>
 </div>`;
 }
 
