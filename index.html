@@ -546,13 +546,12 @@ function buildRentHTML() {
     `<button class="pbtn${k===curPeriod?' active':''}" onclick="setPeriod('${k}')">${v}</button>`
   ).join('');
 
-  function card(label, val, valEur, sub) {
+  function card(label, val, valEur) {
     const cls = val===null ? '' : val>=0 ? 'pos' : 'neg';
     const eurLine = valEur !== undefined && valEur !== null
       ? `<div class="msub" style="color:${valEur>=0?'var(--green)':'var(--red)'}">EUR: ${fmtP(valEur)}</div>`
       : '';
-    const subLine = sub ? `<div style="font-size:9px;color:var(--text3);margin-top:2px;line-height:1.3">${sub}</div>` : '';
-    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div>${eurLine}${subLine}</div>`;
+    return `<div class="metric"><div class="mlbl">${label}</div><div class="mval ${cls}">${fmtP(val)}</div>${eurLine}</div>`;
   }
 
   // Años para el gráfico de barras
@@ -562,7 +561,6 @@ function buildRentHTML() {
 <div class="pbtns">${btns}</div>
 <div class="mgrid">
   ${card('10Bagger', p.b10, null, 'desde ago 2022 · en euros')}
-  ${p.qh !== null && p.qh !== undefined ? card('Quality Hold', p.qh, null, 'desde ene 2025 · en euros') : ''}
   ${card('S&P 500', p.spx, p.spx_eur)}
   ${card('Nasdaq-100', p.ndx, p.ndx_eur)}
 </div>
@@ -574,7 +572,6 @@ function buildRentHTML() {
   <div class="ctit">Rentabilidad anual por año</div>
   <div style="display:flex;gap:12px;margin-bottom:10px;font-size:11px;color:var(--text2)">
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block"></span>10Bagger</span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#E8A838;display:inline-block"></span>Quality Hold</span>
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#B4B2A9;display:inline-block"></span>S&P 500</span>
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#D3D1C7;display:inline-block"></span>Nasdaq-100</span>
   </div>
@@ -624,7 +621,6 @@ function buildRentCharts() {
   if (elA) {
     const años = D.rend.map(r => r.label);
     const d10b = D.rend.map(r => r.b10_ini&&r.b10_fin ? +((r.b10_fin/r.b10_ini-1)*100).toFixed(2) : null);
-    const dQH  = D.rend.map(r => r.qh_ini&&r.qh_fin&&r.qh_ini>0&&r.qh_fin>0 ? +((r.qh_fin/r.qh_ini-1)*100).toFixed(2) : null);
     const dSPX = D.rend.map(r => r.spx_ini&&r.spx_fin ? +((r.spx_fin/r.spx_ini-1)*100).toFixed(2) : null);
     const dNDX = D.rend.map(r => r.ndx_ini&&r.ndx_fin ? +((r.ndx_fin/r.ndx_ini-1)*100).toFixed(2) : null);
     CH.anual = new Chart(elA, {
@@ -632,10 +628,9 @@ function buildRentCharts() {
       data:{
         labels:años,
         datasets:[
-          {label:'10Bagger',    data:d10b, backgroundColor:'#378ADD', borderRadius:3, borderWidth:0},
-          {label:'Quality Hold',data:dQH,  backgroundColor:'#E8A838', borderRadius:3, borderWidth:0},
-          {label:'S&P 500',     data:dSPX, backgroundColor:'#B4B2A9', borderRadius:3, borderWidth:0},
-          {label:'Nasdaq-100',  data:dNDX, backgroundColor:'#D3D1C7', borderRadius:3, borderWidth:0},
+          {label:'10Bagger',   data:d10b, backgroundColor:'#378ADD', borderRadius:3, borderWidth:0},
+          {label:'S&P 500',    data:dSPX, backgroundColor:'#B4B2A9', borderRadius:3, borderWidth:0},
+          {label:'Nasdaq-100', data:dNDX, backgroundColor:'#D3D1C7', borderRadius:3, borderWidth:0},
         ]
       },
       options:{
