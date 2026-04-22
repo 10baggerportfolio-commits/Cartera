@@ -617,7 +617,7 @@ function buildRentCharts() {
   if (elA) {
     const años = D.rend.map(r => r.label);
     const d10b = D.rend.map(r => r.b10_ini&&r.b10_fin ? +((r.b10_fin/r.b10_ini-1)*100).toFixed(2) : null);
-    const dQH  = D.rend.map(r => r.qh_ini&&r.qh_fin   ? +((r.qh_fin/r.qh_ini-1)*100).toFixed(2)   : null);
+    const dQH  = D.rend.map(r => r.qh_ini&&r.qh_fin&&r.qh_ini>0&&r.qh_fin>0 ? +((r.qh_fin/r.qh_ini-1)*100).toFixed(2) : null);
     const dSPX = D.rend.map(r => r.spx_ini&&r.spx_fin ? +((r.spx_fin/r.spx_ini-1)*100).toFixed(2) : null);
     const dNDX = D.rend.map(r => r.ndx_ini&&r.ndx_fin ? +((r.ndx_fin/r.ndx_ini-1)*100).toFixed(2) : null);
     CH.anual = new Chart(elA, {
