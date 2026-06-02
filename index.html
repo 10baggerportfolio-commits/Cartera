@@ -376,7 +376,7 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rEst, rRend, rOps, rHist, rDev, rPubs] = await Promise.all([
+    const [r10b, rEst, rRend, rOps, rHist, rDev, rPubs, rPM] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('ESTUDIADOS'),
       gsheet('REND_SIMPLE'),
@@ -384,12 +384,69 @@ async function loadAll() {
       gsheet('HISTORICO_MENSUAL'),
       gsheet('RESULTADOS'),
       gsheet('PUBLICACIONES'),
+      gsheet('PRECIO_MEDIO'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
     D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
+
+    // ── Calcular precio medio y ganancias desde pestaña PRECIO_MEDIO ──
+    if (rPM && rPM.length > 1) {
+      const posLocal  = {}; // ticker -> {cost, shares} en moneda local
+      const posEur    = {}; // ticker -> {eur_invested, shares, realized}
+      const opsMap    = {}; // ticker -> [ops]
+
+      for (const row of rPM.slice(1)) {
+        const ticker = String(row[1]||'').trim();
+        const tipo   = String(row[3]||'').trim().toUpperCase();
+        const tit    = parseFloat(String(row[4]||'').replace(',','.')) || 0;
+        const precio = parseFloat(String(row[5]||'').replace(',','.')) || 0;
+        const eur    = parseFloat(String(row[6]||'').replace(',','.')) || 0;
+        if (!ticker || !tipo || !tit) continue;
+
+        if (!opsMap[ticker]) opsMap[ticker] = [];
+        opsMap[ticker].push({fecha:String(row[2]||'').trim(), tipo:String(row[3]||'').trim(), tit:String(row[4]||'').trim(), precio:String(row[5]||'').trim(), eur:String(row[6]||'').trim()});
+
+        if (!posLocal[ticker]) posLocal[ticker] = {cost:0, shares:0};
+        if (!posEur[ticker])   posEur[ticker]   = {eur_invested:0, shares:0, realized:0};
+
+        if (tipo.includes('COMPRA')) {
+          posLocal[ticker].cost   += tit * precio;
+          posLocal[ticker].shares += tit;
+          posEur[ticker].eur_invested += eur;
+          posEur[ticker].shares       += tit;
+        } else if (tipo.includes('VENTA')) {
+          if (posLocal[ticker].shares > 0.01) {
+            const ratio = tit / posLocal[ticker].shares;
+            posLocal[ticker].cost   -= posLocal[ticker].cost * ratio;
+            posLocal[ticker].shares -= tit;
+            posEur[ticker].realized += eur - posEur[ticker].eur_invested * ratio;
+            posEur[ticker].eur_invested -= posEur[ticker].eur_invested * ratio;
+            posEur[ticker].shares -= tit;
+          }
+        }
+      }
+
+      // Build computed maps — override static constants
+      const pmLocal = {}, pmEur = {}, realized = {};
+      let totalRealized = 0;
+      for (const [t, p] of Object.entries(posLocal)) {
+        if (p.shares > 0.01) pmLocal[t] = p.cost / p.shares;
+      }
+      for (const [t, p] of Object.entries(posEur)) {
+        if (p.shares > 0.01) pmEur[t] = p.eur_invested / p.shares;
+        if (Math.abs(p.realized) > 0.5) { realized[t] = p.realized; totalRealized += p.realized; }
+      }
+
+      // Override static constants with live data
+      Object.assign(PRECIO_MEDIO,     pmLocal);
+      Object.assign(PRECIO_MEDIO_EUR, pmEur);
+      Object.assign(REALIZED_GAINS,   realized);
+      window._TOTAL_REALIZED = totalRealized;
+      Object.assign(OPS_DATA, opsMap);
+    }
     D.pubs   = (rPubs || []).filter(r => r[0] && String(r[0]).startsWith('http')).map(r => {
       const f = String(r[2]||'').trim();
       const pts = f.split('/');
