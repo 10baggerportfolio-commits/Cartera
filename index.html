@@ -389,12 +389,11 @@ async function loadAll() {
     ]);
 
     D.pos10b = parsePosiciones(r10b);
+    D.posQH  = parsePosiciones(rQH);
     D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
-    // Build sets of tickers in each cartera
-    D.tickers10b = new Set((r10b||[]).slice(1).map(r => String(r[0]||'').trim()).filter(Boolean));
-    D.tickersQH  = new Set((rQH||[]).slice(3).map(r => String(r[0]||'').trim()).filter(Boolean));
+
 
     // ── Calcular precio medio y ganancias desde pestaña PRECIO_MEDIO ──
     if (rPM && rPM.length > 1) {
@@ -1406,9 +1405,9 @@ function buildBuscarHTML() {
       const cleanTicker = t.split(':').pop();
       const logoLocal = 'https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/' + cleanTicker + '.png';
       const logoParqet = 'https://assets.parqet.com/logos/symbol/' + cleanTicker + '?format=jpg';
-      // Check cartera membership
-      const in10b = D.tickers10b && (D.tickers10b.has(t) || [...(D.tickers10b||[])].some(tk => tk.split(':').pop() === cleanTicker));
-      const inQH  = D.tickersQH  && (D.tickersQH.has(t)  || [...(D.tickersQH||[])].some(tk => tk.split(':').pop() === cleanTicker));
+      // Check cartera membership using parsed positions
+      const in10b = (D.pos10b||[]).some(p => p.ticker === t || p.ticker.split(':').pop() === cleanTicker);
+      const inQH  = (D.posQH||[]).some(p => p.ticker === t || p.ticker.split(':').pop() === cleanTicker);
       const dots = (in10b ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#378ADD;margin:0 1px" title="10Bagger"></span>' : '') +
                    (inQH  ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E8A838;margin:0 1px" title="Quality Hold"></span>' : '');
       return `
