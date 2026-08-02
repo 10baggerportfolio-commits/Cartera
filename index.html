@@ -389,7 +389,7 @@ async function loadAll() {
     ]);
 
     D.pos10b = parsePosiciones(r10b);
-    D.posQH  = parsePosiciones(rQH);
+    D.posQH  = parsePosiciones((rQH||[]).slice(3)); // QH tiene 3 filas de cabecera
     D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
