@@ -1370,46 +1370,115 @@ const REALIZED_GAINS = {"HIMS": 65450.0, "ASX:TEA": 6625.0, "RKLB": 37293.0, "NA
 const TOTAL_REALIZED = 200874.0;
 let rssCache = null; // url → {titulo, fecha, resumen}
 
+let buscarVista = 'grid'; // 'grid' | 'list'
+let buscarTickerActivo = null;
+
 function buildBuscarHTML() {
-  // Categorías destacadas
+  // Build ticker counts
+  const tc = {};
+  (D.pubs||[]).forEach(p => p.tickers.forEach(t => { tc[t]=(tc[t]||0)+1; }));
+
+  // Category counts
   const cats = ['Informe de cartera','Filosofía de inversión'];
   const catConfig = {
-    'Informe de cartera':     {bg:'var(--gbg)',  color:'var(--green)', icon:'📊'},
-    'Filosofía de inversión': {bg:'var(--abg)',  color:'var(--amber)', icon:'💡'},
+    'Informe de cartera':     {bg:'var(--gbg)', color:'var(--green)', icon:'📊'},
+    'Filosofía de inversión': {bg:'var(--abg)', color:'var(--amber)', icon:'💡'},
   };
   const catBtns = cats.map(cat => {
     const count = (D.pubs||[]).filter(p => p.categoria === cat).length;
     if (!count) return '';
     const cfg = catConfig[cat];
-    return `<span onclick="document.getElementById('buscar-input').value='${cat}';filtrarArticulos()"
-      style="cursor:pointer;font-size:11px;font-weight:600;color:${cfg.color};background:${cfg.bg};padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin:3px"
-      onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'"
-      >${cfg.icon} ${cat} <span style="opacity:.7">(${count})</span></span>`;
+    return `<button onclick="buscarTickerActivo='${cat}';renderBuscarLista()" 
+      style="cursor:pointer;font-size:11px;font-weight:600;color:${cfg.color};background:${cfg.bg};padding:5px 12px;border-radius:20px;border:none;display:inline-flex;align-items:center;gap:4px"
+      >${cfg.icon} ${cat} <span style="opacity:.7;font-weight:400">(${count})</span></button>`;
   }).join('');
 
-  // Nube de tickers
-  const tickerList = Object.entries((function(){var c={};(D.pubs||[]).forEach(function(p){p.tickers.forEach(function(t){c[t]=(c[t]||0)+1})});return c;})())
+  // Ticker grid — sorted by count
+  const tickerGrid = Object.entries(tc)
     .sort((a,b) => b[1]-a[1])
-    .map(([t,n]) => `<span onclick="document.getElementById('buscar-input').value='${t}';filtrarArticulos()"
-      style="cursor:pointer;font-size:10px;color:var(--text2);padding:2px 6px;border:0.5px solid var(--border2);border-radius:4px;display:inline-flex;align-items:center;gap:3px;margin:2px"
-      onmouseover="this.style.background='var(--bbg)'" onmouseout="this.style.background=''"
-      >${t} <span style="color:var(--text3)">(${n})</span></span>`)
-    .join('');
+    .map(([t,n]) => {
+      const cleanTicker = t.split(':').pop();
+      const logoLocal = 'https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/' + cleanTicker + '.png';
+      const logoParqet = 'https://assets.parqet.com/logos/symbol/' + cleanTicker + '?format=jpg';
+      return `
+      <div onclick="buscarTickerActivo='${t}';renderBuscarLista()" 
+        style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+          <img src="${logoParqet}" alt="${cleanTicker}"
+            style="width:48px;height:48px;object-fit:contain;border-radius:50%"
+            onerror="this.src='${logoLocal}';this.onerror=function(){this.outerHTML='<span style=\'font-size:11px;font-weight:800;color:var(--text2)\'>${cleanTicker}</span>'}">
+        </div>
+        <div style="font-size:11px;font-weight:700;text-align:center">${cleanTicker}</div>
+        <div style="font-size:10px;color:var(--text3)">${n} pub${n!==1?'s':''}</div>
+      </div>`;
+    }).join('');
 
   return `
-<div style="margin-bottom:16px">
-  <div style="font-size:13px;font-weight:600;margin-bottom:12px">Buscar publicaciones por valor</div>
-  <div style="display:flex;gap:8px;margin-bottom:10px">
-    <input type="text" id="buscar-input" placeholder="Buscar ticker..."
-      style="flex:1;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:14px;outline:none;font-family:inherit"
-      oninput="filtrarArticulos()" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
-    <button onclick="document.getElementById('buscar-input').value='';filtrarArticulos()"
-      style="padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--rs);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-size:13px">✕</button>
+<div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:13px;font-weight:600">Publicaciones por valor</div>
+    <div style="display:flex;gap:6px">${catBtns}</div>
   </div>
-  <div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px">${catBtns}</div>
-  <div style="margin-bottom:14px;line-height:1.8">${tickerList}</div>
-  <div id="buscar-resultados"><div style="text-align:center;padding:2rem;color:var(--text3)"><span class="spin"></span> Cargando títulos...</div></div>
+  <div id="buscar-resultados">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px">
+      ${tickerGrid}
+    </div>
+  </div>
 </div>`;
+}
+
+function renderBuscarLista() {
+  const q = buscarTickerActivo || '';
+  const el = document.getElementById('buscar-resultados');
+  if (!el) return;
+
+  const resultados = q
+    ? (D.pubs||[]).filter(p =>
+        p.tickers.some(t => t === q || t.split(':').pop() === q) ||
+        (p.categoria && p.categoria === q))
+    : (D.pubs||[]);
+
+  const sorted = [...resultados].sort((a,b) => {
+    const fa = a.fechaIso ? new Date(a.fechaIso) : new Date(0);
+    const fb = b.fechaIso ? new Date(b.fechaIso) : new Date(0);
+    return fb - fa;
+  });
+
+  const backBtn = `<button onclick="buscarTickerActivo=null;document.getElementById('buscar-resultados').innerHTML=document.getElementById('buscar-grid-cache').innerHTML"
+    style="display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--rs);padding:6px 12px;font-size:12px;cursor:pointer;margin-bottom:14px;color:var(--text)">
+    ← Todos los valores
+  </button>`;
+
+  const titulo = `<div style="font-size:12px;color:var(--text3);margin-bottom:12px">${sorted.length} publicación${sorted.length!==1?'es':''} sobre <strong>${q}</strong></div>`;
+
+  const items = sorted.map(p => {
+    const rss = rssCache[p.url] || {};
+    const tituloRaw = rss.titulo || p.url.split('/p/').pop().replace(/-/g,' ');
+    const titulo2 = tituloRaw.charAt(0).toUpperCase() + tituloRaw.slice(1);
+    const fechaFmt = p.fecha ? (() => {
+      const pts = p.fecha.split('/');
+      if (pts.length===3) return new Date(pts[2],pts[1]-1,pts[0]).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+      return p.fecha;
+    })() : '';
+    const img = p.img || rss.img || '';
+    return `
+    <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;margin-bottom:8px">
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;display:flex;gap:0"
+        onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        ${img ? `<img src="${img}" style="width:80px;height:80px;object-fit:cover;flex-shrink:0">` : `<div style="width:80px;height:80px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3)">${q.split(':').pop()}</div>`}
+        <div style="padding:10px 12px;flex:1;min-width:0">
+          ${fechaFmt ? `<div style="font-size:10px;color:var(--text3);margin-bottom:3px">${fechaFmt}</div>` : ''}
+          <div style="font-size:13px;font-weight:600;line-height:1.4;color:var(--text)">${titulo2}</div>
+          <div style="font-size:11px;color:var(--blue);margin-top:6px">Leer →</div>
+        </div>
+      </div>
+    </a>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div id="buscar-grid-cache" style="display:none"></div>
+    ${backBtn}${titulo}${items}`;
 }
 
 async function initBuscar() {
@@ -1469,7 +1538,9 @@ async function initBuscar() {
       }
     }
   }
-  filtrarArticulos();
+  // Re-render after RSS loads to update titles
+  const el = document.getElementById('buscar-resultados');
+  if (el && buscarTickerActivo) renderBuscarLista();
 }
 
 function filtrarArticulos() {
@@ -1545,4 +1616,3 @@ function filtrarArticulos() {
 </script>
 </body>
 </html>
-
