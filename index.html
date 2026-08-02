@@ -376,7 +376,7 @@ async function loadAll() {
   setBadge('bc','⟳ Cargando');
   setSt('<span class="spin"></span> Conectando...');
   try {
-    const [r10b, rEst, rRend, rOps, rHist, rDev, rPubs, rPM] = await Promise.all([
+    const [r10b, rEst, rRend, rOps, rHist, rDev, rPubs, rPM, rQH] = await Promise.all([
       gsheet('POSICIONES_10BAGGER'),
       gsheet('ESTUDIADOS'),
       gsheet('REND_SIMPLE'),
@@ -385,12 +385,16 @@ async function loadAll() {
       gsheet('RESULTADOS'),
       gsheet('PUBLICACIONES'),
       gsheet('PRECIO_MEDIO'),
+      gsheet('POSICIONES_QUALITY_HOLD'),
     ]);
 
     D.pos10b = parsePosiciones(r10b);
     D.est    = parsePosiciones(rEst);
     D.rend   = parseRend(rRend);
     D.ops    = parseOps(rOps);
+    // Build sets of tickers in each cartera
+    D.tickers10b = new Set((r10b||[]).slice(1).map(r => String(r[0]||'').trim()).filter(Boolean));
+    D.tickersQH  = new Set((rQH||[]).slice(3).map(r => String(r[0]||'').trim()).filter(Boolean));
 
     // ── Calcular precio medio y ganancias desde pestaña PRECIO_MEDIO ──
     if (rPM && rPM.length > 1) {
@@ -1402,10 +1406,16 @@ function buildBuscarHTML() {
       const cleanTicker = t.split(':').pop();
       const logoLocal = 'https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/' + cleanTicker + '.png';
       const logoParqet = 'https://assets.parqet.com/logos/symbol/' + cleanTicker + '?format=jpg';
+      // Check cartera membership
+      const in10b = D.tickers10b && (D.tickers10b.has(t) || [...(D.tickers10b||[])].some(tk => tk.split(':').pop() === cleanTicker));
+      const inQH  = D.tickersQH  && (D.tickersQH.has(t)  || [...(D.tickersQH||[])].some(tk => tk.split(':').pop() === cleanTicker));
+      const dots = (in10b ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#378ADD;margin:0 1px" title="10Bagger"></span>' : '') +
+                   (inQH  ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E8A838;margin:0 1px" title="Quality Hold"></span>' : '');
       return `
       <div onclick="buscarTickerActivo='${t}';renderBuscarLista()" 
         style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        ${dots ? `<div style="display:flex;gap:2px;align-items:center;height:10px">${dots}</div>` : '<div style="height:10px"></div>'}
         <div style="width:48px;height:48px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
           <img src="${["DELIA", "DIG", "DNP", "ELIX", "EVO", "GRG", "HUME", "KARNEL", "PRL", "RMS", "ROKO", "SOFI", "TALK", "TEA", "TTT", "VHI", "VYT"].includes(cleanTicker) ? logoLocal : logoParqet}" alt="${cleanTicker}"
             style="width:48px;height:48px;object-fit:contain;border-radius:50%"
@@ -1418,9 +1428,13 @@ function buildBuscarHTML() {
 
   return `
 <div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
     <div style="font-size:13px;font-weight:600">Publicaciones por valor</div>
     <div style="display:flex;gap:6px">${catBtns}</div>
+  </div>
+  <div style="display:flex;gap:12px;margin-bottom:12px;font-size:11px;color:var(--text2)">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block"></span>En cartera 10Bagger</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:#E8A838;display:inline-block"></span>En cartera Quality Hold</span>
   </div>
   <div id="buscar-resultados">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
