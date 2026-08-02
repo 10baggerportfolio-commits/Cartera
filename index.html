@@ -1394,7 +1394,9 @@ function buildBuscarHTML() {
   }).join('');
 
   // Ticker grid — sorted by count
+  const excludeTickers = new Set(['INPST','EQS','MSI']);
   const tickerGrid = Object.entries(tc)
+    .filter(([t]) => !excludeTickers.has(t.split(':').pop()))
     .sort((a,b) => b[1]-a[1])
     .map(([t,n]) => {
       const cleanTicker = t.split(':').pop();
@@ -1445,7 +1447,7 @@ function renderBuscarLista() {
     return fb - fa;
   });
 
-  const backBtn = `<button onclick="buscarTickerActivo=null;document.getElementById('buscar-resultados').innerHTML=document.getElementById('buscar-grid-cache').innerHTML"
+  const backBtn = `<button onclick="buscarTickerActivo=null;showTab('buscar')"
     style="display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--rs);padding:6px 12px;font-size:12px;cursor:pointer;margin-bottom:14px;color:var(--text)">
     ← Todos los valores
   </button>`;
@@ -1461,23 +1463,18 @@ function renderBuscarLista() {
       if (pts.length===3) return new Date(pts[2],pts[1]-1,pts[0]).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
       return p.fecha;
     })() : '';
-    const img = p.img || rss.img || '';
     return `
-    <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;margin-bottom:8px">
-      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;display:flex;gap:0"
+    <a href="${p.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;margin-bottom:6px">
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px 14px"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
-        ${img ? `<img src="${img}" style="width:80px;height:80px;object-fit:cover;flex-shrink:0">` : `<div style="width:80px;height:80px;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3)">${q.split(':').pop()}</div>`}
-        <div style="padding:10px 12px;flex:1;min-width:0">
-          ${fechaFmt ? `<div style="font-size:10px;color:var(--text3);margin-bottom:3px">${fechaFmt}</div>` : ''}
-          <div style="font-size:13px;font-weight:600;line-height:1.4;color:var(--text)">${titulo2}</div>
-          <div style="font-size:11px;color:var(--blue);margin-top:6px">Leer →</div>
-        </div>
+        ${fechaFmt ? `<div style="font-size:10px;color:var(--text3);margin-bottom:3px">${fechaFmt}</div>` : ''}
+        <div style="font-size:13px;font-weight:600;line-height:1.4;color:var(--text)">${titulo2}</div>
+        <div style="font-size:11px;color:var(--blue);margin-top:6px">Leer →</div>
       </div>
     </a>`;
   }).join('');
 
   el.innerHTML = `
-    <div id="buscar-grid-cache" style="display:none"></div>
     ${backBtn}${titulo}${items}`;
 }
 
