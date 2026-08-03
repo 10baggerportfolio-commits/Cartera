@@ -1424,10 +1424,34 @@ function buildQHHTML() {
 
   return `
 <div class="mgrid" style="margin-bottom:8px">
-  <div class="metric"><div class="mlbl">YTD 2026</div><div class="mval ${cls(qhYTD)}">${fmtP(qhYTD)}</div></div>
+  <div class="metric"><div class="mlbl">YTD 2026</div><div class="mval ${cls(qhYTD)}">${fmtP(qhYTD)}</div><div class="msub">desde ene 2025 · en euros</div></div>
   <div class="metric"><div class="mlbl">2025 completo</div><div class="mval ${cls(qh2025)}">${fmtP(qh2025)}</div></div>
-  <div class="metric"><div class="mlbl">Desde inicio</div><div class="mval ${cls(qhTotal)}">${fmtP(qhTotal)}<div style="font-size:9px;color:var(--text3);margin-top:2px">desde ene 2025 · en euros</div></div></div>
+  <div class="metric"><div class="mlbl">Desde inicio</div><div class="mval ${cls(qhTotal)}">${fmtP(qhTotal)}</div></div>
   <div class="metric"><div class="mlbl">Valor cartera</div><div class="mval">${totalEur>0 ? totalEur.toLocaleString('es-ES',{maximumFractionDigits:0})+'€' : '—'}</div></div>
+</div>
+<div class="mgrid" style="margin-bottom:16px">
+  ${(() => {
+    // Benchmark comparison using same periods as QH data
+    const qhRows = D.rend.filter(r => r.qh_ini && r.qh_fin && r.qh_ini > 0);
+    if (!qhRows.length) return '';
+    // Accumulate SPX and NDX over same periods
+    let spxAcc=1, ndxAcc=1;
+    for (const r of qhRows) {
+      if (r.spx_ini && r.spx_fin) spxAcc *= r.spx_fin/r.spx_ini;
+      if (r.ndx_ini && r.ndx_fin) ndxAcc *= r.ndx_fin/r.ndx_ini;
+    }
+    const spxTotal = (spxAcc-1)*100;
+    const ndxTotal = (ndxAcc-1)*100;
+    // YTD benchmarks
+    const lastR = qhRows[qhRows.length-1];
+    const spxYTD = lastR.spx_ini && lastR.spx_fin ? ((lastR.spx_fin/lastR.spx_ini)-1)*100 : null;
+    const ndxYTD = lastR.ndx_ini && lastR.ndx_fin ? ((lastR.ndx_fin/lastR.ndx_ini)-1)*100 : null;
+    return `
+      <div class="metric"><div class="mlbl">S&P 500 YTD</div><div class="mval ${cls(spxYTD)}">${fmtP(spxYTD)}</div><div class="msub">en USD</div></div>
+      <div class="metric"><div class="mlbl">Nasdaq-100 YTD</div><div class="mval ${cls(ndxYTD)}">${fmtP(ndxYTD)}</div><div class="msub">en USD</div></div>
+      <div class="metric"><div class="mlbl">S&P 500 total</div><div class="mval ${cls(spxTotal)}">${fmtP(spxTotal)}</div><div class="msub">desde ene 2025</div></div>
+      <div class="metric"><div class="mlbl">Nasdaq total</div><div class="mval ${cls(ndxTotal)}">${fmtP(ndxTotal)}</div><div class="msub">desde ene 2025</div></div>`;
+  })()}
 </div>
 
 <div class="cgrid" style="margin-bottom:16px">
@@ -1478,25 +1502,41 @@ function buildQHCharts() {
 
   if (liq && liq.peso > 0) { labels.push('Liquidez'); data.push(liq.peso); colors.push('#B4B2A9'); }
 
+  const posSorted = [...pos].sort((a,b) => b.peso - a.peso);
   new Chart(el, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, data.length), borderWidth: 0, hoverOffset: 6 }] },
-    options: {
-      cutout: '65%', responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true, position: 'right',
-          labels: { color: 'var(--text2)', font: { size: 11 }, boxWidth: 12, padding: 8,
-            generateLabels: chart => chart.data.labels.map((l,i) => ({
-              text: `${l} ${chart.data.datasets[0].data[i].toFixed(1)}%`,
-              fillStyle: chart.data.datasets[0].backgroundColor[i],
-              strokeStyle: 'transparent', index: i
-            }))
-          }
-        },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)}%` } }
+    type:'doughnut',
+    data:{
+      labels: posSorted.map(p=>p.ticker.split(':').pop()),
+      datasets:[{data:posSorted.map(p=>p.peso), backgroundColor:COLS, borderWidth:2, borderColor:'rgba(255,255,255,0.15)'}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'52%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toFixed(1)}%`}}
       }
-    }
+    },
+    plugins:[{
+      id:'labels-qh',
+      afterDraw(chart) {
+        const {ctx, chartArea:{left,right,top,bottom}} = chart;
+        const cx=(left+right)/2, cy=(top+bottom)/2;
+        const meta = chart.getDatasetMeta(0);
+        meta.data.forEach((arc,i) => {
+          if (posSorted[i].peso < 3.5) return;
+          const angle = (arc.startAngle+arc.endAngle)/2;
+          const r = (arc.outerRadius+arc.innerRadius)/2;
+          const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
+          ctx.save();
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
+          ctx.fillText(posSorted[i].ticker.split(':').pop(), x, y-6);
+          ctx.font='10px -apple-system,sans-serif';
+          ctx.fillText(posSorted[i].peso.toFixed(1)+'%', x, y+6);
+          ctx.restore();
+        });
+      }
+    }]
   });
 }
 
