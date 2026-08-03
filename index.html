@@ -1411,46 +1411,31 @@ function buildQHHTML() {
     </tr>`;
   }).join('');
 
-  const opsHtml = QH_OPS.slice(0,8).map(o => {
+  const opsHtml = QH_OPS.slice(0,10).map(o => {
     const esCompra = o.tipo === 'Compra';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px">
-      <div>
-        <span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;background:${esCompra?'var(--gbg)':'var(--rbg)'};color:${esCompra?'var(--green)':'var(--red)'}">${o.tipo}</span>
-        <span style="font-weight:500;margin-left:6px">${o.activo}</span>
-      </div>
-      <div style="color:var(--text2);font-size:11px">${o.fecha} · ${o.cantidad}€</div>
+    const label = esCompra ? 'Apertura' : 'Cierre';
+    const fecha = o.fecha ? new Date(o.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'}) : o.fecha;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px">
+      <span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:${esCompra?'var(--gbg)':'var(--rbg)'};color:${esCompra?'var(--green)':'var(--red)'};white-space:nowrap">${label}</span>
+      <span style="font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.activo}</span>
+      <span style="color:var(--text2);font-size:11px;white-space:nowrap">${fecha}</span>
     </div>`;
   }).join('');
 
   return `
-<div class="mgrid" style="margin-bottom:8px">
-  <div class="metric"><div class="mlbl">YTD 2026</div><div class="mval ${cls(qhYTD)}">${fmtP(qhYTD)}</div><div class="msub">desde ene 2025 · en euros</div></div>
-  <div class="metric"><div class="mlbl">2025 completo</div><div class="mval ${cls(qh2025)}">${fmtP(qh2025)}</div></div>
-  <div class="metric"><div class="mlbl">Desde inicio</div><div class="mval ${cls(qhTotal)}">${fmtP(qhTotal)}</div></div>
-  <div class="metric"><div class="mlbl">Valor cartera</div><div class="mval">${totalEur>0 ? totalEur.toLocaleString('es-ES',{maximumFractionDigits:0})+'€' : '—'}</div></div>
-</div>
 <div class="mgrid" style="margin-bottom:16px">
   ${(() => {
-    // Benchmark comparison using same periods as QH data
     const qhRows = D.rend.filter(r => r.qh_ini && r.qh_fin && r.qh_ini > 0);
-    if (!qhRows.length) return '';
-    // Accumulate SPX and NDX over same periods
-    let spxAcc=1, ndxAcc=1;
-    for (const r of qhRows) {
-      if (r.spx_ini && r.spx_fin) spxAcc *= r.spx_fin/r.spx_ini;
-      if (r.ndx_ini && r.ndx_fin) ndxAcc *= r.ndx_fin/r.ndx_ini;
-    }
+    let spxAcc=1;
+    for (const r of qhRows) { if (r.spx_ini && r.spx_fin) spxAcc *= r.spx_fin/r.spx_ini; }
     const spxTotal = (spxAcc-1)*100;
-    const ndxTotal = (ndxAcc-1)*100;
-    // YTD benchmarks
-    const lastR = qhRows[qhRows.length-1];
+    const lastR = qhRows[qhRows.length-1] || {};
     const spxYTD = lastR.spx_ini && lastR.spx_fin ? ((lastR.spx_fin/lastR.spx_ini)-1)*100 : null;
-    const ndxYTD = lastR.ndx_ini && lastR.ndx_fin ? ((lastR.ndx_fin/lastR.ndx_ini)-1)*100 : null;
     return `
+      <div class="metric"><div class="mlbl">Quality Hold YTD</div><div class="mval ${cls(qhYTD)}">${fmtP(qhYTD)}</div><div class="msub">en euros · act. cada 48h</div></div>
       <div class="metric"><div class="mlbl">S&P 500 YTD</div><div class="mval ${cls(spxYTD)}">${fmtP(spxYTD)}</div><div class="msub">en USD</div></div>
-      <div class="metric"><div class="mlbl">Nasdaq-100 YTD</div><div class="mval ${cls(ndxYTD)}">${fmtP(ndxYTD)}</div><div class="msub">en USD</div></div>
-      <div class="metric"><div class="mlbl">S&P 500 total</div><div class="mval ${cls(spxTotal)}">${fmtP(spxTotal)}</div><div class="msub">desde ene 2025</div></div>
-      <div class="metric"><div class="mlbl">Nasdaq total</div><div class="mval ${cls(ndxTotal)}">${fmtP(ndxTotal)}</div><div class="msub">desde ene 2025</div></div>`;
+      <div class="metric"><div class="mlbl">QH desde inicio</div><div class="mval ${cls(qhTotal)}">${fmtP(qhTotal)}</div><div class="msub">desde ene 2025 · en euros</div></div>
+      <div class="metric"><div class="mlbl">S&P 500 mismo período</div><div class="mval ${cls(spxTotal)}">${fmtP(spxTotal)}</div><div class="msub">desde ene 2025 · en USD</div></div>`;
   })()}
 </div>
 
