@@ -1426,16 +1426,20 @@ function buildQHHTML() {
 <div class="mgrid" style="margin-bottom:16px">
   ${(() => {
     const qhRows = D.rend.filter(r => r.qh_ini && r.qh_fin && r.qh_ini > 0);
-    let spxAcc=1;
-    for (const r of qhRows) { if (r.spx_ini && r.spx_fin) spxAcc *= r.spx_fin/r.spx_ini; }
-    const spxTotal = (spxAcc-1)*100;
+    // SP500 desde inicio QH (2 enero 2025): 5868 → 7600
+    const spxTotal = (7600/5868 - 1)*100;
     const lastR = qhRows[qhRows.length-1] || {};
     const spxYTD = lastR.spx_ini && lastR.spx_fin ? ((lastR.spx_fin/lastR.spx_ini)-1)*100 : null;
     return `
+      // SPX en EUR
+      const spxTotalEur = ((7600/1.1757) / (5868/1.035) - 1)*100;
+      const spxYTDEur = lastR.spx_ini && lastR.spx_fin && lastR.fx_ini && lastR.fx_fin
+        ? ((lastR.spx_fin/lastR.spx_ini) / (lastR.fx_fin/lastR.fx_ini) - 1)*100 : null;
+      return `
       <div class="metric"><div class="mlbl">Quality Hold YTD</div><div class="mval ${cls(qhYTD)}">${fmtP(qhYTD)}</div><div class="msub">en euros · act. cada 48h</div></div>
-      <div class="metric"><div class="mlbl">S&P 500 YTD</div><div class="mval ${cls(spxYTD)}">${fmtP(spxYTD)}</div><div class="msub">en USD</div></div>
+      <div class="metric"><div class="mlbl">S&P 500 YTD</div><div class="mval ${cls(spxYTDEur)}">${fmtP(spxYTDEur)}</div><div class="msub">en euros</div></div>
       <div class="metric"><div class="mlbl">QH desde inicio</div><div class="mval ${cls(qhTotal)}">${fmtP(qhTotal)}</div><div class="msub">desde ene 2025 · en euros</div></div>
-      <div class="metric"><div class="mlbl">S&P 500 mismo período</div><div class="mval ${cls(spxTotal)}">${fmtP(spxTotal)}</div><div class="msub">desde ene 2025 · en USD</div></div>`;
+      <div class="metric"><div class="mlbl">S&P 500 mismo período</div><div class="mval ${cls(spxTotalEur)}">${fmtP(spxTotalEur)}</div><div class="msub">desde ene 2025 · en euros</div></div>`;
   })()}
 </div>
 
