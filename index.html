@@ -402,11 +402,10 @@ async function loadAll() {
       const posEur    = {}; // ticker -> {eur_invested, shares, realized}
       const opsMap    = {}; // ticker -> [ops]
 
-      // Ordenar por fecha ascendente (más antigua primero)
+      // Ordenar por fecha ascendente (más antigua primero) — DD/MM/YYYY -> YYYY-MM-DD
       const pmRows = rPM.slice(1).filter(r => r[1] && r[3] && r[4]).sort((a,b) => {
-        const fa = String(a[2]||'').split('/').reverse().join('-');
-        const fb = String(b[2]||'').split('/').reverse().join('-');
-        return fa.localeCompare(fb);
+        const toISO = f => { const p=String(f||'').trim().split('/'); return p.length===3?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):''; };
+        return toISO(a[2]).localeCompare(toISO(b[2]));
       });
       for (const row of pmRows) {
         const ticker = String(row[1]||'').trim();
