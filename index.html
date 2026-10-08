@@ -147,7 +147,7 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="tab active" onclick="showTab('rent')">Rentabilidad</div>
     <div class="tab" onclick="showTab('10b')">10Bagger</div>
     <div class="tab" onclick="showTab('est')">Estudiados</div>
-    <div class="tab" onclick="showTab('dev')">Próximos resultados</div>
+    <div class="tab" style="display:none" onclick="showTab('dev')">Próximos resultados</div>
     <div class="tab" onclick="showTab('qh')">Quality Hold</div>
     <div class="tab" onclick="showTab('buscar')">Buscar por valor</div>
   </div>
@@ -212,24 +212,96 @@ const T = {
 
 function t(key) { return T[LANG][key] || T['es'][key] || key; }
 
+// ── TRADUCCIÓN DE INTERFAZ (capa sobre el DOM) ───────────────
+const EN_DICT = [
+  ['Panel privado de inversiones','Private investment dashboard'],['Contraseña de suscriptores','Subscriber password'],
+  ['Contraseña','Password'],['Entrar','Enter'],['Salir','Log out'],['↻ Actualizar','↻ Refresh'],
+  ['⟳ Cargando','⟳ Loading'],['✓ Actualizado','✓ Updated'],['● En vivo','● Live'],['Datos en tiempo real','Real-time data'],
+  ['Conectando...','Connecting...'],['Error al conectar.','Connection error.'],
+  ['Rentabilidad','Performance'],['Estudiados','Watchlist'],['Buscar por valor','Search by stock'],['Próximos resultados','Upcoming results'],
+  ['Rentabilidad anual por año','Annual return by year'],['Comparativa','Comparison'],
+  ['Año en curso','Year to date'],['Año anterior','Last year'],['2 años','2 years'],['3 años','3 years'],['4 años','4 years'],
+  ['Desde inicio','Since inception'],['CAGR anualizada','Annualized CAGR'],
+  ['Sin datos de rentabilidad. Comprueba la pestaña REND_SIMPLE en el sheet.','No performance data. Check the REND_SIMPLE tab in the sheet.'],
+  ['CAGR esperado ponderado','Weighted expected CAGR'],['Riesgo medio ponderado','Weighted average risk'],
+  ['de la cartera con P.O.','of portfolio with target'],['ponderado por peso','weighted by size'],['posiciones activas','active positions'],['con P.O.','with target'],
+  ['Liquidez','Cash'],['Composición 10Bagger','10Bagger allocation'],['Composición Quality Hold','Quality Hold allocation'],['Composición','Allocation'],
+  ['Haz clic en un segmento para ver la tesis','Click a segment to see the thesis'],
+  ['✍ Tesis completa','✍ Full thesis'],['✍ Tesis','✍ Thesis'],['📊 Modelo','📊 Model'],
+  ['Últimos movimientos','Recent transactions'],['✅ Más aportan','✅ Top contributors'],['⚠️ Menos aportan','⚠️ Bottom contributors'],
+  ['Sin operaciones registradas','No transactions recorded'],
+  ['APERTURA','OPEN'],['CIERRE','CLOSE'],['AUMENTO','ADD'],['RECORTE','TRIM'],['Apertura','Open'],['Cierre','Close'],
+  ['COMPRA','BUY'],['VENTA','SELL'],
+  ['Precio medio compra','Average cost'],['Precio actual','Current price'],['Precio','Price'],
+  ['Empresa','Company'],['Moneda','Currency'],['Geografía','Geography'],['Peso','Weight'],['Antigüedad','Holding period'],
+  ['Riesgo','Risk'],['P.O. 3a','Target 3y'],['CAGR 3a','CAGR 3y'],
+  ['Valores estudiados — fuera de cartera','Studied stocks — not in portfolio'],
+  ['Posiciones Quality Hold','Quality Hold positions'],['Posiciones','Positions'],['Valor cartera','Portfolio value'],
+  ['empresas','companies'],['valores','stocks'],
+  ['S&P 500 mismo período','S&P 500 same period'],['QH desde inicio','QH since inception'],
+  ['desde ene 2025 · en euros','since Jan 2025 · in euros'],['en euros · act. cada 48h','in euros · updated every 48h'],
+  ['en euros','in euros'],['desde inicio','since inception'],
+  ['Publicaciones por valor','Publications by stock'],['← Todos los valores','← All stocks'],
+  ['Leer en Substack →','Read on Substack →'],['Leer →','Read →'],['Sin publicaciones para','No publications for'],
+  ['publicaciones','publications'],['publicación','publication'],['sobre','about'],
+  ['📊 Informe de cartera','📊 Portfolio report'],['💡 Filosofía de inversión','💡 Investment philosophy'],
+  ['Ganancia latente','Unrealized gain'],['Ganancia realizada','Realized gain'],['Ganancia total','Total gain'],
+  ['🏆 Inversión recuperada','🏆 Investment recovered'],['Nº títulos actuales','Current shares'],['Primera entrada','First entry'],
+  ['Historial de operaciones','Transaction history'],['Importe €','Amount €'],['Fecha','Date'],['Tipo','Type'],['Títulos','Shares'],
+  ['En cartera','In portfolio'],['Seguimiento','Watchlist'],['Ambas','Both'],['¡Hoy!','Today!'],['Publicado','Published'],['días','days'],
+];
+const EN_RX = EN_DICT.slice().sort((a,b)=>b[0].length-a[0].length).map(([es,en]) =>
+  [new RegExp('(^|[^\\p{L}])' + es.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '(?![\\p{L}])','gu'), '$1' + en]);
+function trText(s) { for (const [rx,r] of EN_RX) s = s.replace(rx, r); return s; }
+function trTextNode(n) {
+  const p = n.parentNode;
+  if (!p || /^(SCRIPT|STYLE)$/.test(p.nodeName)) return;
+  const v = n.nodeValue;
+  if (!v || !/[A-Za-zÁÉÍÓÚáéíóúñ]/.test(v)) return;
+  const nv = trText(v);
+  if (nv !== v) { if (n.__es === undefined) n.__es = v; n.nodeValue = nv; }
+}
+function translateNode(root) {
+  if (LANG !== 'en' || !root) return;
+  if (root.nodeType === 3) { trTextNode(root); return; }
+  if (root.nodeType !== 1) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let n; while ((n = w.nextNode())) trTextNode(n);
+  const els = [root, ...root.querySelectorAll('[placeholder],[title]')];
+  els.forEach(el => ['placeholder','title'].forEach(a => {
+    const v = el.getAttribute && el.getAttribute(a);
+    if (!v) return;
+    const nv = trText(v);
+    if (nv !== v) { el.__esAttr = el.__esAttr || {}; if (!(a in el.__esAttr)) el.__esAttr[a] = v; el.setAttribute(a, nv); }
+  }));
+}
+function restoreES() {
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let n; while ((n = w.nextNode())) { if (n.__es !== undefined) { n.nodeValue = n.__es; delete n.__es; } }
+  document.body.querySelectorAll('*').forEach(el => {
+    if (el.__esAttr) { for (const a in el.__esAttr) el.setAttribute(a, el.__esAttr[a]); delete el.__esAttr; }
+  });
+}
+function initI18n() {
+  new MutationObserver(ms => {
+    if (LANG !== 'en') return;
+    for (const m of ms) m.addedNodes.forEach(nd => translateNode(nd));
+  }).observe(document.body, {childList:true, subtree:true});
+  let saved = null; try { saved = localStorage.getItem('lang'); } catch(e) {}
+  if (saved === 'en') toggleLang();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initI18n); else initI18n();
+
 function toggleLang() {
   LANG = LANG === 'es' ? 'en' : 'es';
-  document.getElementById('lang-btn').textContent = LANG === 'es' ? '🌐 EN' : '🌐 ES';
-  // Update tabs
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.textContent = T[LANG].tabs[i] || el.textContent;
-  });
-  // Update login
-  const ll = document.getElementById('login-label');
-  if (ll) ll.textContent = t('password');
-  const lb = document.getElementById('login-btn');
-  if (lb) lb.textContent = t('enter');
-  // Update badge
-  const badge = document.getElementById('badge');
-  if (badge && badge.textContent.includes('Actualizado')) badge.textContent = t('updated');
-  // Re-render current tab
-  showTab(CUR);
+  try { localStorage.setItem('lang', LANG); } catch(e) {}
+  const b = document.getElementById('lang-btn');
+  if (b) b.textContent = LANG === 'es' ? '🌐 EN' : '🌐 ES';
+  if (LANG === 'en') translateNode(document.body); else restoreES();
+  if (D && D.pos10b && D.pos10b.length) showTab(CUR);
+  if (LANG === 'en') translateNode(document.body);
 }
+
 
 
 let SID = "1sRkg-yB94zBcvlBuwPsR8DAOpAL-06YB5MCcuQ4wmQc";
