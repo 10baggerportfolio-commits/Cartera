@@ -158,6 +158,80 @@ tbody tr:hover td{background:var(--bg3)}
 <script>
 const PWD = "suscriptores2026";
 const COLS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#C55A11","#4472C4","#ED7D31","#A9D18E"];
+
+// ── INTERNACIONALIZACIÓN ─────────────────────────────────────
+let LANG = 'es';
+const T = {
+  es: {
+    tabs: ['Rentabilidad','10Bagger','Estudiados','Quality Hold','Próximos resultados','Buscar por valor'],
+    loading: '⟳ Cargando', updated: '✓ Actualizado', error: '✗ Error',
+    company: 'Empresa', geo: 'Geografía', currency: 'Moneda', price: 'Precio',
+    po: 'P.O. 3a', cagr: 'CAGR 3a', weight: 'Peso', age: 'Antigüedad', risk: 'Riesgo', links: 'Links',
+    opening: 'Apertura', closing: 'Cierre', thesis: 'Tesis', model: 'Modelo', detail: 'Detalle',
+    lastMoves: 'Últimos movimientos', moreContrib: '✅ Más aportan', lessContrib: '⚠️ Menos aportan',
+    geoChart: 'Distribución geográfica', composition: 'Composición',
+    nextResults: 'Próximos resultados', companies: 'empresas',
+    searchTitle: 'Publicaciones por valor', searchBack: '← Todos los valores',
+    inPortfolio: 'En cartera', inFollowing: 'Seguimiento',
+    studied: 'Valores estudiados — fuera de cartera', withPO: 'con P.O.',
+    fromStart: 'desde inicio', inEuros: 'en euros', updEvery48h: 'act. cada 48h',
+    realized: 'Ganancia realizada', totalGain: 'Ganancia total', recovered: '🏆 Inversión recuperada',
+    avgPrice: 'Precio medio compra', currentPrice: 'Precio actual', latentGain: 'Ganancia latente',
+    numShares: 'Nº títulos actuales', firstEntry: 'Primera entrada', totalGainPct: '% Ganancia total',
+    opsHistory: 'Historial de operaciones', date: 'Fecha', type: 'Tipo', shares: 'Títulos',
+    readOn: t('readOn'), readArrow: t('readArrow'),
+    publications: 'publicaciones', publication: 'publicación', about: 'sobre',
+    total: 'totales', today: '¡Hoy!', published: 'Publicado',
+    portfolioValue: 'Valor cartera', positions: 'Posiciones',
+    password: 'Contraseña de suscriptores', enter: 'Entrar',
+  },
+  en: {
+    tabs: ['Performance','10Bagger','Watchlist','Quality Hold','Upcoming Results','Search by Stock'],
+    loading: '⟳ Loading', updated: '✓ Updated', error: '✗ Error',
+    company: 'Company', geo: 'Geography', currency: 'Currency', price: 'Price',
+    po: 'Target 3y', cagr: 'CAGR 3y', weight: 'Weight', age: 'Age', risk: 'Risk', links: 'Links',
+    opening: 'Buy', closing: 'Sell', thesis: 'Thesis', model: 'Model', detail: 'Detail',
+    lastMoves: 'Recent transactions', moreContrib: '✅ Top contributors', lessContrib: '⚠️ Bottom contributors',
+    geoChart: 'Geographic breakdown', composition: 'Composition',
+    nextResults: 'Upcoming earnings', companies: 'companies',
+    searchTitle: 'Search by stock', searchBack: '← All stocks',
+    inPortfolio: 'In portfolio', inFollowing: 'Watchlist',
+    studied: 'Studied stocks — not in portfolio', withPO: 'with target',
+    fromStart: 'since inception', inEuros: 'in euros', updEvery48h: 'upd. every 48h',
+    realized: 'Realized gain', totalGain: 'Total gain', recovered: '🏆 Investment recovered',
+    avgPrice: 'Average cost', currentPrice: 'Current price', latentGain: 'Unrealized gain',
+    numShares: 'Current shares', firstEntry: 'First entry', totalGainPct: '% Total return',
+    opsHistory: 'Transaction history', date: 'Date', type: 'Type', shares: 'Shares',
+    readOn: 'Read on Substack →', readArrow: 'Read →',
+    publications: 'publications', publication: 'publication', about: 'on',
+    total: 'total', today: 'Today!', published: 'Published',
+    portfolioValue: 'Portfolio value', positions: 'Positions',
+    password: 'Subscriber password', enter: 'Enter',
+  }
+};
+
+function t(key) { return T[LANG][key] || T['es'][key] || key; }
+
+function toggleLang() {
+  LANG = LANG === 'es' ? 'en' : 'es';
+  document.getElementById('lang-btn').textContent = LANG === 'es' ? '🌐 EN' : '🌐 ES';
+  // Update tabs
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.textContent = T[LANG].tabs[i] || el.textContent;
+  });
+  // Update login
+  const ll = document.getElementById('login-label');
+  if (ll) ll.textContent = t('password');
+  const lb = document.getElementById('login-btn');
+  if (lb) lb.textContent = t('enter');
+  // Update badge
+  const badge = document.getElementById('badge');
+  if (badge && badge.textContent.includes('Actualizado')) badge.textContent = t('updated');
+  // Re-render current tab
+  showTab(CUR);
+}
+
+
 let SID = "1sRkg-yB94zBcvlBuwPsR8DAOpAL-06YB5MCcuQ4wmQc";
 let D = {pos10b:[], posQH:[], rend:[]};
 let CH = {};
@@ -1015,78 +1089,6 @@ function showDetalle(ticker) {
   panel.querySelector('div').insertAdjacentHTML('beforeend', opsHtml);
   panel.onclick = e => { if (e.target === panel) panel.remove(); };
   document.body.appendChild(panel);
-}
-
-// ── INTERNACIONALIZACIÓN ─────────────────────────────────────
-let LANG = 'es';
-const T = {
-  es: {
-    tabs: ['Rentabilidad','10Bagger','Estudiados','Quality Hold','Próximos resultados','Buscar por valor'],
-    loading: '⟳ Cargando', updated: '✓ Actualizado', error: '✗ Error',
-    company: 'Empresa', geo: 'Geografía', currency: 'Moneda', price: 'Precio',
-    po: 'P.O. 3a', cagr: 'CAGR 3a', weight: 'Peso', age: 'Antigüedad', risk: 'Riesgo', links: 'Links',
-    opening: 'Apertura', closing: 'Cierre', thesis: 'Tesis', model: 'Modelo', detail: 'Detalle',
-    lastMoves: 'Últimos movimientos', moreContrib: '✅ Más aportan', lessContrib: '⚠️ Menos aportan',
-    geoChart: 'Distribución geográfica', composition: 'Composición',
-    nextResults: 'Próximos resultados', companies: 'empresas',
-    searchTitle: 'Publicaciones por valor', searchBack: '← Todos los valores',
-    inPortfolio: 'En cartera', inFollowing: 'Seguimiento',
-    studied: 'Valores estudiados — fuera de cartera', withPO: 'con P.O.',
-    fromStart: 'desde inicio', inEuros: 'en euros', updEvery48h: 'act. cada 48h',
-    realized: 'Ganancia realizada', totalGain: 'Ganancia total', recovered: '🏆 Inversión recuperada',
-    avgPrice: 'Precio medio compra', currentPrice: 'Precio actual', latentGain: 'Ganancia latente',
-    numShares: 'Nº títulos actuales', firstEntry: 'Primera entrada', totalGainPct: '% Ganancia total',
-    opsHistory: 'Historial de operaciones', date: 'Fecha', type: 'Tipo', shares: 'Títulos',
-    readOn: t('readOn'), readArrow: t('readArrow'),
-    publications: 'publicaciones', publication: 'publicación', about: 'sobre',
-    total: 'totales', today: '¡Hoy!', published: 'Publicado',
-    portfolioValue: 'Valor cartera', positions: 'Posiciones',
-    password: 'Contraseña de suscriptores', enter: 'Entrar',
-  },
-  en: {
-    tabs: ['Performance','10Bagger','Watchlist','Quality Hold','Upcoming Results','Search by Stock'],
-    loading: '⟳ Loading', updated: '✓ Updated', error: '✗ Error',
-    company: 'Company', geo: 'Geography', currency: 'Currency', price: 'Price',
-    po: 'Target 3y', cagr: 'CAGR 3y', weight: 'Weight', age: 'Age', risk: 'Risk', links: 'Links',
-    opening: 'Buy', closing: 'Sell', thesis: 'Thesis', model: 'Model', detail: 'Detail',
-    lastMoves: 'Recent transactions', moreContrib: '✅ Top contributors', lessContrib: '⚠️ Bottom contributors',
-    geoChart: 'Geographic breakdown', composition: 'Composition',
-    nextResults: 'Upcoming earnings', companies: 'companies',
-    searchTitle: 'Search by stock', searchBack: '← All stocks',
-    inPortfolio: 'In portfolio', inFollowing: 'Watchlist',
-    studied: 'Studied stocks — not in portfolio', withPO: 'with target',
-    fromStart: 'since inception', inEuros: 'in euros', updEvery48h: 'upd. every 48h',
-    realized: 'Realized gain', totalGain: 'Total gain', recovered: '🏆 Investment recovered',
-    avgPrice: 'Average cost', currentPrice: 'Current price', latentGain: 'Unrealized gain',
-    numShares: 'Current shares', firstEntry: 'First entry', totalGainPct: '% Total return',
-    opsHistory: 'Transaction history', date: 'Date', type: 'Type', shares: 'Shares',
-    readOn: 'Read on Substack →', readArrow: 'Read →',
-    publications: 'publications', publication: 'publication', about: 'on',
-    total: 'total', today: 'Today!', published: 'Published',
-    portfolioValue: 'Portfolio value', positions: 'Positions',
-    password: 'Subscriber password', enter: 'Enter',
-  }
-};
-
-function t(key) { return T[LANG][key] || T['es'][key] || key; }
-
-function toggleLang() {
-  LANG = LANG === 'es' ? 'en' : 'es';
-  document.getElementById('lang-btn').textContent = LANG === 'es' ? '🌐 EN' : '🌐 ES';
-  // Update tabs
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.textContent = T[LANG].tabs[i] || el.textContent;
-  });
-  // Update login
-  const ll = document.getElementById('login-label');
-  if (ll) ll.textContent = t('password');
-  const lb = document.getElementById('login-btn');
-  if (lb) lb.textContent = t('enter');
-  // Update badge
-  const badge = document.getElementById('badge');
-  if (badge && badge.textContent.includes('Actualizado')) badge.textContent = t('updated');
-  // Re-render current tab
-  showTab(CUR);
 }
 
 // ── SORT STATE ───────────────────────────────────────────────
