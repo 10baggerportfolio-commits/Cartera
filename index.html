@@ -157,7 +157,7 @@ tbody tr:hover td{background:var(--bg3)}
 
 <script>
 const PWD = "suscriptores2026";
-const COLS = ["#378ADD","#1D9E75","#EF9F27","#D4537E","#533AB7","#D85A30","#639922","#3B8BD4","#BA7517","#0F6E56","#993556","#5F5E5A","#C55A11","#4472C4","#ED7D31","#A9D18E"];
+const COLS = ["#2F6FB3","#E07B1F","#2E9D6B","#C8445A","#6A4BB5","#B8901C","#1F8A99","#D0518F","#4F7A28","#B5532A","#3A4E8C","#6E6E6A","#A33B7A","#2B7F5C","#9E4F9E","#5C8FD6","#8E3B2E","#4C9C9C","#7D5BA6","#9C7B48"];
 
 // ── INTERNACIONALIZACIÓN ─────────────────────────────────────
 let LANG = 'es';
@@ -1405,6 +1405,78 @@ function buildCarteraHTML(pos, nombre, id) {
 </div>`;
 }
 
+// ── ETIQUETAS DEL ANILLO (dentro si caben, fuera con línea guía si no) ──
+function donutLabels(items) {
+  return {
+    id: 'donutLabels',
+    afterDraw(chart) {
+      const ctx = chart.ctx;
+      const meta = chart.getDatasetMeta(0);
+      if (!meta.data.length) return;
+      const cx = meta.data[0].x, cy = meta.data[0].y;
+      const css = getComputedStyle(document.documentElement);
+      const txtCol = (css.getPropertyValue('--text2') || '#6b6b66').trim() || '#6b6b66';
+      const lineCol = (css.getPropertyValue('--border2') || 'rgba(0,0,0,0.2)').trim() || 'rgba(0,0,0,0.2)';
+      const FONT_B = 'bold 11px -apple-system,BlinkMacSystemFont,sans-serif';
+      const FONT_S = '10px -apple-system,BlinkMacSystemFont,sans-serif';
+      const outside = [];
+      ctx.save();
+      meta.data.forEach((arc, i) => {
+        const it = items[i]; if (!it) return;
+        const name = String(it.ticker).split(':').pop().replace(/-[A-Z]$/, '');
+        const pct = it.peso.toFixed(1) + '%';
+        const a = (arc.startAngle + arc.endAngle) / 2;
+        const rIn = arc.innerRadius, rOut = arc.outerRadius, rMid = (rIn + rOut) / 2;
+        const arcLen = (arc.endAngle - arc.startAngle) * rMid;
+        ctx.font = FONT_B; const wName = ctx.measureText(name).width;
+        ctx.font = FONT_S; const wPct = ctx.measureText(pct).width;
+        // Cabe dentro si el arco es más ancho que el texto y el anillo tiene grosor para 2 líneas
+        if (arcLen >= Math.max(wName, wPct) + 8 && (rOut - rIn) >= 28) {
+          const x = cx + Math.cos(a) * rMid, y = cy + Math.sin(a) * rMid;
+          const bg = String(arc.options.backgroundColor || '#000').replace('#','');
+          const lum = bg.length === 6 ? (0.299*parseInt(bg.slice(0,2),16) + 0.587*parseInt(bg.slice(2,4),16) + 0.114*parseInt(bg.slice(4,6),16)) / 255 : 0;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+          ctx.font = FONT_B; ctx.fillText(name, x, y - 6);
+          ctx.font = FONT_S; ctx.fillText(pct, x, y + 7);
+        } else {
+          outside.push({a, rOut, text: name + ' ' + pct, color: arc.options.backgroundColor,
+                        right: Math.cos(a) >= 0, y: cy + Math.sin(a) * (rOut + 14)});
+        }
+      });
+      // Colocar las etiquetas exteriores sin solaparse (por lado)
+      const GAP = 14, minY = chart.chartArea.top + 6, maxY = chart.chartArea.bottom - 6;
+      ['right','left'].forEach(side => {
+        const g = outside.filter(o => (side === 'right') === o.right).sort((p, q) => p.y - q.y);
+        if (!g.length) return;
+        const meanOrig = g.reduce((s, o) => s + o.y, 0) / g.length;
+        for (let k = 1; k < g.length; k++) if (g[k].y - g[k-1].y < GAP) g[k].y = g[k-1].y + GAP;
+        const shift = meanOrig - g.reduce((s, o) => s + o.y, 0) / g.length;   // recentrar el bloque
+        g.forEach(o => o.y += shift);
+        if (g[0].y < minY) { const d = minY - g[0].y; g.forEach(o => o.y += d); }
+        if (g[g.length-1].y > maxY) { const d = g[g.length-1].y - maxY; g.forEach(o => o.y -= d); }
+        g.forEach(o => {
+          const x0 = cx + Math.cos(o.a) * o.rOut, y0 = cy + Math.sin(o.a) * o.rOut;
+          const x1 = cx + Math.cos(o.a) * (o.rOut + 10), y1 = cy + Math.sin(o.a) * (o.rOut + 10);
+          const xt = o.right ? Math.max(x1, cx) + 12 : Math.min(x1, cx) - 12;
+          ctx.strokeStyle = lineCol; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineTo(xt, o.y); ctx.stroke();
+          ctx.fillStyle = o.color; ctx.beginPath(); ctx.arc(x0, y0, 1.8, 0, Math.PI * 2); ctx.fill();
+          ctx.font = FONT_S; ctx.fillStyle = txtCol; ctx.textBaseline = 'middle';
+          ctx.textAlign = o.right ? 'left' : 'right';
+          ctx.fillText(o.text, xt + (o.right ? 3 : -3), o.y);
+        });
+      });
+      ctx.restore();
+    }
+  };
+}
+
+function donutRotation(items) {
+  const total = items.reduce((s, p) => s + (p.peso || 0), 0) || 1;
+  const small = items.filter(p => p.peso < 4).reduce((s, p) => s + p.peso, 0);
+  return 90 + (small / total * 360) / 2;
+}
+
 function buildCarteraCharts(id, pos) {
   const activos = (pos||[]).filter(p => p.ticker !== 'LIQUIDEZ' && p.peso > 0);
 
@@ -1444,7 +1516,7 @@ function buildCarteraCharts(id, pos) {
         datasets:[{data:activosSorted.map(p=>p.peso), backgroundColor:COLS, borderWidth:2, borderColor:'rgba(255,255,255,0.15)'}]
       },
       options:{
-        responsive:true, maintainAspectRatio:false, cutout:'52%',
+        responsive:true, maintainAspectRatio:false, cutout:'55%', layout:{padding:{left:78,right:78,top:16,bottom:16}}, rotation: donutRotation(activosSorted),
         onClick: donutClick,
         plugins:{
           legend:{display:false},
@@ -1454,27 +1526,7 @@ function buildCarteraCharts(id, pos) {
           }}}
         }
       },
-      plugins:[{
-        id:'labels',
-        afterDraw(chart) {
-          const {ctx, chartArea:{left,right,top,bottom}} = chart;
-          const cx=(left+right)/2, cy=(top+bottom)/2;
-          const meta = chart.getDatasetMeta(0);
-          meta.data.forEach((arc,i) => {
-            if (activosSorted[i].peso < 3.5) return;
-            const angle = (arc.startAngle+arc.endAngle)/2;
-            const r = (arc.outerRadius+arc.innerRadius)/2;
-            const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
-            ctx.save();
-            ctx.textAlign='center'; ctx.textBaseline='middle';
-            ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
-            ctx.fillText(activosSorted[i].ticker.split(':').pop(), x, y-6);
-            ctx.font='10px -apple-system,sans-serif';
-            ctx.fillText(activosSorted[i].peso.toFixed(1)+'%', x, y+6);
-            ctx.restore();
-          });
-        }
-      }]
+      plugins:[donutLabels(activosSorted)]
     });
   }
 
@@ -1645,33 +1697,13 @@ function buildQHCharts() {
       datasets:[{data:posSorted.map(p=>p.peso), backgroundColor:COLS, borderWidth:2, borderColor:'rgba(255,255,255,0.15)'}]
     },
     options:{
-      responsive:true, maintainAspectRatio:false, cutout:'52%',
+      responsive:true, maintainAspectRatio:false, cutout:'55%', layout:{padding:{left:78,right:78,top:16,bottom:16}}, rotation: donutRotation(posSorted), 
       plugins:{
         legend:{display:false},
         tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toFixed(1)}%`}}
       }
     },
-    plugins:[{
-      id:'labels-qh',
-      afterDraw(chart) {
-        const {ctx, chartArea:{left,right,top,bottom}} = chart;
-        const cx=(left+right)/2, cy=(top+bottom)/2;
-        const meta = chart.getDatasetMeta(0);
-        meta.data.forEach((arc,i) => {
-          if (posSorted[i].peso < 3.5) return;
-          const angle = (arc.startAngle+arc.endAngle)/2;
-          const r = (arc.outerRadius+arc.innerRadius)/2;
-          const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
-          ctx.save();
-          ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.font='bold 11px -apple-system,sans-serif'; ctx.fillStyle='#fff';
-          ctx.fillText(posSorted[i].ticker.split(':').pop(), x, y-6);
-          ctx.font='10px -apple-system,sans-serif';
-          ctx.fillText(posSorted[i].peso.toFixed(1)+'%', x, y+6);
-          ctx.restore();
-        });
-      }
-    }]
+    plugins:[donutLabels(posSorted)]
   });
 }
 
