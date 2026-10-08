@@ -136,6 +136,7 @@ tbody tr:hover td{background:var(--bg3)}
 <div id="dash">
   <div class="topbar">
     <div class="brand"><img src="https://raw.githubusercontent.com/10baggerportfolio-commits/Cartera/main/img/logo.png" style="width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle"> 10Bagger Portfolio <span class="badge bc" id="badge">⟳ Cargando</span></div>
+    <button id="lang-btn" onclick="toggleLang()" style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);margin-left:8px">🌐 EN</button>
     <div class="tright">
       <span class="utime" id="lupd"></span>
       <button class="bsm" onclick="loadAll()">↻ Actualizar</button>
@@ -374,7 +375,7 @@ function parseOps(rows) {
 
 // ── CARGA ─────────────────────────────────────────────────────
 async function loadAll() {
-  setBadge('bc','⟳ Cargando');
+  setBadge('bc',t('loading'));
   setSt('<span class="spin"></span> Conectando...');
   try {
     const [r10b, rEst, rRend, rOps, rHist, rDev, rPubs, rPM, rQH] = await Promise.all([
@@ -1016,6 +1017,78 @@ function showDetalle(ticker) {
   document.body.appendChild(panel);
 }
 
+// ── INTERNACIONALIZACIÓN ─────────────────────────────────────
+let LANG = 'es';
+const T = {
+  es: {
+    tabs: ['Rentabilidad','10Bagger','Estudiados','Quality Hold','Próximos resultados','Buscar por valor'],
+    loading: '⟳ Cargando', updated: '✓ Actualizado', error: '✗ Error',
+    company: 'Empresa', geo: 'Geografía', currency: 'Moneda', price: 'Precio',
+    po: 'P.O. 3a', cagr: 'CAGR 3a', weight: 'Peso', age: 'Antigüedad', risk: 'Riesgo', links: 'Links',
+    opening: 'Apertura', closing: 'Cierre', thesis: 'Tesis', model: 'Modelo', detail: 'Detalle',
+    lastMoves: 'Últimos movimientos', moreContrib: '✅ Más aportan', lessContrib: '⚠️ Menos aportan',
+    geoChart: 'Distribución geográfica', composition: 'Composición',
+    nextResults: 'Próximos resultados', companies: 'empresas',
+    searchTitle: 'Publicaciones por valor', searchBack: '← Todos los valores',
+    inPortfolio: 'En cartera', inFollowing: 'Seguimiento',
+    studied: 'Valores estudiados — fuera de cartera', withPO: 'con P.O.',
+    fromStart: 'desde inicio', inEuros: 'en euros', updEvery48h: 'act. cada 48h',
+    realized: 'Ganancia realizada', totalGain: 'Ganancia total', recovered: '🏆 Inversión recuperada',
+    avgPrice: 'Precio medio compra', currentPrice: 'Precio actual', latentGain: 'Ganancia latente',
+    numShares: 'Nº títulos actuales', firstEntry: 'Primera entrada', totalGainPct: '% Ganancia total',
+    opsHistory: 'Historial de operaciones', date: 'Fecha', type: 'Tipo', shares: 'Títulos',
+    readOn: t('readOn'), readArrow: t('readArrow'),
+    publications: 'publicaciones', publication: 'publicación', about: 'sobre',
+    total: 'totales', today: '¡Hoy!', published: 'Publicado',
+    portfolioValue: 'Valor cartera', positions: 'Posiciones',
+    password: 'Contraseña de suscriptores', enter: 'Entrar',
+  },
+  en: {
+    tabs: ['Performance','10Bagger','Watchlist','Quality Hold','Upcoming Results','Search by Stock'],
+    loading: '⟳ Loading', updated: '✓ Updated', error: '✗ Error',
+    company: 'Company', geo: 'Geography', currency: 'Currency', price: 'Price',
+    po: 'Target 3y', cagr: 'CAGR 3y', weight: 'Weight', age: 'Age', risk: 'Risk', links: 'Links',
+    opening: 'Buy', closing: 'Sell', thesis: 'Thesis', model: 'Model', detail: 'Detail',
+    lastMoves: 'Recent transactions', moreContrib: '✅ Top contributors', lessContrib: '⚠️ Bottom contributors',
+    geoChart: 'Geographic breakdown', composition: 'Composition',
+    nextResults: 'Upcoming earnings', companies: 'companies',
+    searchTitle: 'Search by stock', searchBack: '← All stocks',
+    inPortfolio: 'In portfolio', inFollowing: 'Watchlist',
+    studied: 'Studied stocks — not in portfolio', withPO: 'with target',
+    fromStart: 'since inception', inEuros: 'in euros', updEvery48h: 'upd. every 48h',
+    realized: 'Realized gain', totalGain: 'Total gain', recovered: '🏆 Investment recovered',
+    avgPrice: 'Average cost', currentPrice: 'Current price', latentGain: 'Unrealized gain',
+    numShares: 'Current shares', firstEntry: 'First entry', totalGainPct: '% Total return',
+    opsHistory: 'Transaction history', date: 'Date', type: 'Type', shares: 'Shares',
+    readOn: 'Read on Substack →', readArrow: 'Read →',
+    publications: 'publications', publication: 'publication', about: 'on',
+    total: 'total', today: 'Today!', published: 'Published',
+    portfolioValue: 'Portfolio value', positions: 'Positions',
+    password: 'Subscriber password', enter: 'Enter',
+  }
+};
+
+function t(key) { return T[LANG][key] || T['es'][key] || key; }
+
+function toggleLang() {
+  LANG = LANG === 'es' ? 'en' : 'es';
+  document.getElementById('lang-btn').textContent = LANG === 'es' ? '🌐 EN' : '🌐 ES';
+  // Update tabs
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.textContent = T[LANG].tabs[i] || el.textContent;
+  });
+  // Update login
+  const ll = document.getElementById('login-label');
+  if (ll) ll.textContent = t('password');
+  const lb = document.getElementById('login-btn');
+  if (lb) lb.textContent = t('enter');
+  // Update badge
+  const badge = document.getElementById('badge');
+  if (badge && badge.textContent.includes('Actualizado')) badge.textContent = t('updated');
+  // Re-render current tab
+  showTab(CUR);
+}
+
 // ── SORT STATE ───────────────────────────────────────────────
 let sortField = 'peso', sortDir = -1; // -1=desc, 1=asc
 
@@ -1245,13 +1318,13 @@ function buildCarteraHTML(pos, nombre, id) {
   </div>
   <div class="ox"><table>
     <thead><tr>
-      <th style="width:22%;text-align:left">Empresa</th>
-      <th class="col-hide-mobile">Geografía</th><th class="col-hide-mobile">Moneda</th><th class="col-hide-mobile">Precio</th><th class="col-hide-mobile">P.O. 3a</th>
-      <th style="cursor:pointer;user-select:none" onclick="sortCartera('cagr')" title="Ordenar por CAGR">CAGR 3a <span id="sort-cagr">↕</span></th>
-      <th style="cursor:pointer;user-select:none" onclick="sortCartera('peso')" title="Ordenar por peso">Peso <span id="sort-peso">↕</span></th>
-      <th class="col-hide-mobile" style="cursor:pointer;user-select:none" onclick="sortCartera('ant')" title="Ordenar por antigüedad">Antigüedad <span id="sort-ant">↕</span></th>
-      <th style="cursor:pointer;user-select:none" onclick="sortCartera('riesgo')" title="Ordenar por riesgo">Riesgo <span id="sort-riesgo">↕</span></th>
-      <th style="text-align:right">Links</th>
+      <th style="width:22%;text-align:left">${t('company')}</th>
+      <th class="col-hide-mobile">${t('geo')}</th><th class="col-hide-mobile">${t('currency')}</th><th class="col-hide-mobile">${t('price')}</th><th class="col-hide-mobile">${t('po')}</th>
+      <th style="cursor:pointer;user-select:none" onclick="sortCartera('cagr')">${t('cagr')} <span id="sort-cagr">↕</span></th>
+      <th style="cursor:pointer;user-select:none" onclick="sortCartera('peso')">${t('weight')} <span id="sort-peso">↕</span></th>
+      <th class="col-hide-mobile" style="cursor:pointer;user-select:none" onclick="sortCartera('ant')">${t('age')} <span id="sort-ant">↕</span></th>
+      <th style="cursor:pointer;user-select:none" onclick="sortCartera('riesgo')">${t('risk')} <span id="sort-riesgo">↕</span></th>
+      <th style="text-align:right">${t('links')}</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>
@@ -1418,7 +1491,7 @@ function buildQHHTML() {
 
   const opsHtml = QH_OPS.slice(0,10).map(o => {
     const esCompra = o.tipo === 'Compra';
-    const label = esCompra ? 'Apertura' : 'Cierre';
+    const label = esCompra ? t('opening') : t('closing');
     const fecha = o.fecha ? new Date(o.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'}) : o.fecha;
     return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px">
       <span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:${esCompra?'var(--gbg)':'var(--rbg)'};color:${esCompra?'var(--green)':'var(--red)'};white-space:nowrap">${label}</span>
@@ -1578,9 +1651,9 @@ function buildBuscarHTML() {
         style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
         <div style="width:48px;height:48px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
-          <img src="${["DELIA", "DIG", "DNP", "ELIX", "EVO", "GRG", "HUME", "KARNEL", "PRL", "RMS", "ROKO", "SOFI", "TALK", "TEA", "TTT", "VHI", "VYT"].includes(cleanTicker) ? logoLocal : logoParqet}" alt="${cleanTicker}"
+          <img src="${["C79", "DELIA", "DIG", "DNP", "ELIX", "EVO", "GRG", "HUME", "KARNEL", "PNG", "PRL", "RMS", "ROKO", "SOFI", "TALK", "TEA", "TTT", "VHI", "VYT"].includes(cleanTicker) ? logoLocal : logoParqet}" alt="${cleanTicker}"
             style="width:48px;height:48px;object-fit:contain;border-radius:50%"
-            onerror="this.src='${["DELIA", "DIG", "DNP", "ELIX", "EVO", "GRG", "HUME", "KARNEL", "PRL", "RMS", "ROKO", "SOFI", "TALK", "TEA", "TTT", "VHI", "VYT"].includes(cleanTicker) ? logoParqet : logoLocal}';this.onerror=function(){this.outerHTML='<span style=\'font-size:11px;font-weight:800;color:var(--text2)\'>${cleanTicker}</span>'}">
+            onerror="this.src='${["C79", "DELIA", "DIG", "DNP", "ELIX", "EVO", "GRG", "HUME", "KARNEL", "PNG", "PRL", "RMS", "ROKO", "SOFI", "TALK", "TEA", "TTT", "VHI", "VYT"].includes(cleanTicker) ? logoParqet : logoLocal}';this.onerror=function(){this.outerHTML='<span style=\'font-size:11px;font-weight:800;color:var(--text2)\'>${cleanTicker}</span>'}">
         </div>
         <div style="font-size:11px;font-weight:700;text-align:center">${cleanTicker}</div>
         <div style="font-size:10px;color:var(--text3)">${n} pub${n!==1?'s':''}</div>
