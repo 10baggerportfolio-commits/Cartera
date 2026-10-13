@@ -1082,37 +1082,10 @@ let AW = null;
 async function cargarAgente() {
   if (!AW) AW = JSON.parse(new TextDecoder().decode(await descifrar('watchlist/datos.enc')));
 }
-// La página final "Valoración a cinco años" va cifrada aparte porque cambia cada semana; se une al PDF de la tesis aquí,
-// con pdf-lib, para no volver a subir cada semana los PDF de las tesis. Si pdf-lib no carga, se abre la tesis sola.
-let PDFLIB = null;
-function cargarPdfLib() {
-  if (!PDFLIB) PDFLIB = new Promise((ok, mal) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
-    s.onload = () => ok(window.PDFLib); s.onerror = () => { PDFLIB = null; mal(new Error('pdf-lib')); };
-    document.head.appendChild(s);
-  });
-  return PDFLIB;
-}
-async function pdfConAnexo(ticker) {
-  const tesis = await descifrar(`watchlist/pdf/${ticker}.enc`);
-  const v = AW && AW.valores.find(x => x.ticker === ticker);
-  if (!v || !v.anexo) return tesis;
-  try {
-    const [lib, anexo] = await Promise.all([cargarPdfLib(), descifrar(`watchlist/anexo/${ticker}.enc`)]);
-    const doc = await lib.PDFDocument.load(tesis);
-    const extra = await lib.PDFDocument.load(anexo);
-    (await doc.copyPages(extra, extra.getPageIndices())).forEach(p => doc.addPage(p));
-    return await doc.save();
-  } catch (e) {
-    console.warn('Anexo no añadido:', e);
-    return tesis;
-  }
-}
 async function abrirTesisAgente(ticker) {
   const w = window.open('', '_blank');  // se abre ya, dentro del clic, para que el navegador no la bloquee
   try {
-    const url = URL.createObjectURL(new Blob([await pdfConAnexo(ticker)], {type: 'application/pdf'}));
+    const url = URL.createObjectURL(new Blob([await descifrar(`watchlist/pdf/${ticker}.enc`)], {type: 'application/pdf'}));
     if (w) w.location = url; else location.href = url;
   } catch (e) {
     if (w) w.close();
