@@ -23,6 +23,7 @@ input:focus{border-color:var(--blue)}
 .ssec{margin-top:1.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
 .hint{font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px}
 #dash{display:none;flex-direction:column;min-height:100vh}
+html:not(.preview) .tab-pronto{display:none}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100}
 .brand{font-size:15px;font-weight:700;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
 .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
@@ -114,6 +115,21 @@ tbody tr:hover td{background:var(--bg3)}
   .bsm{font-size:11px;padding:4px 8px}
 }
 .cbadge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+  /* Modo vídeo (?video en la URL): nombres emborronados para grabar el dashboard */
+  html.video .vb{filter:blur(6px);user-select:none}
+  /* Investigación: acciones de la tarjeta y reproductor del podcast */
+  .inv-accion{display:inline-flex;align-items:center;gap:9px;padding:8px 14px 8px 11px;border-radius:8px;border:1px solid var(--blue);background:var(--bbg);color:var(--blue);cursor:pointer;text-align:left;font:inherit}
+  .inv-accion span{display:flex;flex-direction:column;line-height:1.25}
+  .inv-accion b{font-size:12.5px;font-weight:700}
+  .inv-accion small{font-size:10.5px;opacity:.85}
+  .inv-accion:hover{background:var(--blue);color:#fff}
+  .inv-audio{background:var(--blue);color:#fff}
+  .inv-audio:hover{filter:brightness(1.1)}
+  .inv-player{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 12px;padding:10px 12px;border-radius:8px;background:var(--bg3)}
+  .inv-player audio{flex:1;min-width:240px;height:36px}
+  .inv-vel{display:flex;gap:4px}
+  .inv-vel button{font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer}
+  .inv-vel button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 </style>
 </head>
 <body>
@@ -147,8 +163,10 @@ tbody tr:hover td{background:var(--bg3)}
   <div class="tabs">
     <div class="tab active" onclick="showTab('rent')">Rentabilidad</div>
     <div class="tab" onclick="showTab('10b')">10Bagger</div>
-    <div class="tab" onclick="showTab('est')">Estudiados</div>
+    <div class="tab" style="display:none" onclick="showTab('est')">Estudiados</div>
     <div class="tab" onclick="showTab('aw')">Agente watchlist</div>
+    <div class="tab tab-pronto" onclick="showTab('ht')">Historial de tesis</div>
+    <div class="tab tab-pronto" onclick="showTab('inv')">Investigación</div>
     <div class="tab" style="display:none" onclick="showTab('dev')">Próximos resultados</div>
     <div class="tab" onclick="showTab('qh')">Quality Hold</div>
     <div class="tab" onclick="showTab('buscar')">Buscar por valor</div>
@@ -161,6 +179,15 @@ tbody tr:hover td{background:var(--bg3)}
 // La contraseña no está en el código: es válida si descifra la prueba de clave.json (tools/tb_cifrado.py en el
 // proyecto AE). Con la misma clave se descifran la lista y los PDF del Agente watchlist.
 let KEY = null;
+// Modo vídeo: abrir con ?video para grabar el dashboard sin enseñar nombres (Agente watchlist, salvo VIDEO_VISIBLES,
+// y cartera 10Bagger). No cambia nada más.
+const VIDEO = new URLSearchParams(location.search).has('video');
+const VIDEO_VISIBLES = ['SYK', 'TDG', 'BONEX'];
+const VIDEO_REVISION = ['HAS'];
+const VIDEO_VISIBLES_HT = ['VYT', 'RKLB', 'PRL'];  // historial de tesis: ejemplos sin emborronar  // solo en modo vídeo: enseña cómo se ve la marca En revisión
+if (VIDEO) document.documentElement.classList.add('video');
+// Pestañas aún sin activar para suscriptores: solo se ven con ?preview (o en modo vídeo)
+if (VIDEO || new URLSearchParams(location.search).has('preview')) document.documentElement.classList.add('preview');
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function derivarClave(pwd) {
   const c = await (await fetch('clave.json', {cache: 'no-store'})).json();
@@ -235,7 +262,7 @@ const EN_DICT = [
   ['Panel privado de inversiones','Private investment dashboard'],['Contraseña de suscriptores','Subscriber password'],
   ['Contraseña','Password'],['Entrar','Enter'],['Salir','Log out'],['↻ Actualizar','↻ Refresh'],
   ['⟳ Cargando','⟳ Loading'],['✓ Actualizado','✓ Updated'],['● En vivo','● Live'],['Datos en tiempo real','Real-time data'],
-  ['Conectando...','Connecting...'],['Agente watchlist','Watchlist agent'],['Descifrando...','Decrypting...'],
+  ['Conectando...','Connecting...'],['Rentabilidad media','Average return'],['Media hasta hoy','Average to today'],['MSCI World, mismos periodos','MSCI World, same periods'],['Ganan dinero','Make money'],['tesis publicadas','theses published'],['hasta la venta si se vendió','to the sale if sold'],['como si no se hubiera vendido ninguna','as if none had been sold'],['en euros, con dividendos','in euros, with dividends'],['de las tesis','of the theses'],['Publicación','Published'],['Diferencia (pp)','Difference (pp)'],['precios del','prices as of'],['Leer el estudio','Read the study'],['Escuchar el podcast','Listen to the podcast'],['Aprendizaje inmersivo','Immersive learning'],['páginas','pages'],['investigación elaborada con IA','AI-assisted research'],['Estudio en profundidad','In-depth study'],['Nuevo','New'],['Preparando el podcast...','Preparing the podcast...'],['Historial de tesis','Thesis track record'],['Investigación','Research'],['Agente watchlist','Watchlist agent'],['Descifrando...','Decrypting...'],
   ['Qué es el Agente watchlist','What the Watchlist agent is'],['Tesis de agente','Agent thesis'],['Tesis 10Bagger','10Bagger thesis'],
   ['Rentab. 5 años','5-year return'],['Exigida','Required'],['Precio de entrada','Entry price'],['Distancia','Distance'],
   ['A tiro','In range'],['Cerca','Close'],['Lejos','Far'],['En revisión','Under review'],['Error al conectar.','Connection error.'],
@@ -658,7 +685,7 @@ async function loadAll() {
 
     setBadge('bl','● En vivo');
     const t = nowStr();
-    document.getElementById('lupd').textContent = 'Actualizado ' + t;
+    document.getElementById('lupd').textContent = (LANG === 'en' ? 'Updated ' : 'Actualizado ') + t;
     setSt('Datos en tiempo real · ' + t);
     showTab(CUR);
   } catch(e) {
@@ -690,6 +717,14 @@ function showTab(tab) {
     mc.innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Descifrando...</div>';
     cargarAgente().then(() => { if (CUR === 'aw') { mc.innerHTML = buildAgenteHTML(); if (LANG === 'en') translateNode(mc); } })
       .catch(e => { mc.innerHTML = `<div class="ebox">No se pudo cargar el Agente watchlist: ${e.message}</div>`; });
+  } else if (tab === 'ht') {
+    mc.innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Descifrando...</div>';
+    cargarHistorial().then(() => { if (CUR === 'ht') { mc.innerHTML = buildHistorialHTML(); if (LANG === 'en') translateNode(mc); } })
+      .catch(e => { mc.innerHTML = `<div class="ebox">No se pudo cargar el historial de tesis: ${e.message}</div>`; });
+  } else if (tab === 'inv') {
+    mc.innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text2)"><span class="spin"></span> Descifrando...</div>';
+    cargarInvestigacion().then(() => { if (CUR === 'inv') { mc.innerHTML = buildInvestigacionHTML(); if (LANG === 'en') translateNode(mc); } })
+      .catch(e => { mc.innerHTML = `<div class="ebox">No se pudo cargar la investigación: ${e.message}</div>`; });
   } else if (tab === 'dev') {
     mc.innerHTML = buildDevHTML(D.dev || []);
   } else if (tab === 'qh') {
@@ -905,8 +940,8 @@ function renderOpsHTML() {
     return `<div style="display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
       <span class="${cls}" style="text-align:center;width:72px">${o.tipo}</span>
       <div style="min-width:0">
-        <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div>
-        <div style="font-size:10px;color:var(--text3)">${o.ticker} · ${o.fecha}</div>
+        <div class="vb" style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.empresa}</div>
+        <div style="font-size:10px;color:var(--text3)"><span class="vb">${o.ticker}</span> · ${o.fecha}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;min-width:90px">
         <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:1px">Precio</div>
@@ -1085,7 +1120,10 @@ async function cargarAgente() {
 async function abrirTesisAgente(ticker) {
   const w = window.open('', '_blank');  // se abre ya, dentro del clic, para que el navegador no la bloquee
   try {
-    const url = URL.createObjectURL(new Blob([await descifrar(`watchlist/pdf/${ticker}.enc`)], {type: 'application/pdf'}));
+    // Con el idioma en inglés, la versión inglesa si existe (pdf_en en la lista)
+    const v = AW && AW.valores.find(x => x.ticker === ticker);
+    const archivo = LANG === 'en' && v && v.pdf_en ? `${ticker}-en` : ticker;
+    const url = URL.createObjectURL(new Blob([await descifrar(`watchlist/pdf/${archivo}.enc`)], {type: 'application/pdf'}));
     if (w) w.location = url; else location.href = url;
   } catch (e) {
     if (w) w.close();
@@ -1100,16 +1138,17 @@ function buildAgenteHTML() {
   const est = {'a tiro': ['rlo', 'A tiro'], 'cerca': ['rmd', 'Cerca'], 'lejos': ['', 'Lejos']};
   const rows = AW.valores.map((v, i) => {
     const [cls, txt] = est[v.estado] || ['', v.estado];
-    const estado = v.en_revision ? '<span class="cbadge" style="background:var(--abg);color:var(--amber)">En revisión</span>'
+    const estado = v.en_revision || (VIDEO && VIDEO_REVISION.includes(v.ticker)) ? '<span class="cbadge" style="background:var(--abg);color:var(--amber)">En revisión</span>'
       : `<span class="cbadge ${cls}" style="${cls ? '' : 'background:var(--bg3);color:var(--text2)'}">${txt}</span>`;
     const esc = v.escenarios.map(e => `${e[0]}: ${pct(e[1])}`).join('\n');
     const tip = (v.aviso ? v.aviso + '\n\n' : '') + 'Rentabilidad anual a 5 años por escenario:\n' + esc
       + `\n\nValor de la tesis: ${precio(v, v.valor_tesis)}`;
     const tA = v.pdf ? `<button onclick="abrirTesisAgente('${v.ticker}')" class="ilink" style="cursor:pointer;background:var(--bg3)">Tesis de agente</button>` : '';
     const tD = v.tesis_dani ? `<a href="${v.tesis_dani}" target="_blank" class="ilink ilink-tesis">Tesis 10Bagger</a>` : '';
+    const oculto = VIDEO && !VIDEO_VISIBLES.includes(v.ticker);
     return `<tr>
       <td style="color:var(--text3)">${i + 1}</td>
-      <td title="${tip.replace(/"/g, '&quot;')}" style="cursor:help;text-align:left">${v.nombre}<span class="tsub">${v.ticker}</span></td>
+      <td ${oculto ? '' : `title="${tip.replace(/"/g, '&quot;')}"`} style="cursor:help;text-align:left"><span class="${oculto ? 'vb' : ''}">${v.nombre}<span class="tsub">${v.ticker}</span></span></td>
       <td>${precio(v, v.precio)}</td>
       <td class="${v.tir >= 0 ? 'pos' : 'neg'}" style="font-weight:600">${pct(v.tir)}</td>
       <td>${num(v.exigida * 100, 0)}%</td>
@@ -1121,12 +1160,17 @@ function buildAgenteHTML() {
   }).join('');
   const f = AW.fecha.split('-').reverse().join('/');
   return `
-<details class="card" style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text2)">
+${LANG === 'en' ? `<details class="card" style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text2)">
+  <summary style="cursor:pointer;font-weight:600;color:var(--text)">What the Watchlist agent is</summary>
+  <p style="margin-top:10px">The Watchlist agent is a way of studying businesses that interest us for some reason but are not in the portfolio. Each study starts from research by nine agents; an agent running on Fable then reviews which decisive factors are missing and which carry more weight than they should, and an agent trained on my criteria values the business. The result is a thesis with four scenarios, the probability we give each one and its valuation. The table is updated every week at the closing price, so the return you see in it is always the return from buying today; each thesis PDF is at its reference price and we update it when we review the thesis. The value of the business does not change with the share price; the only thing that changes is what we pay for it. If something happens that could affect a thesis, the stock is flagged "Under review" until we analyse it.</p>
+  <p style="margin-top:10px">The entry price is the price at which the business would give us, over five years, the return we require from it, and that requirement is not the same for every business. From a very high-quality business we require 12% a year, and from a high-beta one, up to 30%. That price is also calculated on the probability-weighted value of the four scenarios, so the bear and disruption cases weigh on it from the start according to their probability. In other words, it is a very conservative price: a business with an estimated weighted return of 9% can beat 17% a year if its bull case plays out, and still not appear "in range" on this list. It is demanding on purpose.</p>
+  <p style="margin-top:10px">Even so, I think it is an excellent tool, not only for getting to know these businesses in depth, but as an alert. When even the most conservative version of the thesis tells us there is an opportunity, it is time to study the business again, calmly. Each stock has two links: the agent thesis, which is the full study, and the 10Bagger thesis, when there is one, which is my personal analysis published in the newsletter.</p>
+</details>` : `<details class="card" style="padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text2)">
   <summary style="cursor:pointer;font-weight:600;color:var(--text)">Qué es el Agente watchlist</summary>
-  <p style="margin-top:10px">El Agente watchlist es un acercamiento al estudio de negocios que nos interesan por algún motivo, pero que no forman parte de la cartera. Cada estudio lo elabora un sistema de ocho agentes interconectados y un comité a través de Fable, y el resultado es una tesis con cuatro escenarios, la probabilidad que le damos a cada uno y su valoración. Cada semana actualizamos las tesis al precio de cierre, de modo que la rentabilidad que ves en la tabla y en el PDF es siempre la de comprar hoy. La valoración del negocio no cambia con la cotización; lo único que cambia es lo que pagamos por ella. Si ocurre algo que pueda afectar a la tesis, el valor aparece marcado "En revisión" hasta que lo analicemos.</p>
-  <p style="margin-top:10px">El precio de entrada es el precio al que el negocio nos daría, a cinco años, la rentabilidad que le exigimos, y esa exigencia no es igual para todos. A un negocio de mucha calidad le pedimos un 12% anual, y a uno de alta beta, hasta un 30%. Además, ese precio se calcula sobre el valor ponderado de los cuatro escenarios, así que el bajista y el de disrupción restan desde el principio según su probabilidad. Dicho de otro modo, es un precio muy conservador: un negocio con una rentabilidad estimada del 7% en su ponderado puede superar el 15% anual si se cumple su escenario alcista, y aun así no aparecerá "a tiro" en esta lista. Es exigente a propósito.</p>
+  <p style="margin-top:10px">El Agente watchlist es un acercamiento al estudio de negocios que nos interesan por algún motivo, pero que no forman parte de la cartera. Cada estudio parte de una investigación de nueve agentes; después, un agente con Fable revisa qué factores determinantes faltan y cuáles pesan más de lo que deberían, y un agente entrenado con mi criterio lo valora. El resultado es una tesis con cuatro escenarios, la probabilidad que le damos a cada uno y su valoración. La tabla se actualiza cada semana al precio de cierre, de modo que la rentabilidad que ves en ella es siempre la de comprar hoy; el PDF de cada tesis está a su precio de referencia y lo actualizamos cuando revisamos la tesis. La valoración del negocio no cambia con la cotización; lo único que cambia es lo que pagamos por ella. Si ocurre algo que pueda afectar a la tesis, el valor aparece marcado "En revisión" hasta que lo analicemos.</p>
+  <p style="margin-top:10px">El precio de entrada es el precio al que el negocio nos daría, a cinco años, la rentabilidad que le exigimos, y esa exigencia no es igual para todos. A un negocio de mucha calidad le pedimos un 12% anual, y a uno de alta beta, hasta un 30%. Además, ese precio se calcula sobre el valor ponderado de los cuatro escenarios, así que el bajista y el de disrupción restan desde el principio según su probabilidad. Dicho de otro modo, es un precio muy conservador: un negocio con una rentabilidad estimada del 9% en su ponderado puede superar el 17% anual si se cumple su escenario alcista, y aun así no aparecerá "a tiro" en esta lista. Es exigente a propósito.</p>
   <p style="margin-top:10px">Con todo, creo que es una magnífica herramienta, no solo para conocer más a fondo estos negocios, sino como alerta. Cuando incluso la versión más conservadora de la tesis nos dice que hay oportunidad, es el momento de volver a estudiar el negocio con calma. En cada valor encontrarás dos enlaces: la tesis de agente, que es el estudio completo actualizado al precio de la semana, y la tesis 10Bagger, cuando exista, que es mi análisis personal publicado en la newsletter.</p>
-</details>
+</details>`}
 <div class="card">
   <div class="ch">
     <span class="ct">Agente watchlist</span>
@@ -1141,7 +1185,143 @@ function buildAgenteHTML() {
     <tbody>${rows}</tbody>
   </table></div>
 </div>
-<div class="hint" style="padding:0 4px 16px">A tiro: la rentabilidad a 5 años alcanza la exigida. Cerca: el precio está a menos de un ${num(AW.margen_cerca * 100, 0)}% del de entrada. Pasa el ratón por el nombre para ver cada escenario. Esto no es una recomendación de compra ni de venta.</div>`;
+<div class="hint" style="padding:0 4px 16px">${LANG === 'en' ? `In range: the 5-year return reaches the required return. Close: the price is less than ${num(AW.margen_cerca * 100, 0)}% above the entry price. Hover over the name to see each scenario. This is not a recommendation to buy or sell.` : `A tiro: la rentabilidad a 5 años alcanza la exigida. Cerca: el precio está a menos de un ${num(AW.margen_cerca * 100, 0)}% del de entrada. Pasa el ratón por el nombre para ver cada escenario. Esto no es una recomendación de compra ni de venta.`}</div>`;
+}
+
+// ── HISTORIAL DE TESIS ───────────────────────────────────────
+// Tabla cifrada que genera tools/tb_historial_publicar.py (proyecto AE) en historial/.
+let HT = null;
+async function cargarHistorial() {
+  if (!HT) HT = JSON.parse(new TextDecoder().decode(await descifrar('historial/datos.enc')));
+}
+function buildHistorialHTML() {
+  const loc = LANG === 'en' ? 'en-US' : 'es-ES';
+  const pct = x => x === null || x === undefined ? '—'
+    : (x >= 0 ? '+' : '') + (x * 100).toLocaleString(loc, {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%';
+  const pp = x => (x >= 0 ? '+' : '') + (x * 100).toLocaleString(loc, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const fecha = f => f.split('-').reverse().join('/');
+  const L = [...HT.tesis].sort((a, b) => b.rentabilidad - a.rentabilidad);
+  const media = k => L.reduce((s, x) => s + x[k], 0) / L.length;
+  const r = L.map(x => x.rentabilidad).sort((a, b) => a - b), n = r.length;
+  const mediana = n % 2 ? r[(n - 1) / 2] : (r[n / 2 - 1] + r[n / 2]) / 2;
+  const ganan = L.filter(x => x.rentabilidad > 0).length, baten = L.filter(x => x.diferencia > 0).length;
+  const en = LANG === 'en';
+  const rows = L.map((x, i) => {
+    const hoy = x.estado === 'cerrada' ? pct(x.rentabilidad_hoy) : '=';
+    const cerr = x.estado === 'cerrada' ? `<span class="tsub">${LANG === 'en' ? 'sold on' : 'vendida el'} ${fecha(x.fecha_fin)}</span>` : '';
+    const oculto = VIDEO && !VIDEO_VISIBLES_HT.includes(x.ticker);
+    return `<tr>
+      <td style="color:var(--text3)">${i + 1}</td>
+      <td style="text-align:left" ${oculto ? '' : `title="${x.titulo.replace(/"/g, '&quot;')}"`}><span class="${oculto ? 'vb' : ''}">${x.empresa}<span class="tsub">${x.ticker}</span></span></td>
+      <td>${fecha(x.fecha)}</td>
+      <td class="${x.rentabilidad >= 0 ? 'pos' : 'neg'}" style="font-weight:700">${pct(x.rentabilidad)}${cerr}</td>
+      <td style="color:var(--text2)">${hoy}</td>
+      <td style="color:var(--text2)">${pct(x.msci_world)}</td>
+      <td class="${x.diferencia >= 0 ? 'pos' : 'neg'}" style="font-weight:600">${pp(x.diferencia)}</td>
+      <td style="text-align:right"><a href="${x.url}" target="_blank" class="ilink ilink-tesis">${en ? '10Bagger thesis' : 'Tesis 10Bagger'}</a></td>
+    </tr>`;
+  }).join('');
+  return `
+<div class="mgrid" style="margin-bottom:16px">
+  <div class="metric"><div class="mlbl">Rentabilidad media</div><div class="mval pos">${pct(media('rentabilidad'))}</div><div class="msub">${en ? `${L.length} theses · to the sale if sold` : `${L.length} tesis · hasta la venta si se vendió`}</div></div>
+  <div class="metric"><div class="mlbl">Media hasta hoy</div><div class="mval pos">${pct(media('rentabilidad_hoy'))}</div><div class="msub">como si no se hubiera vendido ninguna</div></div>
+  <div class="metric"><div class="mlbl">MSCI World, mismos periodos</div><div class="mval">${pct(media('msci_world'))}</div><div class="msub">en euros, con dividendos</div></div>
+  <div class="metric"><div class="mlbl">Ganan dinero</div><div class="mval">${ganan} ${en ? 'of' : 'de'} ${L.length}</div><div class="msub">${en ? `${Math.round(ganan / L.length * 100)}% of the theses` : `el ${Math.round(ganan / L.length * 100)}% de las tesis`}</div></div>
+</div>
+<div class="card">
+  <div class="ch">
+    <span class="ct">Historial de tesis</span>
+    <span class="cm">${en ? `${L.length} theses · prices as of ${fecha(HT.fecha)}` : `${L.length} tesis · precios del ${fecha(HT.fecha)}`}</span>
+  </div>
+  <div class="ox"><table>
+    <thead><tr>
+      <th style="width:3%">#</th><th style="width:22%;text-align:left">Empresa</th><th>Publicación</th>
+      <th>${en ? 'Return' : 'Rentabilidad'}</th><th>${en ? 'Today' : 'Hoy'}</th><th>MSCI World</th><th>Diferencia (pp)</th>
+      <th style="text-align:right">Links</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>
+</div>
+<div class="hint" style="padding:0 4px 16px">${LANG === 'en' ? `Total return with dividends and in local currency, from the close on the publication day to today, or to the sale of the last share in the 10Bagger portfolio if it was sold. "Today" is the same return without stopping at the sale; for open theses it is the same (=). MSCI World in euros with dividends (iShares Core MSCI World) over the same period. Past performance does not guarantee future results. This is not a recommendation to buy or sell.` : `Rentabilidad total con dividendos y en moneda local, desde el cierre del día de publicación hasta hoy o hasta la venta de la última acción de la cartera 10Bagger si se ha vendido. "Hoy" es la misma rentabilidad sin parar en la venta; en las tesis en curso coincide (=). MSCI World en euros con dividendos (iShares Core MSCI World) en el mismo periodo. Rentabilidades pasadas no garantizan rentabilidades futuras. Esto no es una recomendación de compra ni de venta.`}</div>`;
+}
+
+// ── INVESTIGACIÓN ────────────────────────────────────────────
+// Estudios en profundidad cifrados que genera tools/tb_investigacion_publicar.py (proyecto AE) en investigacion/.
+let INV = null;
+async function cargarInvestigacion() {
+  if (!INV) INV = JSON.parse(new TextDecoder().decode(await descifrar('investigacion/datos.enc')));
+}
+async function abrirEstudio(id) {
+  const w = window.open('', '_blank');  // se abre ya, dentro del clic, para que el navegador no la bloquee
+  try {
+    const url = URL.createObjectURL(new Blob([await descifrar(`investigacion/pdf/${id}${LANG === 'en' && (INV.estudios.find(x => x.id === id) || {}).pdf_en ? '-en' : ''}.enc`)], {type: 'application/pdf'}));
+    if (w) w.location = url; else location.href = url;
+  } catch (e) {
+    if (w) w.close();
+    alert('No se pudo abrir el estudio: ' + e.message);
+  }
+}
+const ICONO_PDF = `<svg width="30" height="36" viewBox="0 0 30 36" aria-hidden="true"><path d="M3 1h17l7 7v25a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2z" fill="var(--bg2)" stroke="var(--red)" stroke-width="1.6"/><path d="M20 1v7h7" fill="none" stroke="var(--red)" stroke-width="1.6"/><rect x="4" y="19" width="22" height="10" rx="2" fill="var(--red)"/><text x="15" y="26.6" text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff" font-family="-apple-system,BlinkMacSystemFont,sans-serif">PDF</text></svg>`;
+const ICONO_LEER = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>`;
+const ICONO_ESCUCHAR = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>`;
+// El podcast se descifra al pulsar y se reproduce dentro de la tarjeta; recuerda la posición en este navegador.
+async function escucharEstudio(id, tipo) {
+  const caja = document.getElementById('reproductor-' + id);
+  if (!caja || caja.dataset.listo) return;
+  caja.innerHTML = '<div class="hint" style="margin:4px 0 12px"><span class="spin"></span> Preparando el podcast...</div>';
+  try {
+    const url = URL.createObjectURL(new Blob([await descifrar(`investigacion/audio/${id}${LANG === 'en' && (INV.estudios.find(x => x.id === id) || {}).audio_en ? '-en' : ''}.enc`)], {type: tipo}));
+    caja.dataset.listo = '1';
+    caja.innerHTML = `<div class="inv-player">
+      <audio id="audio-${id}" src="${url}" controls preload="metadata"></audio>
+      <div class="inv-vel">${[1, 1.25, 1.5].map(v => `<button onclick="velocidadAudio('${id}', ${v}, this)" class="${v === 1 ? 'on' : ''}">${String(v).replace('.', ',')}x</button>`).join('')}</div>
+    </div>`;
+    const a = document.getElementById('audio-' + id), k = 'podcast-pos-' + id;
+    try { const p = parseFloat(localStorage.getItem(k)); if (p > 5) a.addEventListener('loadedmetadata', () => { a.currentTime = p; }, {once: true}); } catch (e) {}
+    a.addEventListener('timeupdate', () => { try { localStorage.setItem(k, a.currentTime); } catch (e) {} });
+    a.play().catch(() => {});
+  } catch (e) {
+    caja.innerHTML = `<div class="ebox">No se pudo cargar el podcast: ${e.message}</div>`;
+  }
+}
+function velocidadAudio(id, v, b) {
+  const a = document.getElementById('audio-' + id); if (a) a.playbackRate = v;
+  b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+}
+function buildInvestigacionHTML() {
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const en = LANG === 'en';
+  const meses_en = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fecha = f => { const [a, m, d] = f.split('-'); return en ? `${+d} ${meses_en[+m - 1]} ${a}` : `${+d} de ${meses[+m - 1]} de ${a}`; };
+  const tr = (e, k) => (en && e[k + '_en']) || e[k];
+  const tarjetas = INV.estudios.map((e, i) => { const ideas = (en && e.ideas_en) || e.ideas; const pags = (en && e.paginas_en) || e.paginas; const audio = (en && e.audio_en) || e.audio; return `
+<div class="card" style="padding:18px 20px">
+  <div style="display:flex;gap:18px;align-items:flex-start">
+    <button onclick="abrirEstudio('${e.id}')" title="Abrir el estudio en PDF" style="background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;margin-top:2px">${ICONO_PDF}</button>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--blue);margin-bottom:4px">${en ? 'In-depth study' : 'Estudio en profundidad'} · ${tr(e, 'tema')}${i === 0 ? ` · <span style="color:var(--green)">${en ? 'New' : 'Nuevo'}</span>` : ''}</div>
+      <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px">${tr(e, 'titulo')}</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px">${fecha(e.fecha)} · ${pags} ${en ? 'pages · AI-assisted research' : 'páginas · investigación elaborada con IA'}</div>
+      <p style="font-size:13px;line-height:1.65;color:var(--text2);margin:0 0 12px">${tr(e, 'resumen')}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:${ideas && ideas.length ? '12px' : '0'}">
+        <button onclick="abrirEstudio('${e.id}')" class="inv-accion">${ICONO_LEER}<span><b>${en ? 'Read the study' : 'Leer el estudio'}</b><small>${en ? `PDF${e.pdf_en ? '' : ' in Spanish'} · ${pags} pages` : `PDF · ${e.paginas} páginas`}</small></span></button>
+        ${audio ? `<button onclick="escucharEstudio('${e.id}', '${audio.tipo}')" class="inv-accion inv-audio">${ICONO_ESCUCHAR}<span><b>${en ? 'Listen to the podcast' : 'Escuchar el podcast'}</b><small>${en ? `Immersive learning${e.audio_en ? '' : ' · in Spanish'} · ${audio.min} min` : `Aprendizaje inmersivo · ${audio.min} min`}</small></span></button>` : ''}
+        ${e.acompana ? `<a href="${(en && e.acompana.url_en) || e.acompana.url}" target="_blank" class="ilink ilink-tesis">${(en && e.acompana.texto_en) || e.acompana.texto}</a>` : ''}
+      </div>
+      <div id="reproductor-${e.id}"></div>
+      ${ideas && ideas.length ? `
+      <details style="border-top:0.5px solid var(--border);padding-top:10px">
+        <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--text)">${en ? `The study's ${ideas.length} key ideas in five minutes` : `Las ${ideas.length} ideas del estudio en cinco minutos`}</summary>
+        <ol style="margin:10px 0 0;padding-left:20px;font-size:12.5px;line-height:1.65;color:var(--text2)">
+          ${ideas.map(([t, d]) => `<li style="margin-bottom:6px"><strong style="color:var(--text)">${t}</strong> ${d}</li>`).join('')}
+        </ol>
+      </details>` : ''}
+    </div>
+  </div>
+</div>`; }).join('');
+  return `
+<div class="hint" style="padding:0 4px 12px;font-size:12px">${LANG === 'en' ? 'Long studies on a sector, a market or a theme that matters for investing. They are AI-assisted research built from cited public sources and reviewed by 10Bagger. They are not recommendations to buy or sell.' : `Estudios largos sobre un sector, un mercado o un tema que importa para invertir. Son investigaciones elaboradas con IA a partir de fuentes públicas citadas y revisadas por 10Bagger. No son recomendaciones de compra ni de venta.`}</div>
+${tarjetas}`;
 }
 
 // ── DETALLE VALOR ────────────────────────────────────────────
@@ -1359,7 +1539,7 @@ function buildCarteraHTML(pos, nombre, id) {
       ? p.antiguedad < 1 ? p.antiguedad.toFixed(1) + 'a' : p.antiguedad.toFixed(1) + 'a'
       : '—';
     return `<tr>
-      <td ${tooltip} style="${p.resumen ? 'cursor:help' : ''}">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></td>
+      <td ${VIDEO ? '' : tooltip} style="${p.resumen ? 'cursor:help' : ''}"><span class="vb">${p.empresa}<span class="tsub"><a href="${gf}" target="_blank" style="color:var(--blue);text-decoration:none">${p.ticker}</a></span></span></td>
       <td class="col-hide-mobile" style="color:var(--text2)">${p.geo || '—'}</td>
       <td class="col-hide-mobile">${p.moneda}</td><td class="col-hide-mobile">${p.precio}</td>
       <td class="col-hide-mobile" style="font-weight:500">${p.po}</td>
@@ -1465,7 +1645,7 @@ function buildCarteraHTML(pos, nombre, id) {
           const ganVal = Math.round(p.gananciaTotal);
           const ganFmt = (ganVal >= 0 ? '+' : '') + ganVal.toLocaleString('es-ES') + '€';
           const cls = p.gananciaTotal >= 0 ? 'pos' : 'neg';
-          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span class="vb" style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
         }).join('')}
       </div>
       <div class="ctit" style="margin-bottom:4px">⚠️ Menos aportan</div>
@@ -1474,7 +1654,7 @@ function buildCarteraHTML(pos, nombre, id) {
           const ganVal = Math.round(p.gananciaTotal);
           const ganFmt = (ganVal >= 0 ? '+' : '') + ganVal.toLocaleString('es-ES') + '€';
           const cls = p.gananciaTotal >= 0 ? 'pos' : 'neg';
-          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:11px"><span class="vb" style="font-weight:500">'+p.ticker.split(':').pop()+'</span><span class="'+cls+'" style="font-weight:700">'+ganFmt+'</span></div>';
         }).join('')}
       </div>
     </div>
@@ -1501,7 +1681,7 @@ function buildCarteraHTML(pos, nombre, id) {
 }
 
 // ── ETIQUETAS DEL ANILLO (dentro si caben, fuera con línea guía si no) ──
-function donutLabels(items) {
+function donutLabels(items, ocultar) {
   return {
     id: 'donutLabels',
     afterDraw(chart) {
@@ -1531,10 +1711,10 @@ function donutLabels(items) {
           const bg = String(arc.options.backgroundColor || '#000').replace('#','');
           const lum = bg.length === 6 ? (0.299*parseInt(bg.slice(0,2),16) + 0.587*parseInt(bg.slice(2,4),16) + 0.114*parseInt(bg.slice(4,6),16)) / 255 : 0;
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-          ctx.font = FONT_B; ctx.fillText(name, x, y - 6);
+          ctx.font = FONT_B; if (ocultar) ctx.filter = 'blur(4px)'; ctx.fillText(name, x, y - 6); ctx.filter = 'none';
           ctx.font = FONT_S; ctx.fillText(pct, x, y + 7);
         } else {
-          outside.push({a, rOut, text: name + ' ' + pct, color: arc.options.backgroundColor,
+          outside.push({a, rOut, name, pct, text: name + ' ' + pct, color: arc.options.backgroundColor,
                         right: Math.cos(a) >= 0, y: cy + Math.sin(a) * (rOut + 14)});
         }
       });
@@ -1558,7 +1738,12 @@ function donutLabels(items) {
           ctx.fillStyle = o.color; ctx.beginPath(); ctx.arc(x0, y0, 1.8, 0, Math.PI * 2); ctx.fill();
           ctx.font = FONT_S; ctx.fillStyle = txtCol; ctx.textBaseline = 'middle';
           ctx.textAlign = o.right ? 'left' : 'right';
-          ctx.fillText(o.text, xt + (o.right ? 3 : -3), o.y);
+          if (ocultar) {  // el nombre borroso y el peso nítido
+            const xs = xt + (o.right ? 3 : -3), wP = ctx.measureText(' ' + o.pct).width, wN = ctx.measureText(o.name).width;
+            const xN = o.right ? xs : xs - wP, xP = o.right ? xs + wN : xs;
+            ctx.filter = 'blur(4px)'; ctx.fillText(o.name, xN, o.y); ctx.filter = 'none';
+            ctx.fillText(' ' + o.pct, xP, o.y);
+          } else ctx.fillText(o.text, xt + (o.right ? 3 : -3), o.y);
         });
       });
       ctx.restore();
@@ -1584,7 +1769,7 @@ function buildCarteraCharts(id, pos) {
       const chart = CH[`d-${id}`];
       if (!chart) return;
       const pts = chart.getElementsAtEventForMode(evt, 'nearest', {intersect:true}, false);
-      if (!pts.length) return;
+      if (!pts.length || VIDEO) return;
       const idx = pts[0].index;
       const pos = activosSorted[idx];
       const panel = document.getElementById('tesis-panel-' + id);
@@ -1615,13 +1800,13 @@ function buildCarteraCharts(id, pos) {
         onClick: donutClick,
         plugins:{
           legend:{display:false},
-          tooltip:{callbacks:{label:c=>{
+          tooltip:{enabled:!VIDEO, callbacks:{label:c=>{
             const p = activosSorted[c.dataIndex];
             return ` ${c.label}: ${c.raw.toFixed(1)}%${p && p.resumen ? ' · clic para tesis' : ''}`;
           }}}
         }
       },
-      plugins:[donutLabels(activosSorted)]
+      plugins:[donutLabels(activosSorted, VIDEO)]
     });
   }
 
