@@ -167,7 +167,7 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="tab" onclick="showTab('aw')">Agente watchlist</div>
     <div class="tab tab-pronto" onclick="showTab('ht')">Historial de tesis</div>
     <div class="tab" onclick="showTab('inv')">Investigación</div>
-    <div class="tab" style="display:none" onclick="showTab('dev')">Próximos resultados</div>
+    <div class="tab" onclick="showTab('dev')">Próximos resultados</div>
     <div class="tab" onclick="showTab('qh')">Quality Hold</div>
     <div class="tab" onclick="showTab('buscar')">Buscar por valor</div>
   </div>
@@ -585,6 +585,17 @@ async function loadAll() {
       gsheet('PRECIO_MEDIO'),
       gsheet('POSICIONES_QUALITY_HOLD'),
     ]);
+
+    // Si Google Sheets aún está cargando cotizaciones, alguna posición llega sin precio o sin valor y la fila TOTAL
+    // sale incompleta (la rentabilidad del año llegó a verse en -64 %). Se espera y se reintenta antes de pintar.
+    const incompletas = r10b.filter(r => r && r[0] && !String(r[0]).includes('TOTAL') && toNum(r[3]) > 0
+                                         && !(toNum(r[4]) > 0 && toNum(r[6]) > 0));
+    if (incompletas.length && (window.__reintentos = (window.__reintentos || 0) + 1) <= 6) {
+      setSt('<span class="spin"></span> ' + (LANG === 'en' ? 'Waiting for live prices...' : 'Esperando cotizaciones...'));
+      setTimeout(loadAll, 5000);
+      return;
+    }
+    window.__reintentos = 0;
 
     D.pos10b = parsePosiciones(r10b);
     D.posQH  = parsePosiciones(rQH); // QH sin slice, API omite cabeceras
