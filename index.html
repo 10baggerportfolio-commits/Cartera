@@ -264,7 +264,7 @@ const EN_DICT = [
   ['⟳ Cargando','⟳ Loading'],['✓ Actualizado','✓ Updated'],['● En vivo','● Live'],['Datos en tiempo real','Real-time data'],
   ['Conectando...','Connecting...'],['Rentabilidad media','Average return'],['Media hasta hoy','Average to today'],['MSCI World, mismos periodos','MSCI World, same periods'],['Ganan dinero','Make money'],['tesis publicadas','theses published'],['hasta la venta si se vendió','to the sale if sold'],['como si no se hubiera vendido ninguna','as if none had been sold'],['en euros, con dividendos','in euros, with dividends'],['de las tesis','of the theses'],['Publicación','Published'],['Diferencia (pp)','Difference (pp)'],['precios del','prices as of'],['Leer el estudio','Read the study'],['Escuchar el podcast','Listen to the podcast'],['Aprendizaje inmersivo','Immersive learning'],['páginas','pages'],['investigación elaborada con IA','AI-assisted research'],['Estudio en profundidad','In-depth study'],['Nuevo','New'],['Preparando el podcast...','Preparing the podcast...'],['Historial de tesis','Thesis track record'],['Investigación','Research'],['Agente watchlist','Watchlist agent'],['Descifrando...','Decrypting...'],
   ['Qué es el Agente watchlist','What the Watchlist agent is'],['Tesis de agente','Agent thesis'],['Tesis 10Bagger','10Bagger thesis'],
-  ['Rentab. 5 años','5-year return'],['Exigida','Required'],['Precio de entrada','Entry price'],['Distancia','Distance'],
+  ['Rentab. 5 años','5-year return'],['Semana','Week'],['Exigida','Required'],['Precio de entrada','Entry price'],['Distancia','Distance'],
   ['A tiro','In range'],['Cerca','Close'],['Lejos','Far'],['En revisión','Under review'],['Error al conectar.','Connection error.'],
   ['Rentabilidad','Performance'],['Estudiados','Watchlist'],['Buscar por valor','Search by stock'],['Próximos resultados','Upcoming results'],
   ['Rentabilidad anual por año','Annual return by year'],['Comparativa','Comparison'],
@@ -1161,6 +1161,7 @@ function buildAgenteHTML() {
       <td style="color:var(--text3)">${i + 1}</td>
       <td ${oculto ? '' : `title="${tip.replace(/"/g, '&quot;')}"`} style="cursor:help;text-align:left"><span class="${oculto ? 'vb' : ''}">${v.nombre}<span class="tsub">${v.ticker}</span></span></td>
       <td>${precio(v, v.precio)}</td>
+      <td style="color:var(--text2)" title="Variación del precio desde la lista anterior; si baja, el valor se acerca a su precio de entrada">${pct(v.var_semana)}</td>
       <td class="${v.tir >= 0 ? 'pos' : 'neg'}" style="font-weight:600">${pct(v.tir)}</td>
       <td>${num(v.exigida * 100, 0)}%</td>
       <td style="font-weight:500">${precio(v, v.entrada)}</td>
@@ -1190,7 +1191,7 @@ ${LANG === 'en' ? `<details class="card" style="padding:14px 16px;font-size:13px
   <div class="ox"><table>
     <thead><tr>
       <th style="width:3%">#</th><th style="width:24%;text-align:left">Empresa</th>
-      <th>Precio</th><th>Rentab. 5 años</th><th>Exigida</th><th>Precio de entrada</th><th>Distancia</th><th>Estado</th>
+      <th>Precio</th><th>Semana</th><th>Rentab. 5 años</th><th>Exigida</th><th>Precio de entrada</th><th>Distancia</th><th>Estado</th>
       <th style="text-align:right">Links</th>
     </tr></thead>
     <tbody>${rows}</tbody>
